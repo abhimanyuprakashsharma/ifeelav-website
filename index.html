@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IFEELAV | Ultra Premium</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,700&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        :root { --gold: #C5A059; --bg-center: #ffffff; --bg-edge: #f2eee5; }
+        body { margin: 0; overflow: hidden; font-family: 'Inter', sans-serif; background: radial-gradient(circle at center, var(--bg-center) 20%, var(--bg-edge) 100%); }
+        #bgCanvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; }
+        .premium-font { font-family: 'Playfair Display', serif; }
+        .gold-text { color: var(--gold); }
+        .glass-panel { background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(12px); border: 1px solid rgba(197, 160, 89, 0.2); box-shadow: 0 8px 32px rgba(197, 160, 89, 0.1); }
+        .genre-btn { background: linear-gradient(145deg, #fff, #f9f9f9); border: 1px solid rgba(197, 160, 89, 0.2); color: #444; font-family: 'Playfair Display', serif; font-size: 1.2rem; font-weight: 700; padding: 1.5rem 1rem; border-radius: 20px; transition: all 0.3s; text-transform: uppercase; letter-spacing: 1px; }
+        .genre-btn:hover { border-color: var(--gold); color: var(--gold); transform: translateY(-3px); box-shadow: 0 10px 20px rgba(197, 160, 89, 0.15); }
+        .premium-card { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(25px); box-shadow: 0 40px 80px rgba(197, 160, 89, 0.2); border: 1px solid rgba(197, 160, 89, 0.3); border-radius: 40px; }
+        .gold-btn { background: linear-gradient(135deg, var(--gold) 0%, #A68545 100%); box-shadow: 0 10px 25px rgba(197, 160, 89, 0.3); }
+        .slide-right { transform: translateX(120%) rotate(15deg); opacity: 0; }
+        .slide-left { transform: translateX(-120%) rotate(-15deg); opacity: 0; }
+        .fade-in { animation: fadeIn 0.6s ease-out forwards; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        #watchlistPanel { transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1); transform: translateX(100%); }
+        #watchlistPanel.open { transform: translateX(0); }
+    </style>
+</head>
+<body>
+    <canvas id="bgCanvas"></canvas>
+    <div class="fixed top-0 left-0 w-full z-50 p-4 flex justify-between items-center">
+        <div class="text-xl font-bold italic premium-font gold-text cursor-pointer" onclick="location.reload()">IFEELAV</div>
+        <div class="flex gap-3">
+            <div class="relative group">
+                <input type="text" id="searchInput" placeholder="Search..." class="glass-panel rounded-full px-4 py-2 w-32 focus:w-48 transition-all outline-none text-sm text-gray-700 placeholder-gray-400 focus:border-[#C5A059]" onkeypress="handleSearch(event)">
+                <span class="absolute right-3 top-2.5 text-gray-400">🔍</span>
+            </div>
+            <button onclick="toggleWatchlist()" class="glass-panel w-10 h-10 rounded-full flex items-center justify-center text-gray-600 hover:text-[#C5A059] transition">❤️</button>
+        </div>
+    </div>
+    <div class="relative z-10 h-screen flex items-center justify-center pt-10">
+        <div id="setup" class="text-center p-6 max-w-lg w-full fade-in">
+            <h1 class="premium-font italic text-7xl gold-text mb-2 tracking-tighter drop-shadow-sm">IFEELAV</h1>
+            <p class="text-gray-400 uppercase tracking-[6px] text-[10px] mb-12 italic">Curated by Abhimanyu</p>
+            <div class="grid grid-cols-2 gap-4">
+                <button onclick="startApp('mystery', '9648')" class="genre-btn">Mystery</button>
+                <button onclick="startApp('thriller', '53')" class="genre-btn">Thriller</button>
+                <button onclick="startApp('sci-fi', '10765')" class="genre-btn">Sci-Fi</button>
+                <button onclick="startApp('horror', '9648')" class="genre-btn">Horror</button>
+            </div>
+        </div>
+        <div id="swipeStep" class="hidden w-full max-w-sm px-5">
+            <div id="showCard" class="premium-card overflow-hidden relative transition-all duration-500 transform ease-in-out">
+                <img id="poster" src="" onerror="this.src='https://placehold.co/500x750/EEE/C5A059?text=No+Poster'" class="w-full h-[450px] object-cover bg-gray-100">
+                <div class="p-6">
+                    <div class="flex justify-between items-center mb-2">
+                        <span id="yearTag" class="gold-text text-[10px] font-black tracking-[2px]">TOP PICK</span>
+                        <span id="rating" class="text-gray-900 font-bold text-sm bg-yellow-100 px-2 rounded"></span>
+                    </div>
+                    <h2 id="title" class="premium-font text-2xl text-gray-900 mb-2 truncate"></h2>
+                    <p id="summary" class="text-gray-500 text-xs line-clamp-3 leading-relaxed"></p>
+                </div>
+            </div>
+            <div class="flex justify-center gap-10 mt-8">
+                <button onclick="handleAction('pass')" class="w-16 h-16 rounded-full border border-gray-200 bg-white text-gray-400 hover:text-red-500 shadow-sm text-xl transition">✖</button>
+                <button onclick="handleAction('smash')" class="w-20 h-20 rounded-full gold-btn text-white flex items-center justify-center shadow-xl text-3xl hover:scale-110 transition">♥</button>
+            </div>
+        </div>
+    </div>
+    <div id="watchlistPanel" class="fixed top-0 right-0 h-full w-80 bg-white/95 backdrop-blur-xl shadow-2xl z-[60] p-6 border-l border-[#C5A059]/30 overflow-y-auto">
+        <div class="flex justify-between items-center mb-8"><h2 class="premium-font text-2xl gold-text italic">Your Vault</h2><button onclick="toggleWatchlist()" class="text-gray-400 hover:text-red-500 text-xl">✕</button></div>
+        <div id="watchlistItems" class="space-y-4"><p class="text-gray-400 text-sm text-center mt-10">No items saved yet.</p></div>
+    </div>
+    <script>
+        const canvas = document.getElementById('bgCanvas'); const ctx = canvas.getContext('2d');
+        let particles = []; function initCanvas() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; particles = []; for(let i=0; i<80; i++) particles.push({x:Math.random()*canvas.width, y:Math.random()*canvas.height, r:Math.random()*2, vx:Math.random()*0.5-0.25, vy:Math.random()*0.5-0.25}); }
+        window.onresize = initCanvas; initCanvas();
+        function animate() { ctx.clearRect(0,0,canvas.width,canvas.height); ctx.fillStyle = `rgba(197, 160, 89, 0.3)`; particles.forEach(p => { p.x+=p.vx; p.y+=p.vy; if(p.x<0||p.x>canvas.width) p.vx*=-1; if(p.y<0||p.y>canvas.height) p.vy*=-1; ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, Math.PI*2); ctx.fill(); }); for(let i=0; i<particles.length; i++) { for(let j=i+1; j<particles.length; j++) { let dx = particles[i].x - particles[j].x; let dy = particles[i].y - particles[j].y; let dist = Math.sqrt(dx*dx+dy*dy); if(dist<100) { ctx.beginPath(); ctx.strokeStyle = `rgba(197, 160, 89, ${0.15 - dist/1000})`; ctx.lineWidth = 0.5; ctx.moveTo(particles[i].x, particles[i].y); ctx.lineTo(particles[j].x, particles[j].y); ctx.stroke(); } } } requestAnimationFrame(animate); } animate();
+        let shows = []; let index = 0; let watchlist = JSON.parse(localStorage.getItem('avWatchlist')) || [];
+        async function startApp(vibe, genreId) { transitionToSwipe(); fetchShows(`/api/getShows?genre=${genreId}`); }
+        async function handleSearch(e) { if (e.key === 'Enter') { const query = e.target.value; if (!query) return; transitionToSwipe(); fetchShows(`/api/getShows?query=${encodeURIComponent(query)}`); } }
+        async function fetchShows(endpoint) { try { const res = await fetch(endpoint); const data = await res.json(); shows = data.results.filter(s => s.poster_path); index = 0; if(shows.length > 0) render(); else alert("No shows found."); } catch (err) { console.error(err); alert("Server Error"); } }
+        function transitionToSwipe() { document.getElementById('setup').classList.add('hidden'); document.getElementById('swipeStep').classList.remove('hidden'); }
+        function render() { if (index >= shows.length) { alert("End of list!"); location.reload(); return; } const show = shows[index]; document.getElementById('title').innerText = show.name || show.original_name; document.getElementById('poster').src = `https://image.tmdb.org/t/p/w500${show.poster_path}`; document.getElementById('rating').innerText = "★ " + show.vote_average.toFixed(1); document.getElementById('summary').innerText = show.overview; document.getElementById('yearTag').innerText = show.first_air_date ? show.first_air_date.split('-')[0] : "CLASSIC"; const card = document.getElementById('showCard'); card.style.opacity = '0'; card.style.transform = 'scale(0.95)'; setTimeout(() => { card.style.opacity = '1'; card.style.transform = 'scale(1)'; }, 50); }
+        function handleAction(type) { const card = document.getElementById('showCard'); if (type === 'smash') { addToWatchlist(shows[index]); card.classList.add('slide-right'); } else { card.classList.add('slide-left'); } setTimeout(() => { index++; card.classList.remove('slide-right', 'slide-left'); render(); }, 400); }
+        function addToWatchlist(show) { if (!watchlist.some(item => item.id === show.id)) { watchlist.push(show); localStorage.setItem('avWatchlist', JSON.stringify(watchlist)); updateWatchlistUI(); } }
+        function toggleWatchlist() { document.getElementById('watchlistPanel').classList.toggle('open'); updateWatchlistUI(); }
+        function removeFromWatchlist(id) { watchlist = watchlist.filter(item => item.id !== id); localStorage.setItem('avWatchlist', JSON.stringify(watchlist)); updateWatchlistUI(); }
+        function updateWatchlistUI() { const container = document.getElementById('watchlistItems'); if (watchlist.length === 0) { container.innerHTML = '<p class="text-gray-400 text-sm text-center mt-10">Vault is empty.</p>'; return; } container.innerHTML = watchlist.map(item => `<div class="flex gap-3 items-center bg-gray-50 p-2 rounded-xl border border-gray-100"><img src="https://image.tmdb.org/t/p/w200${item.poster_path}" class="w-12 h-16 object-cover rounded-lg"><div class="flex-1 min-w-0"><h4 class="font-bold text-sm text-gray-800 truncate">${item.name || item.original_name}</h4><p class="text-[10px] text-gray-500">${item.first_air_date ? item.first_air_date.split('-')[0] : 'N/A'}</p></div><button onclick="removeFromWatchlist(${item.id})" class="text-gray-400 hover:text-red-500">✕</button></div>`).join(''); } updateWatchlistUI();
+    </script>
+</body>
+</html>
