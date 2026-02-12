@@ -1,5 +1,5 @@
 export default async function handler(req, res) {
-    const API_KEY = process.env.TMDB_API_KEY;
+    const API_KEY = 'E4c152ec5e6b03175865d3ce2f0febea';
     const { genre, query } = req.query;
 
     if (!API_KEY) return res.status(500).json({ error: "API Key Missing" });
