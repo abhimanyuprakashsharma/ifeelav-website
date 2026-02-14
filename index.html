@@ -3,44 +3,30 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>IFEELAV | The Final Collection</title>
+    <title>IFEELAV | The Smart Collection</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,700&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
     
     <style>
         :root { --gold: #C5A059; --gold-glow: rgba(197, 160, 89, 0.5); }
-        
-        /* Deep Dark Mode Styles */
-        body { transition: background 0.5s ease, color 0.5s; font-family: 'Inter', sans-serif; background: #ffffff; color: #1a1a1a; overflow-x: hidden; }
+        body { transition: background 0.5s ease; font-family: 'Inter', sans-serif; background: #ffffff; color: #1a1a1a; overflow-x: hidden; }
         body.dark { background: #050505; color: #ffffff; }
-        
         #bgCanvas { position: fixed; inset: 0; z-index: -1; pointer-events: none; }
         .premium-font { font-family: 'Playfair Display', serif; }
         .gold-text { color: var(--gold); }
-        
-        /* Highlighted Animations for Dark Mode */
-        .glass-panel { background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(12px); border: 1px solid rgba(197, 160, 89, 0.2); transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
-        body.dark .glass-panel { background: rgba(20, 20, 20, 0.7); border-color: var(--gold); box-shadow: 0 0 15px rgba(197, 160, 89, 0.1); }
-        
-        .cat-btn { background: white; border: 1px solid rgba(197, 160, 89, 0.3); transition: all 0.4s ease; }
+        .glass-panel { background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(12px); border: 1px solid rgba(197, 160, 89, 0.2); transition: all 0.3s; }
+        body.dark .glass-panel { background: rgba(20, 20, 20, 0.7); border-color: var(--gold); }
+        .cat-btn { background: white; border: 1px solid rgba(197, 160, 89, 0.3); transition: 0.4s; }
         body.dark .cat-btn { background: #111; color: white; border-color: var(--gold); }
-        .cat-btn:hover { transform: translateY(-5px); box-shadow: 0 10px 20px var(--gold-glow); border-color: var(--gold); }
-        
-        /* Card Styling */
-        .premium-card { cursor: pointer; height: 65vh; width: 100%; max-width: 400px; border-radius: 30px; overflow: hidden; transition: 0.3s; box-shadow: 0 20px 40px rgba(0,0,0,0.2); }
-        body.dark .premium-card { border: 1px solid rgba(197, 160, 89, 0.3); }
-
-        /* Detail Overlay */
-        #detailOverlay { position: fixed; inset: 0; z-index: 100; background: white; transform: translateY(100%); transition: transform 0.5s ease; overflow-y: auto; }
+        .premium-card { cursor: pointer; height: 65vh; width: 100%; max-width: 400px; border-radius: 30px; overflow: hidden; box-shadow: 0 20px 40px rgba(0,0,0,0.2); }
+        #detailOverlay { position: fixed; inset: 0; z-index: 200; background: white; transform: translateY(100%); transition: transform 0.4s ease; overflow-y: auto; }
         #detailOverlay.active { transform: translateY(0); }
         body.dark #detailOverlay { background: #050505; }
-
-        /* Search Suggestions Highlight */
-        #searchDropdown { position: absolute; top: 110%; left: 0; width: 100%; background: white; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); z-index: 200; display: none; overflow: hidden; }
+        #authModal { transition: opacity 0.3s ease; opacity: 0; pointer-events: none; z-index: 300; }
+        #authModal.active { opacity: 1; pointer-events: auto; }
+        #searchDropdown { position: absolute; top: 110%; left: 0; width: 100%; background: white; border-radius: 20px; z-index: 150; display: none; }
         body.dark #searchDropdown { background: #1a1a1a; border: 1px solid var(--gold); }
         #searchDropdown.active { display: block; }
-        .suggestion-item { padding: 12px; display: flex; align-items: center; gap: 10px; cursor: pointer; border-bottom: 1px solid rgba(0,0,0,0.05); }
-        .suggestion-item:hover { background: rgba(197, 160, 89, 0.1); }
     </style>
 </head>
 <body class="dark">
@@ -50,20 +36,35 @@
         <div class="text-xl md:text-2xl font-bold italic premium-font gold-text cursor-pointer" onclick="location.reload()">IFEELAV</div>
         <div class="flex gap-2 items-center">
             <button onclick="toggleDarkMode()" class="glass-panel w-10 h-10 rounded-full flex items-center justify-center">🌓</button>
-            
             <div class="relative">
                 <input type="text" id="searchInput" oninput="handleTyping(event)" placeholder="Search..." autocomplete="off" class="glass-panel rounded-full px-4 py-2 w-32 md:w-64 text-sm outline-none focus:border-[#C5A059]">
-                <div id="searchDropdown"></div>
+                <div id="searchDropdown" class="overflow-hidden"></div>
             </div>
-
-            <button onclick="toggleAuthModal()" class="glass-panel w-10 h-10 rounded-full overflow-hidden relative">
+            <button onclick="toggleAuthModal()" class="glass-panel w-10 h-10 rounded-full overflow-hidden relative border-2 border-gold/30">
                 <img id="headerAvatar" src="https://api.dicebear.com/7.x/adventurer/svg?seed=Felix" class="w-full h-full object-cover">
             </button>
         </div>
     </div>
 
+    <div id="authModal" class="fixed inset-0 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+        <div class="bg-white dark:bg-zinc-900 p-8 rounded-3xl w-full max-w-sm relative">
+            <button onclick="toggleAuthModal()" class="absolute top-4 right-4 text-gray-400">✕</button>
+            <div id="loggedOutView">
+                <h2 class="premium-font text-2xl mb-4 gold-text">Account</h2>
+                <input type="email" id="email" placeholder="Email" class="w-full p-3 mb-3 rounded-xl border dark:bg-zinc-800 dark:border-zinc-700 outline-none">
+                <input type="password" id="password" placeholder="Password" class="w-full p-3 mb-6 rounded-xl border dark:bg-zinc-800 dark:border-zinc-700 outline-none">
+                <button onclick="window.handleLogin()" class="w-full bg-gold text-white py-3 rounded-xl font-bold mb-3">Sign In</button>
+                <button onclick="window.handleSignup()" class="w-full border border-gold text-gold py-3 rounded-xl font-bold">Sign Up</button>
+            </div>
+            <div id="loggedInView" class="hidden text-center">
+                <div class="w-20 h-20 bg-gold/10 rounded-full mx-auto mb-4 flex items-center justify-center text-3xl">👤</div>
+                <h3 id="userDisplay" class="font-bold mb-6 text-xl">User</h3>
+                <button onclick="window.handleLogout()" class="w-full bg-red-500/10 text-red-500 py-3 rounded-xl font-bold">Sign Out</button>
+            </div>
+        </div>
+    </div>
+
     <div id="mainContent" class="relative z-10 min-h-screen flex flex-col items-center justify-center pt-20 px-4">
-        
         <div id="step1" class="text-center w-full max-w-3xl">
             <h1 class="premium-font italic text-5xl md:text-7xl gold-text mb-12">IFEELAV</h1>
             <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -73,7 +74,6 @@
                 <button onclick="selectRegion('ko', 'K-Drama')" class="cat-btn p-6 rounded-2xl font-bold glass-panel">K-DRAMA</button>
             </div>
         </div>
-
         <div id="step2" class="hidden text-center w-full max-w-3xl">
             <h1 id="regionTitle" class="premium-font text-4xl gold-text mb-8"></h1>
             <div class="grid grid-cols-2 md:grid-cols-3 gap-4 mb-8">
@@ -83,153 +83,132 @@
                 <button onclick="startApp('9648')" class="glass-panel p-4 rounded-xl font-bold">Mystery</button>
                 <button onclick="startApp('10765')" class="glass-panel p-4 rounded-xl font-bold">Sci-Fi</button>
             </div>
-            <button onclick="resetToStep1()" class="text-gray-400 text-sm hover:text-gold uppercase tracking-widest">← Back</button>
         </div>
-
         <div id="swipeStep" class="hidden w-full flex flex-col items-center">
-            <div id="showCard" onclick="handleCardClick()" class="premium-card relative">
+            <div id="showCard" onclick="openDetails(shows[index].id)" class="premium-card relative">
                 <img id="poster" src="" class="w-full h-full object-cover">
                 <div class="absolute bottom-0 w-full p-6 bg-gradient-to-t from-black to-transparent text-white">
                     <h2 id="cardTitle" class="premium-font text-3xl"></h2>
                 </div>
             </div>
             <div class="flex gap-8 mt-8">
-                <button onclick="handleAction('pass')" class="w-16 h-16 rounded-full glass-panel text-2xl flex items-center justify-center">✕</button>
-                <button onclick="handleAction('smash')" class="w-16 h-16 rounded-full bg-[#C5A059] text-white text-3xl shadow-xl">♥</button>
+                <button onclick="handleAction('pass')" class="w-16 h-16 rounded-full glass-panel flex items-center justify-center">✕</button>
+                <button onclick="handleAction('smash')" class="w-16 h-16 rounded-full bg-gold text-white text-3xl shadow-xl">♥</button>
             </div>
         </div>
     </div>
 
     <div id="detailOverlay">
-        <button onclick="closeDetails()" class="fixed top-6 right-6 z-[110] bg-black/50 text-white w-10 h-10 rounded-full">✕</button>
-        <div class="relative h-[50vh]">
-            <img id="detailBackdrop" src="" class="w-full h-full object-cover">
-            <div class="absolute inset-0 bg-gradient-to-t from-current to-transparent"></div>
-        </div>
-        <div class="max-w-4xl mx-auto p-6 -mt-20 relative z-10">
-            <h1 id="detailTitle" class="premium-font text-5xl mb-4"></h1>
-            <p id="detailOverview" class="text-lg opacity-80 mb-10"></p>
-            <div id="episodeSection">
-                <h3 class="gold-text premium-font text-2xl mb-6">📺 Episode Ratings (S1)</h3>
-                <div id="episodeList" class="grid gap-3"></div>
-            </div>
-        </div>
+        <button onclick="closeDetails()" class="fixed top-6 right-6 z-[210] bg-black/50 text-white w-10 h-10 rounded-full">✕</button>
+        <div id="detailContent"></div>
     </div>
 
-    <script>
-        let shows = [], index = 0, selectedLang = '', searchTimer;
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
-        window.toggleDarkMode = () => document.body.classList.toggle('dark');
+        const firebaseConfig = {
+            apiKey: "AIzaSyAoCZuJ4tGdwmFuz8y-_tc5phvfbn2oi1A",
+            authDomain: "ifeelav-app.firebaseapp.com",
+            projectId: "ifeelav-app",
+            storageBucket: "ifeelav-app.firebasestorage.app",
+            messagingSenderId: "1060067685106",
+            appId: "1:1060067685106:web:4ba1523ee066af4633966b"
+        };
 
-        // Navigation
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+
+        // ATTACH TO WINDOW SO HTML BUTTONS WORK
+        window.handleLogin = () => signInWithEmailAndPassword(auth, document.getElementById('email').value, document.getElementById('password').value).then(() => toggleAuthModal()).catch(err => alert(err.message));
+        window.handleSignup = () => createUserWithEmailAndPassword(auth, document.getElementById('email').value, document.getElementById('password').value).then(() => toggleAuthModal()).catch(err => alert(err.message));
+        window.handleLogout = () => signOut(auth);
+
+        onAuthStateChanged(auth, user => {
+            const outView = document.getElementById('loggedOutView');
+            const inView = document.getElementById('loggedInView');
+            if (user) {
+                outView.classList.add('hidden'); inView.classList.remove('hidden');
+                document.getElementById('userDisplay').innerText = user.email.split('@')[0];
+            } else {
+                outView.classList.remove('hidden'); inView.classList.add('hidden');
+            }
+        });
+
+        // --- SMART BACK NAVIGATION ---
+        let currentStep = 1;
         window.selectRegion = (lang, name) => {
             selectedLang = lang;
             document.getElementById('step1').classList.add('hidden');
             document.getElementById('step2').classList.remove('hidden');
             document.getElementById('regionTitle').innerText = name;
+            currentStep = 2;
+            history.pushState({step: 2}, ""); // Push state to browser
         };
 
-        window.resetToStep1 = () => {
-            document.getElementById('step2').classList.add('hidden');
-            document.getElementById('step1').classList.remove('hidden');
-        };
-
-        window.startApp = async (gid) => {
+        window.startApp = (gid) => {
             document.getElementById('step2').classList.add('hidden');
             document.getElementById('swipeStep').classList.remove('hidden');
             fetchShows(`/api/getShows?genre=${gid}&lang=${selectedLang}`);
+            currentStep = 3;
+            history.pushState({step: 3}, "");
         };
 
+        window.addEventListener('popstate', (event) => {
+            // Handle browser back gesture
+            if (!event.state || event.state.step === 1) {
+                location.reload(); // Go back to start
+            } else if (event.state.step === 2) {
+                document.getElementById('swipeStep').classList.add('hidden');
+                document.getElementById('step2').classList.remove('hidden');
+                currentStep = 2;
+            }
+        });
+
+        // --- REST OF APP LOGIC ---
+        let shows = [], index = 0, selectedLang = '';
+        window.toggleDarkMode = () => document.body.classList.toggle('dark');
+        window.toggleAuthModal = () => document.getElementById('authModal').classList.toggle('active');
+        
         async function fetchShows(url) {
-            const res = await fetch(url);
-            const data = await res.json();
-            shows = data.results.filter(s => s.poster_path);
-            index = 0;
-            renderCard();
+            const res = await fetch(url); const data = await res.json();
+            shows = data.results.filter(s => s.poster_path); index = 0; renderCard();
         }
 
         function renderCard() {
-            if(index >= shows.length) { alert("End of List"); location.reload(); return; }
-            const s = shows[index];
-            document.getElementById('cardTitle').innerText = s.name || s.original_name;
-            document.getElementById('poster').src = `https://image.tmdb.org/t/p/w780${s.poster_path}`;
+            if(!shows[index]) return;
+            document.getElementById('cardTitle').innerText = shows[index].name || shows[index].original_name;
+            document.getElementById('poster').src = `https://image.tmdb.org/t/p/w780${shows[index].poster_path}`;
         }
 
         window.handleAction = (type) => {
             const card = document.getElementById('showCard');
             card.style.transform = type === 'smash' ? 'translateX(100%) rotate(20deg)' : 'translateX(-100%) rotate(-20deg)';
             card.style.opacity = '0';
-            setTimeout(() => {
-                index++;
-                card.style.transform = '';
-                card.style.opacity = '1';
-                renderCard();
-            }, 300);
+            setTimeout(() => { index++; card.style.transform = ''; card.style.opacity = '1'; renderCard(); }, 300);
         };
-
-        // Live Search Logic
-        window.handleTyping = (e) => {
-            const q = e.target.value;
-            const dd = document.getElementById('searchDropdown');
-            clearTimeout(searchTimer);
-            if(q.length < 2) { dd.classList.remove('active'); return; }
-
-            searchTimer = setTimeout(async () => {
-                const res = await fetch(`/api/getShows?query=${encodeURIComponent(q)}`);
-                const data = await res.json();
-                const results = data.results.slice(0, 5);
-                dd.innerHTML = results.map(s => `
-                    <div class="suggestion-item" onclick="openDetails(${s.id})">
-                        <img src="https://image.tmdb.org/t/p/w92${s.poster_path}" class="w-8 h-12 rounded">
-                        <div class="text-sm font-bold">${s.name || s.original_name}</div>
-                    </div>
-                `).join('');
-                dd.classList.add('active');
-            }, 300);
-        };
-
-        window.handleCardClick = () => openDetails(shows[index].id);
 
         window.openDetails = async (id) => {
-            document.getElementById('searchDropdown').classList.remove('active');
-            const overlay = document.getElementById('detailOverlay');
-            overlay.classList.add('active');
-            
-            const res = await fetch(`/api/getDetails?id=${id}`);
-            const data = await res.json();
-            document.getElementById('detailTitle').innerText = data.name;
-            document.getElementById('detailOverview').innerText = data.overview;
-            document.getElementById('detailBackdrop').src = `https://image.tmdb.org/t/p/original${data.backdrop_path || data.poster_path}`;
-
-            const epRes = await fetch(`/api/getEpisodes?id=${id}&season=1`);
-            const epData = await epRes.json();
-            document.getElementById('episodeList').innerHTML = epData.episodes.map(e => `
-                <div class="glass-panel p-3 rounded-xl flex justify-between items-center">
-                    <span class="text-sm">E${e.episode_number}: ${e.name}</span>
-                    <span class="gold-text font-bold">★ ${e.vote_average.toFixed(1)}</span>
-                </div>
-            `).join('');
+            document.getElementById('detailOverlay').classList.add('active');
+            const res = await fetch(`/api/getDetails?id=${id}`); const data = await res.json();
+            document.getElementById('detailContent').innerHTML = `
+                <div class="h-[50vh] relative"><img src="https://image.tmdb.org/t/p/original${data.backdrop_path}" class="w-full h-full object-cover"></div>
+                <div class="p-6">
+                    <h1 class="premium-font text-4xl mb-4 gold-text">${data.name}</h1>
+                    <p class="opacity-80">${data.overview}</p>
+                </div>`;
+            history.pushState({step: 'details'}, ""); // Track details view
         };
-
-        window.closeDetails = () => document.getElementById('detailOverlay').classList.remove('active');
-
-        // Background Animation
-        const canvas = document.getElementById('bgCanvas'), ctx = canvas.getContext('2d');
-        function init() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
-        window.onresize = init; init();
-        let particles = Array.from({length: 40}, () => ({x:Math.random()*canvas.width, y:Math.random()*canvas.height, vx:Math.random()*0.4-0.2, vy:Math.random()*0.4-0.2}));
-        function animate() {
-            ctx.clearRect(0,0,canvas.width,canvas.height);
-            ctx.fillStyle = "rgba(197, 160, 89, 0.4)";
-            particles.forEach(p => {
-                p.x += p.vx; p.y += p.vy;
-                if(p.x<0 || p.x>canvas.width) p.vx*=-1;
-                if(p.y<0 || p.y>canvas.height) p.vy*=-1;
-                ctx.beginPath(); ctx.arc(p.x, p.y, 2, 0, Math.PI*2); ctx.fill();
+        window.closeDetails = () => { document.getElementById('detailOverlay').classList.remove('active'); history.back(); };
+        
+        window.handleTyping = (e) => {
+            const q = e.target.value; const dd = document.getElementById('searchDropdown');
+            if(q.length < 2) { dd.classList.remove('active'); return; }
+            fetch(`/api/getShows?query=${q}`).then(r => r.json()).then(data => {
+                dd.innerHTML = data.results.slice(0, 5).map(s => `<div class="p-3 border-b dark:border-zinc-800 cursor-pointer hover:bg-gold/10" onclick="openDetails(${s.id})">${s.name || s.original_name}</div>`).join('');
+                dd.classList.add('active');
             });
-            requestAnimationFrame(animate);
-        }
-        animate();
+        };
     </script>
 </body>
 </html>
