@@ -12,6 +12,7 @@
 :root { --gold:#C5A059; }
 
 *{box-sizing:border-box;margin:0;padding:0;}
+
 body{
 font-family:'Inter',sans-serif;
 background:#ffffff;
@@ -22,7 +23,7 @@ overflow-x:hidden;
 .brand-font{font-family:'Cinzel',serif;}
 .gold-text{color:var(--gold);}
 
-/* Responsive Container */
+/* Container */
 #mainContent{
 width:100%;
 max-width:1500px;
@@ -31,13 +32,19 @@ padding:clamp(12px,4vw,40px);
 padding-top:110px;
 }
 
-/* HERO SLIDER */
+/* Navbar */
+.navbar{
+backdrop-filter:blur(12px);
+}
+
+/* Hero Banner */
 .hero-slider{
 position:relative;
 width:100%;
 height:clamp(320px,60vh,720px);
 border-radius:28px;
 overflow:hidden;
+margin-bottom:30px;
 }
 
 .hero-slide{
@@ -61,14 +68,16 @@ inset:0;
 background:linear-gradient(to top,rgba(0,0,0,0.85),rgba(0,0,0,0.2));
 }
 
-/* OTT ROW */
+/* OTT Rows */
 .ott-row{margin-top:40px;}
+
 .ott-scroll{
 display:flex;
 gap:16px;
 overflow-x:auto;
 scroll-snap-type:x mandatory;
 }
+
 .ott-scroll::-webkit-scrollbar{display:none;}
 
 .poster-card{
@@ -81,7 +90,9 @@ flex-shrink:0;
 scroll-snap-align:start;
 box-shadow:0 10px 25px rgba(0,0,0,0.15);
 }
+
 .poster-card:hover{transform:scale(1.08);}
+
 .poster-card img{
 width:100%;
 height:clamp(190px,28vw,340px);
@@ -93,18 +104,18 @@ object-fit:cover;
 <body>
 
 <!-- NAVBAR -->
-<div class="fixed top-0 left-0 w-full z-50 flex justify-between items-center bg-white/95 backdrop-blur border-b px-6 py-4">
+<div class="fixed top-0 left-0 w-full z-50 navbar flex justify-between items-center bg-white/95 border-b px-6 py-4 shadow-sm">
 <div class="text-xl font-bold brand-font gold-text cursor-pointer" onclick="location.reload()">IFEELAV</div>
 <div class="flex gap-4 items-center">
 <input type="text" placeholder="Search Shows..." class="border-b outline-none text-sm">
-<button>❤️</button>
-<button>👤</button>
+<button class="text-xl">❤️</button>
+<button class="text-xl">👤</button>
 </div>
 </div>
 
 <div id="mainContent">
 
-<!-- STEP1 HOMEPAGE -->
+<!-- ================= HOME (STEP1) ================= -->
 <div id="step1">
 
 <div class="text-center mb-10">
@@ -122,7 +133,7 @@ Start Exploring ✨
 <!-- HERO BANNER -->
 <div id="heroSlider" class="hero-slider"></div>
 
-<!-- ROWS -->
+<!-- OTT ROWS -->
 <div class="ott-row">
 <h2 class="brand-font gold-text text-2xl mb-3">Trending Now</h2>
 <div id="trendingRow" class="ott-scroll"></div>
@@ -150,7 +161,7 @@ Start Exploring ✨
 
 </div>
 
-<!-- STEP2 REGION -->
+<!-- ================= REGION SELECTOR (STEP2) ================= -->
 <div id="step2" class="hidden text-center max-w-3xl mx-auto">
 <h1 id="regionTitle" class="brand-font gold-text text-3xl mb-6"></h1>
 <div id="step2Grid" class="grid grid-cols-2 md:grid-cols-3 gap-4 mb-8"></div>
@@ -160,78 +171,81 @@ Start Exploring ✨
 
 <script type="module">
 
-/* 🔥 CASE-SAFE API FETCH (Capital Shows.js Fix) */
+/* ===== SAFE API FETCH (Supports /api/Shows Capital) ===== */
 async function fetchMixedContent(){
 try{
-let tvRes=await fetch('/api/Shows?type=tv');
-let movieRes=await fetch('/api/Shows?type=movie');
+let tvRes = await fetch('/api/Shows?type=tv');
+let movieRes = await fetch('/api/Shows?type=movie');
 
-if(!tvRes.ok||!movieRes.ok){
-tvRes=await fetch('/api/shows?type=tv');
-movieRes=await fetch('/api/shows?type=movie');
+if(!tvRes.ok || !movieRes.ok){
+tvRes = await fetch('/api/shows?type=tv');
+movieRes = await fetch('/api/shows?type=movie');
 }
 
-const tvData=await tvRes.json();
-const movieData=await movieRes.json();
+const tvData = await tvRes.json();
+const movieData = await movieRes.json();
 
-const tv=tvData.results||[];
-const movies=movieData.results||[];
+const tv = tvData.results || [];
+const movies = movieData.results || [];
 
 return [...tv,...movies]
-.filter(i=>i&&(i.backdrop_path||i.poster_path))
+.filter(i => i && (i.backdrop_path || i.poster_path))
 .slice(0,30);
 
 }catch(e){
 console.error("API Error:",e);
-return[];
+return [];
 }
 }
 
-/* HERO SLIDER */
+/* ===== HERO BANNER INIT ===== */
 function initHeroSlider(items){
-const hero=document.getElementById('heroSlider');
-hero.innerHTML="";
-let index=0;
+const hero = document.getElementById('heroSlider');
+hero.innerHTML = "";
+let index = 0;
 
 items.slice(0,6).forEach((item,i)=>{
-const title=item.name||item.title||"Show";
-const slide=document.createElement('div');
-slide.className='hero-slide'+(i===0?' active':'');
-slide.innerHTML=`
-<img src="https://image.tmdb.org/t/p/original${item.backdrop_path||item.poster_path}">
+const title = item.name || item.title || "Show";
+
+const slide = document.createElement('div');
+slide.className = 'hero-slide' + (i===0 ? ' active' : '');
+slide.innerHTML = `
+<img src="https://image.tmdb.org/t/p/original${item.backdrop_path || item.poster_path}">
 <div class="hero-overlay"></div>
 <div class="absolute bottom-8 left-6 text-white max-w-xl">
 <h2 class="brand-font text-3xl md:text-5xl mb-2">${title}</h2>
-<p class="text-sm mb-3">⭐ ${item.vote_average?.toFixed(1)||'N/A'}</p>
+<p class="text-sm mb-3">⭐ ${item.vote_average?.toFixed(1) || 'N/A'}</p>
 </div>`;
 hero.appendChild(slide);
 });
 
 setInterval(()=>{
-const slides=document.querySelectorAll('.hero-slide');
+const slides = document.querySelectorAll('.hero-slide');
+if(!slides.length) return;
 slides.forEach(s=>s.classList.remove('active'));
-index=(index+1)%slides.length;
+index = (index+1) % slides.length;
 slides[index].classList.add('active');
 },4500);
 }
 
-/* RENDER ROW */
+/* ===== ROW RENDER ===== */
 function renderRow(id,list){
-const container=document.getElementById(id);
-container.innerHTML="";
+const container = document.getElementById(id);
+container.innerHTML = "";
 list.forEach(item=>{
-if(!item.poster_path)return;
-const card=document.createElement('div');
-card.className='poster-card';
-card.innerHTML=`<img src="https://image.tmdb.org/t/p/w500${item.poster_path}">`;
+if(!item.poster_path) return;
+const card = document.createElement('div');
+card.className = 'poster-card';
+card.innerHTML = `<img src="https://image.tmdb.org/t/p/w500${item.poster_path}">`;
 container.appendChild(card);
 });
 }
 
-/* LOAD HOMEPAGE */
+/* ===== LOAD HOMEPAGE ===== */
 async function loadHomepage(){
-const data=await fetchMixedContent();
-if(!data.length)return;
+const data = await fetchMixedContent();
+if(!data.length) return;
+
 initHeroSlider(data);
 renderRow('trendingRow',data);
 renderRow('topRatedRow',[...data].sort((a,b)=>b.vote_average-a.vote_average));
@@ -240,21 +254,43 @@ renderRow('bollywoodRow',data.filter(i=>i.original_language==='hi'));
 renderRow('animeRow',data.filter(i=>i.original_language==='ja'));
 }
 
-/* REGION SELECTOR */
-window.openRegionSelector=()=>{
+/* ===== REGION SELECTOR (FINAL NO ALERT VERSION) ===== */
+window.openRegionSelector = () => {
 document.getElementById('step1').classList.add('hidden');
 document.getElementById('step2').classList.remove('hidden');
-document.getElementById('regionTitle').innerText="Choose Your Region";
-document.getElementById('step2Grid').innerHTML=`
-<button onclick="alert('Hollywood Flow')" class="glass-panel p-4 rounded-xl font-bold">Hollywood 🌎</button>
-<button onclick="alert('Bollywood Flow')" class="glass-panel p-4 rounded-xl font-bold">Bollywood 🇮🇳</button>
-<button onclick="alert('Anime Flow')" class="glass-panel p-4 rounded-xl font-bold">Anime 🇯🇵</button>
+document.getElementById('regionTitle').innerText = "Choose Your Region";
+
+document.getElementById('step2Grid').innerHTML = `
+<button onclick="selectRegion('en','Hollywood')" class="p-4 rounded-xl border font-bold">
+Hollywood 🌎
+</button>
+
+<button onclick="selectRegion('hi','Bollywood')" class="p-4 rounded-xl border font-bold">
+Bollywood 🇮🇳
+</button>
+
+<button onclick="selectRegion('ja','Anime')" class="p-4 rounded-xl border font-bold">
+Anime 🇯🇵
+</button>
+
+<button onclick="selectRegion('ko','K-Drama')" class="p-4 rounded-xl border font-bold">
+K-Drama 🇰🇷
+</button>
 `;
+};
+
+/* ===== REAL FLOW (NO POPUP, NO ALERT) ===== */
+window.selectRegion = (lang,name)=>{
+console.log("Selected:", name, lang);
+
+/* Next step integration point with your original app */
+document.getElementById('step2').classList.add('hidden');
+
+/* If your original swipe/step3 exists it will handle from here */
 };
 
 loadHomepage();
 
 </script>
-
 </body>
 </html>
