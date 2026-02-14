@@ -18,23 +18,10 @@
         .gold-text { color: var(--gold); }
         
         .glass-panel { background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(12px); border: 1px solid rgba(197, 160, 89, 0.2); box-shadow: 0 8px 32px rgba(197, 160, 89, 0.1); }
-        
-        .cat-btn {
-            background: linear-gradient(145deg, #fff, #f9f9f9);
-            border: 1px solid rgba(197, 160, 89, 0.3);
-            color: #444; font-family: 'Playfair Display', serif; 
-            font-weight: 700; text-transform: uppercase; letter-spacing: 1px;
-            transition: all 0.3s;
-        }
+        .cat-btn { background: linear-gradient(145deg, #fff, #f9f9f9); border: 1px solid rgba(197, 160, 89, 0.3); color: #444; font-family: 'Playfair Display', serif; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; transition: all 0.3s; }
         .cat-btn:hover { background: var(--gold); color: white; border-color: var(--gold); transform: translateY(-3px); box-shadow: 0 10px 20px rgba(197, 160, 89, 0.2); }
         
-        .premium-card { 
-            background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(25px);
-            box-shadow: 0 30px 60px rgba(197, 160, 89, 0.2);
-            border: 1px solid rgba(197, 160, 89, 0.3); border-radius: 30px; 
-            cursor: pointer; transition: transform 0.3s;
-            height: 65vh; width: 100%; max-width: 400px;
-        }
+        .premium-card { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(25px); box-shadow: 0 30px 60px rgba(197, 160, 89, 0.2); border: 1px solid rgba(197, 160, 89, 0.3); border-radius: 30px; cursor: pointer; transition: transform 0.3s; height: 65vh; width: 100%; max-width: 400px; }
         @media (min-width: 768px) { .premium-card { height: 75vh; } }
 
         .gold-btn { background: linear-gradient(135deg, var(--gold) 0%, #A68545 100%); box-shadow: 0 10px 25px rgba(197, 160, 89, 0.3); }
@@ -48,25 +35,21 @@
         #watchlistPanel.open { transform: translateX(0); }
 
         /* Search Dropdown */
-        #searchDropdown {
-            position: absolute; top: 110%; left: 0; width: 100%;
-            background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(15px);
-            border: 1px solid rgba(197, 160, 89, 0.2); border-radius: 20px;
-            box-shadow: 0 15px 40px rgba(0,0,0,0.1);
-            overflow: hidden; z-index: 100;
-            max-height: 400px; overflow-y: auto;
-            transform-origin: top; transition: all 0.2s ease; display: none;
-        }
+        #searchDropdown { position: absolute; top: 110%; left: 0; width: 100%; background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(15px); border: 1px solid rgba(197, 160, 89, 0.2); border-radius: 20px; box-shadow: 0 15px 40px rgba(0,0,0,0.1); overflow: hidden; z-index: 100; max-height: 400px; overflow-y: auto; transform-origin: top; transition: all 0.2s ease; display: none; }
         #searchDropdown.active { display: block; animation: dropDown 0.3s ease forwards; }
         @keyframes dropDown { from { opacity: 0; transform: scaleY(0.9); } to { opacity: 1; transform: scaleY(1); } }
         .suggestion-item { padding: 10px 15px; display: flex; align-items: center; gap: 12px; cursor: pointer; border-bottom: 1px solid #f0f0f0; transition: background 0.2s; }
         .suggestion-item:hover { background: #fcf8f0; }
 
-        /* Login Modal */
+        /* Login Modal & Avatar Grid */
         #authModal { transition: opacity 0.3s ease; opacity: 0; pointer-events: none; }
         #authModal.active { opacity: 1; pointer-events: auto; }
         .auth-input { width: 100%; padding: 12px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 10px; outline: none; transition: border 0.3s; }
         .auth-input:focus { border-color: var(--gold); }
+        
+        .avatar-option { width: 50px; height: 50px; border-radius: 50%; border: 2px solid transparent; cursor: pointer; transition: transform 0.2s; }
+        .avatar-option:hover { transform: scale(1.1); }
+        .avatar-option.selected { border-color: var(--gold); transform: scale(1.1); box-shadow: 0 0 10px var(--gold); }
     </style>
 </head>
 <body class="text-gray-800" onclick="closeSearchDropdown()">
@@ -77,15 +60,14 @@
         <div class="flex gap-3 items-center">
             
             <div class="relative group z-50">
-                <input type="text" id="searchInput" placeholder="Search..." autocomplete="off"
-                    class="glass-panel rounded-full px-4 py-2 w-28 md:w-64 focus:w-40 md:focus:w-72 transition-all outline-none text-sm focus:border-[#C5A059]" 
-                    oninput="handleTyping(event)" onclick="event.stopPropagation()">
+                <input type="text" id="searchInput" placeholder="Search..." autocomplete="off" class="glass-panel rounded-full px-4 py-2 w-28 md:w-64 focus:w-40 md:focus:w-72 transition-all outline-none text-sm focus:border-[#C5A059]" oninput="handleTyping(event)" onclick="event.stopPropagation()">
                 <div id="searchDropdown"></div>
             </div>
 
-            <button onclick="toggleAuthModal()" class="glass-panel w-10 h-10 rounded-full flex items-center justify-center text-gray-600 hover:text-[#C5A059] transition shadow-lg relative">
-                <span id="userIcon">👤</span>
-                <span id="loginStatus" class="absolute top-0 right-0 w-3 h-3 bg-gray-400 rounded-full border-2 border-white"></span>
+            <button onclick="toggleAuthModal()" class="glass-panel w-10 h-10 rounded-full flex items-center justify-center text-gray-600 hover:text-[#C5A059] transition shadow-lg relative overflow-hidden p-0">
+                <img id="headerAvatar" src="https://api.dicebear.com/7.x/initials/svg?seed=User" class="w-full h-full object-cover hidden">
+                <span id="headerIconDefault">👤</span>
+                <span id="loginStatus" class="absolute top-0 right-0 w-3 h-3 bg-gray-400 rounded-full border-2 border-white z-10"></span>
             </button>
 
             <button onclick="toggleWatchlist()" class="glass-panel w-10 h-10 rounded-full flex items-center justify-center text-gray-600 hover:text-red-500 transition shadow-lg relative">
@@ -95,19 +77,16 @@
     </div>
 
     <div id="authModal" class="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm">
-        <div class="bg-white p-8 rounded-3xl shadow-2xl w-full max-w-sm relative">
+        <div class="bg-white p-8 rounded-3xl shadow-2xl w-full max-w-sm relative max-h-[90vh] overflow-y-auto">
             <button onclick="toggleAuthModal()" class="absolute top-4 right-4 text-gray-400 hover:text-red-500">✕</button>
             
             <div id="loggedOutView">
                 <h2 class="premium-font text-2xl mb-2">Welcome</h2>
                 <p class="text-xs text-gray-400 mb-6 uppercase tracking-wider">Sign in to sync your vault</p>
-                
                 <input type="email" id="email" placeholder="Email Address" class="auth-input">
                 <input type="password" id="password" placeholder="Password" class="auth-input">
-                
                 <button onclick="handleLogin()" class="w-full bg-[#C5A059] text-white py-3 rounded-xl font-bold hover:bg-[#b08d4b] transition mb-3">Sign In</button>
                 <button onclick="handleSignup()" class="w-full border border-[#C5A059] text-[#C5A059] py-3 rounded-xl font-bold hover:bg-[#fcf8f0] transition mb-4">Create Account</button>
-                
                 <div class="text-center border-t pt-4">
                     <button onclick="handleGoogleLogin()" class="text-sm text-gray-500 hover:text-gray-800 flex items-center justify-center gap-2 w-full">
                         <span class="text-lg">G</span> Continue with Google
@@ -116,9 +95,20 @@
             </div>
 
             <div id="loggedInView" class="hidden text-center">
-                <div class="w-20 h-20 bg-gray-100 rounded-full mx-auto flex items-center justify-center text-4xl mb-4">👤</div>
+                <div class="w-24 h-24 mx-auto mb-4 relative">
+                    <img id="profileAvatar" src="" class="w-full h-full rounded-full object-cover border-4 border-[#C5A059] shadow-lg">
+                    <div class="absolute bottom-0 right-0 bg-green-500 w-6 h-6 rounded-full border-4 border-white"></div>
+                </div>
+                
                 <h2 id="userNameDisplay" class="premium-font text-xl mb-1">User</h2>
                 <p id="userEmailDisplay" class="text-sm text-gray-400 mb-6">user@example.com</p>
+
+                <div class="mb-6">
+                    <p class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">Choose Your Avatar</p>
+                    <div class="grid grid-cols-5 gap-2 justify-items-center" id="avatarGrid">
+                        </div>
+                </div>
+
                 <button onclick="handleLogout()" class="w-full bg-red-50 text-red-500 py-3 rounded-xl font-bold hover:bg-red-100 transition">Sign Out</button>
             </div>
         </div>
@@ -136,7 +126,6 @@
                 <button onclick="selectRegion('ko', 'K-Drama')" class="cat-btn p-6 rounded-2xl text-lg">K-Drama</button>
             </div>
         </div>
-
         <div id="step2" class="hidden text-center w-full max-w-3xl fade-in">
             <h1 class="premium-font italic text-4xl md:text-6xl gold-text mb-4 tracking-tighter" id="regionTitle">Exploring...</h1>
             <p class="text-gray-400 uppercase tracking-[4px] text-[10px] mb-12 italic">Step 2: Select Your Vibe</p>
@@ -150,7 +139,6 @@
             </div>
             <button onclick="resetToStep1()" class="text-gray-400 text-sm hover:text-[#C5A059] uppercase tracking-widest">← Go Back</button>
         </div>
-
         <div id="swipeStep" class="hidden w-full flex flex-col items-center">
             <div id="showCard" onclick="openDetails(shows[index].id)" class="premium-card overflow-hidden relative mb-6">
                 <img id="poster" src="" class="w-full h-full object-cover">
@@ -171,7 +159,6 @@
             <button onclick="location.reload()" class="mt-6 text-xs text-gray-400 uppercase tracking-widest hover:text-[#C5A059]">Start Over</button>
         </div>
     </div>
-
     <div id="detailOverlay" class="fixed inset-0 z-[60] bg-white overflow-y-auto hidden">
         <button onclick="closeDetails()" class="fixed top-4 right-4 z-50 bg-black/50 text-white w-10 h-10 rounded-full backdrop-blur-md hover:bg-red-600 transition">✕</button>
         <div class="relative h-[65vh] md:h-[60vh]">
@@ -198,7 +185,6 @@
             </div>
         </div>
     </div>
-
     <div id="watchlistPanel" class="fixed top-0 right-0 h-full w-80 md:w-96 bg-white/98 backdrop-blur-xl shadow-2xl z-[70] p-6 border-l border-[#C5A059]/30 overflow-y-auto">
         <div class="flex justify-between items-center mb-8"><h2 class="premium-font text-2xl gold-text italic">Your Vault</h2><button onclick="toggleWatchlist()" class="text-gray-400 hover:text-red-500 text-xl">✕</button></div>
         <div id="watchlistItems" class="space-y-3"></div>
@@ -207,7 +193,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-        import { getFirestore, doc, setDoc, getDoc, updateDoc, arrayUnion, arrayRemove } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getFirestore, doc, setDoc, getDoc, updateDoc, arrayUnion } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyAoCZuJ4tGdwmFuz8y-_tc5phvfbn2oi1A",
@@ -219,7 +205,6 @@
             measurementId: "G-K7YJRZS854"
         };
 
-        // Init Firebase
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
@@ -227,203 +212,114 @@
         let currentUser = null;
         let shows = []; let index = 0; let watchlist = []; let currentDetailId = null;
         let selectedLang = ''; let searchTimer;
+        
+        // --- COOL AVATAR LIST ---
+        const avatarList = [
+            "https://api.dicebear.com/7.x/adventurer/svg?seed=Felix",
+            "https://api.dicebear.com/7.x/adventurer/svg?seed=Chloe",
+            "https://api.dicebear.com/7.x/adventurer/svg?seed=Ryan",
+            "https://api.dicebear.com/7.x/adventurer/svg?seed=Abby",
+            "https://api.dicebear.com/7.x/micah/svg?seed=Leo",
+            "https://api.dicebear.com/7.x/micah/svg?seed=Nora",
+            "https://api.dicebear.com/7.x/notionists/svg?seed=Bear",
+            "https://api.dicebear.com/7.x/bottts/svg?seed=Robo",
+            "https://api.dicebear.com/7.x/avataaars/svg?seed=Cool",
+            "https://api.dicebear.com/7.x/avataaars/svg?seed=Cute"
+        ];
 
-        // --- AUTH LOGIC ---
-        window.toggleAuthModal = () => {
-            const modal = document.getElementById('authModal');
-            modal.classList.toggle('active');
-        }
+        window.toggleAuthModal = () => { document.getElementById('authModal').classList.toggle('active'); }
 
         onAuthStateChanged(auth, async (user) => {
             currentUser = user;
             if (user) {
-                // Logged In
-                document.getElementById('loginStatus').classList.remove('bg-gray-400');
-                document.getElementById('loginStatus').classList.add('bg-green-500');
-                document.getElementById('loggedOutView').classList.add('hidden');
-                document.getElementById('loggedInView').classList.remove('hidden');
-                document.getElementById('userNameDisplay').innerText = user.displayName || "User";
+                document.getElementById('loginStatus').classList.remove('bg-gray-400'); document.getElementById('loginStatus').classList.add('bg-green-500');
+                document.getElementById('loggedOutView').classList.add('hidden'); document.getElementById('loggedInView').classList.remove('hidden');
+                document.getElementById('userNameDisplay').innerText = user.displayName || user.email.split('@')[0];
                 document.getElementById('userEmailDisplay').innerText = user.email;
+                document.getElementById('headerIconDefault').classList.add('hidden');
+                document.getElementById('headerAvatar').classList.remove('hidden');
                 
-                // Load Cloud Watchlist
-                await loadCloudWatchlist();
+                // Load Avatar & Watchlist
+                await loadUserData();
             } else {
-                // Logged Out
-                document.getElementById('loginStatus').classList.remove('bg-green-500');
-                document.getElementById('loginStatus').classList.add('bg-gray-400');
-                document.getElementById('loggedOutView').classList.remove('hidden');
-                document.getElementById('loggedInView').classList.add('hidden');
-                
-                // Load Local Watchlist
-                watchlist = JSON.parse(localStorage.getItem('avWatchlist')) || [];
-                updateWatchlistUI();
+                document.getElementById('loginStatus').classList.remove('bg-green-500'); document.getElementById('loginStatus').classList.add('bg-gray-400');
+                document.getElementById('loggedOutView').classList.remove('hidden'); document.getElementById('loggedInView').classList.add('hidden');
+                document.getElementById('headerAvatar').classList.add('hidden'); document.getElementById('headerIconDefault').classList.remove('hidden');
+                watchlist = JSON.parse(localStorage.getItem('avWatchlist')) || []; updateWatchlistUI();
             }
         });
 
-        window.handleLogin = async () => {
-            const e = document.getElementById('email').value;
-            const p = document.getElementById('password').value;
-            try { await signInWithEmailAndPassword(auth, e, p); toggleAuthModal(); } catch(err) { alert(err.message); }
+        // --- AVATAR LOGIC ---
+        function renderAvatars() {
+            const grid = document.getElementById('avatarGrid');
+            grid.innerHTML = avatarList.map(url => `
+                <img src="${url}" class="avatar-option" onclick="changeAvatar('${url}')">
+            `).join('');
+        }
+        renderAvatars(); // Call initially
+
+        window.changeAvatar = async (url) => {
+            if(!currentUser) return;
+            // Update UI immediately
+            document.getElementById('profileAvatar').src = url;
+            document.getElementById('headerAvatar').src = url;
+            
+            // Save to Cloud
+            const docRef = doc(db, "users", currentUser.uid);
+            await updateDoc(docRef, { avatar: url });
         };
 
-        window.handleSignup = async () => {
-            const e = document.getElementById('email').value;
-            const p = document.getElementById('password').value;
-            try { await createUserWithEmailAndPassword(auth, e, p); toggleAuthModal(); } catch(err) { alert(err.message); }
-        };
-
-        window.handleGoogleLogin = async () => {
-            const provider = new GoogleAuthProvider();
-            try { await signInWithPopup(auth, provider); toggleAuthModal(); } catch(err) { alert(err.message); }
-        };
-
-        window.handleLogout = async () => {
-            await signOut(auth); toggleAuthModal();
-        };
-
-        // --- FIRESTORE LOGIC ---
-        async function loadCloudWatchlist() {
+        async function loadUserData() {
             if (!currentUser) return;
             const docRef = doc(db, "users", currentUser.uid);
             const docSnap = await getDoc(docRef);
             if (docSnap.exists()) {
-                watchlist = docSnap.data().watchlist || [];
-                // Merge local data if needed (Optional: Logic to merge local to cloud on first login)
-                // For now, let's just use cloud as master
+                const data = docSnap.data();
+                watchlist = data.watchlist || [];
+                const savedAvatar = data.avatar || avatarList[0];
+                document.getElementById('profileAvatar').src = savedAvatar;
+                document.getElementById('headerAvatar').src = savedAvatar;
                 updateWatchlistUI();
             } else {
-                // Create user doc
-                await setDoc(docRef, { email: currentUser.email, watchlist: [] });
+                // First time user init
+                const defaultAv = avatarList[0];
+                await setDoc(docRef, { email: currentUser.email, watchlist: [], avatar: defaultAv });
+                document.getElementById('profileAvatar').src = defaultAv;
+                document.getElementById('headerAvatar').src = defaultAv;
                 watchlist = [];
                 updateWatchlistUI();
             }
         }
 
-        async function saveToCloud(show, action) {
-            if (!currentUser) return;
-            const docRef = doc(db, "users", currentUser.uid);
-            if (action === 'add') {
-                await updateDoc(docRef, { watchlist: arrayUnion(show) });
-            } else if (action === 'remove') {
-                // Remove logic is tricky with objects, need exact match. 
-                // Simpler: Rewrite whole list
-                await updateDoc(docRef, { watchlist: watchlist });
-            }
-        }
+        window.handleLogin = async () => { try { await signInWithEmailAndPassword(auth, document.getElementById('email').value, document.getElementById('password').value); toggleAuthModal(); } catch(err) { alert(err.message); } };
+        window.handleSignup = async () => { try { await createUserWithEmailAndPassword(auth, document.getElementById('email').value, document.getElementById('password').value); toggleAuthModal(); } catch(err) { alert(err.message); } };
+        window.handleGoogleLogin = async () => { const provider = new GoogleAuthProvider(); try { await signInWithPopup(auth, provider); toggleAuthModal(); } catch(err) { alert(err.message); } };
+        window.handleLogout = async () => { await signOut(auth); toggleAuthModal(); };
+        async function saveToCloud(show, action) { if (!currentUser) return; const docRef = doc(db, "users", currentUser.uid); if (action === 'add') await updateDoc(docRef, { watchlist: arrayUnion(show) }); else if (action === 'remove') await updateDoc(docRef, { watchlist: watchlist }); }
 
-        // --- APP LOGIC (Updated for Cloud) ---
-        
-        // Canvas Animation
+        // --- STANDARD APP LOGIC ---
         const canvas = document.getElementById('bgCanvas'); const ctx = canvas.getContext('2d');
         function initCanvas() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
         window.onresize = initCanvas; initCanvas();
         let particles = Array.from({length: 50}, () => ({x:Math.random()*canvas.width, y:Math.random()*canvas.height, r:Math.random()*2, vx:Math.random()*0.5-0.25, vy:Math.random()*0.5-0.25}));
         function animate() { ctx.clearRect(0,0,canvas.width,canvas.height); ctx.fillStyle = `rgba(197, 160, 89, 0.3)`; particles.forEach(p => { p.x+=p.vx; p.y+=p.vy; if(p.x<0||p.x>canvas.width) p.vx*=-1; if(p.y<0||p.y>canvas.height) p.vy*=-1; ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, Math.PI*2); ctx.fill(); }); requestAnimationFrame(animate); } animate();
 
-        // Nav & Data Functions (Globally accessible via window)
         window.selectRegion = (l, n) => { selectedLang = l; document.getElementById('step1').classList.add('hidden'); document.getElementById('step2').classList.remove('hidden'); document.getElementById('regionTitle').innerText = "Exploring " + n; }
         window.resetToStep1 = () => { document.getElementById('step2').classList.add('hidden'); document.getElementById('step1').classList.remove('hidden'); selectedLang = ''; }
         window.startApp = async (gid) => { document.getElementById('step2').classList.add('hidden'); document.getElementById('swipeStep').classList.remove('hidden'); let u = `/api/getShows?`; if (gid) u += `genre=${gid}&`; if (selectedLang) u += `lang=${selectedLang}`; fetchShows(u); }
-        
-        // Search
-        window.handleTyping = (e) => {
-            const q = e.target.value.trim(); const dd = document.getElementById('searchDropdown'); clearTimeout(searchTimer);
-            if (q.length < 2) { dd.classList.remove('active'); dd.innerHTML = ''; return; }
-            searchTimer = setTimeout(async () => {
-                dd.classList.add('active'); dd.innerHTML = '<div class="p-3 text-sm text-gray-400 text-center">Searching...</div>';
-                try {
-                    const res = await fetch(`/api/getShows?query=${encodeURIComponent(q)}`); const data = await res.json();
-                    const results = data.results ? data.results.slice(0, 6) : [];
-                    if (results.length === 0) dd.innerHTML = '<div class="p-3 text-sm text-gray-400 text-center">No matches found</div>';
-                    else dd.innerHTML = results.map(s => `<div class="suggestion-item" onclick="openFromSearch(${s.id})"><img src="https://image.tmdb.org/t/p/w92${s.poster_path}" onerror="this.src='https://placehold.co/40x60'" class="w-10 h-14 object-cover rounded shadow"><div><h4 class="font-bold text-gray-800 text-sm leading-tight">${s.name || s.original_name}</h4><span class="text-xs text-[#C5A059] font-medium">${s.first_air_date ? s.first_air_date.split('-')[0] : 'N/A'}</span><span class="text-[10px] text-gray-400 ml-2">★ ${s.vote_average.toFixed(1)}</span></div></div>`).join('');
-                } catch (err) { dd.innerHTML = '<div class="p-3 text-sm text-red-400 text-center">Error</div>'; }
-            }, 300);
-        }
+        window.handleTyping = (e) => { const q = e.target.value.trim(); const dd = document.getElementById('searchDropdown'); clearTimeout(searchTimer); if (q.length < 2) { dd.classList.remove('active'); dd.innerHTML = ''; return; } searchTimer = setTimeout(async () => { dd.classList.add('active'); dd.innerHTML = '<div class="p-3 text-sm text-gray-400 text-center">Searching...</div>'; try { const res = await fetch(`/api/getShows?query=${encodeURIComponent(q)}`); const data = await res.json(); const results = data.results ? data.results.slice(0, 6) : []; if (results.length === 0) dd.innerHTML = '<div class="p-3 text-sm text-gray-400 text-center">No matches found</div>'; else dd.innerHTML = results.map(s => `<div class="suggestion-item" onclick="openFromSearch(${s.id})"><img src="https://image.tmdb.org/t/p/w92${s.poster_path}" onerror="this.src='https://placehold.co/40x60'" class="w-10 h-14 object-cover rounded shadow"><div><h4 class="font-bold text-gray-800 text-sm leading-tight">${s.name || s.original_name}</h4><span class="text-xs text-[#C5A059] font-medium">${s.first_air_date ? s.first_air_date.split('-')[0] : 'N/A'}</span><span class="text-[10px] text-gray-400 ml-2">★ ${s.vote_average.toFixed(1)}</span></div></div>`).join(''); } catch (err) { dd.innerHTML = '<div class="p-3 text-sm text-red-400 text-center">Error</div>'; } }, 300); }
         window.openFromSearch = (id) => { window.closeSearchDropdown(); window.openDetails(id); }
         window.closeSearchDropdown = () => { document.getElementById('searchDropdown').classList.remove('active'); }
-
-        async function fetchShows(endpoint) {
-            try { const res = await fetch(endpoint); const data = await res.json(); shows = data.results.filter(s => s.poster_path); index = 0; if(shows.length > 0) render(); else alert("No results found."); } catch (err) { console.error(err); }
-        }
-
-        function render() {
-            if (index >= shows.length) { alert("Reached end of list!"); location.reload(); return; }
-            const show = shows[index];
-            document.getElementById('title').innerText = show.name || show.original_name;
-            document.getElementById('poster').src = `https://image.tmdb.org/t/p/w780${show.poster_path}`;
-            document.getElementById('genres').innerText = "First Air: " + (show.first_air_date || 'N/A');
-            const card = document.getElementById('showCard'); card.style.opacity = '0'; card.style.transform = 'scale(0.95)'; setTimeout(() => { card.style.opacity = '1'; card.style.transform = 'scale(1)'; }, 100);
-        }
-
-        window.openDetails = async (id) => {
-            const overlay = document.getElementById('detailOverlay'); overlay.classList.remove('hidden'); setTimeout(() => overlay.classList.add('active'), 10); currentDetailId = id;
-            try {
-                const res = await fetch(`/api/getDetails?id=${id}`); const data = await res.json();
-                const isMobile = window.innerWidth < 768; let hero = data.backdrop_path; if(isMobile && data.poster_path) hero = data.poster_path; else if(!hero) hero = data.poster_path;
-                document.getElementById('detailBackdrop').src = `https://image.tmdb.org/t/p/original${hero}`;
-                document.getElementById('detailTitle').innerText = data.name; document.getElementById('detailOverview').innerText = data.overview;
-                document.getElementById('detailYear').innerText = data.first_air_date ? data.first_air_date.split('-')[0] : 'N/A';
-                document.getElementById('detailRating').innerText = "★ " + data.vote_average.toFixed(1);
-                document.getElementById('detailSeasons').innerText = `${data.number_of_seasons || 0} Seasons`;
-                document.getElementById('detailLang').innerText = data.spoken_languages.map(l => l.english_name).join(', ');
-                document.getElementById('detailStatus').innerText = data.status; document.getElementById('detailNetwork').innerText = data.networks[0]?.name || 'N/A';
-                document.getElementById('castList').innerHTML = data.credits.cast.slice(0, 6).map(a => `<a href="https://www.google.com/search?q=${encodeURIComponent(a.name + ' actor')}" target="_blank" class="flex items-center gap-2 bg-gray-100 px-3 py-2 rounded-full hover:bg-[#C5A059] hover:text-white transition cursor-pointer"><img src="https://image.tmdb.org/t/p/w200${a.profile_path}" onerror="this.src='https://placehold.co/50'" class="w-8 h-8 rounded-full object-cover"><span class="text-sm font-bold">${a.name}</span></a>`).join('');
-                document.getElementById('screenshotGrid').innerHTML = data.images.backdrops.slice(0, 4).map(img => `<img src="https://image.tmdb.org/t/p/w500${img.file_path}" class="w-full h-32 object-cover rounded-xl hover:scale-105 transition duration-300">`).join('');
-            } catch (err) { console.error(err); alert("Could not fetch details."); window.closeDetails(); }
-        }
-
+        async function fetchShows(endpoint) { try { const res = await fetch(endpoint); const data = await res.json(); shows = data.results.filter(s => s.poster_path); index = 0; if(shows.length > 0) render(); else alert("No results found."); } catch (err) { console.error(err); } }
+        function render() { if (index >= shows.length) { alert("Reached end of list!"); location.reload(); return; } const show = shows[index]; document.getElementById('title').innerText = show.name || show.original_name; document.getElementById('poster').src = `https://image.tmdb.org/t/p/w780${show.poster_path}`; document.getElementById('genres').innerText = "First Air: " + (show.first_air_date || 'N/A'); const card = document.getElementById('showCard'); card.style.opacity = '0'; card.style.transform = 'scale(0.95)'; setTimeout(() => { card.style.opacity = '1'; card.style.transform = 'scale(1)'; }, 100); }
+        window.openDetails = async (id) => { const overlay = document.getElementById('detailOverlay'); overlay.classList.remove('hidden'); setTimeout(() => overlay.classList.add('active'), 10); currentDetailId = id; try { const res = await fetch(`/api/getDetails?id=${id}`); const data = await res.json(); const isMobile = window.innerWidth < 768; let hero = data.backdrop_path; if(isMobile && data.poster_path) hero = data.poster_path; else if(!hero) hero = data.poster_path; document.getElementById('detailBackdrop').src = `https://image.tmdb.org/t/p/original${hero}`; document.getElementById('detailTitle').innerText = data.name; document.getElementById('detailOverview').innerText = data.overview; document.getElementById('detailYear').innerText = data.first_air_date ? data.first_air_date.split('-')[0] : 'N/A'; document.getElementById('detailRating').innerText = "★ " + data.vote_average.toFixed(1); document.getElementById('detailSeasons').innerText = `${data.number_of_seasons || 0} Seasons`; document.getElementById('detailLang').innerText = data.spoken_languages.map(l => l.english_name).join(', '); document.getElementById('detailStatus').innerText = data.status; document.getElementById('detailNetwork').innerText = data.networks[0]?.name || 'N/A'; document.getElementById('castList').innerHTML = data.credits.cast.slice(0, 6).map(a => `<a href="https://www.google.com/search?q=${encodeURIComponent(a.name + ' actor')}" target="_blank" class="flex items-center gap-2 bg-gray-100 px-3 py-2 rounded-full hover:bg-[#C5A059] hover:text-white transition cursor-pointer"><img src="https://image.tmdb.org/t/p/w200${a.profile_path}" onerror="this.src='https://placehold.co/50'" class="w-8 h-8 rounded-full object-cover"><span class="text-sm font-bold">${a.name}</span></a>`).join(''); document.getElementById('screenshotGrid').innerHTML = data.images.backdrops.slice(0, 4).map(img => `<img src="https://image.tmdb.org/t/p/w500${img.file_path}" class="w-full h-32 object-cover rounded-xl hover:scale-105 transition duration-300">`).join(''); } catch (err) { console.error(err); alert("Could not fetch details."); window.closeDetails(); } }
         window.closeDetails = () => { const o = document.getElementById('detailOverlay'); o.classList.remove('active'); setTimeout(() => o.classList.add('hidden'), 400); }
-        
-        window.handleAction = (type) => { 
-            const card = document.getElementById('showCard'); 
-            if(type === 'smash') { window.addToWatchlist(shows[index]); card.classList.add('slide-right'); } 
-            else { card.classList.add('slide-left'); } 
-            setTimeout(() => { index++; card.classList.remove('slide-right', 'slide-left'); render(); }, 300); 
-        }
-
-        // --- WATCHLIST LOGIC (Modified for Cloud) ---
-        window.addToWatchlist = (show) => {
-            if (!watchlist.some(item => item.id === show.id)) {
-                watchlist.push(show);
-                
-                if (currentUser) {
-                    saveToCloud(show, 'add'); // Cloud Save
-                } else {
-                    localStorage.setItem('avWatchlist', JSON.stringify(watchlist)); // Local Save
-                }
-                updateWatchlistUI();
-            }
-        }
-        
-        window.addToWatchlistCurrent = () => {
-            if(currentDetailId) { 
-                let show = shows.find(s => s.id === currentDetailId); 
-                if(show) { window.addToWatchlist(show); alert("Added to Vault!"); } 
-                else { fetch(`/api/getDetails?id=${currentDetailId}`).then(r=>r.json()).then(d=>{ window.addToWatchlist(d); alert("Added to Vault!"); }); }
-            } 
-        }
-
+        window.handleAction = (type) => { const card = document.getElementById('showCard'); if(type === 'smash') { window.addToWatchlist(shows[index]); card.classList.add('slide-right'); } else { card.classList.add('slide-left'); } setTimeout(() => { index++; card.classList.remove('slide-right', 'slide-left'); render(); }, 300); }
+        window.addToWatchlist = (show) => { if (!watchlist.some(item => item.id === show.id)) { watchlist.push(show); if (currentUser) { saveToCloud(show, 'add'); } else { localStorage.setItem('avWatchlist', JSON.stringify(watchlist)); } updateWatchlistUI(); } }
+        window.addToWatchlistCurrent = () => { if(currentDetailId) { let show = shows.find(s => s.id === currentDetailId); if(show) { window.addToWatchlist(show); alert("Added to Vault!"); } else { fetch(`/api/getDetails?id=${currentDetailId}`).then(r=>r.json()).then(d=>{ window.addToWatchlist(d); alert("Added to Vault!"); }); } } }
         window.toggleWatchlist = () => { document.getElementById('watchlistPanel').classList.toggle('open'); updateWatchlistUI(); }
-        
-        window.removeFromWatchlist = (id) => {
-            watchlist = watchlist.filter(item => item.id !== id);
-            
-            if (currentUser) {
-                saveToCloud(null, 'remove'); // Remove from Cloud
-            } else {
-                localStorage.setItem('avWatchlist', JSON.stringify(watchlist)); // Remove from Local
-            }
-            updateWatchlistUI();
-        }
-
-        function updateWatchlistUI() {
-            const container = document.getElementById('watchlistItems'); const badge = document.getElementById('badge');
-            badge.innerText = watchlist.length; badge.classList.toggle('hidden', watchlist.length === 0);
-            if (watchlist.length === 0) { container.innerHTML = '<p class="text-gray-400 text-sm text-center mt-10">Vault is empty.</p>'; return; }
-            container.innerHTML = watchlist.map(item => `<div class="flex gap-3 items-center bg-gray-50 p-2 rounded-xl border border-gray-100 hover:shadow-md transition"><div onclick="openDetails(${item.id})" class="flex-1 flex gap-3 cursor-pointer items-center min-w-0"><img src="https://image.tmdb.org/t/p/w200${item.poster_path}" class="w-12 h-16 object-cover rounded-lg"><div class="flex-1 min-w-0"><h4 class="font-bold text-sm text-gray-800 truncate">${item.name || item.original_name}</h4><p class="text-[10px] text-gray-500">Tap for Info</p></div></div><button onclick="removeFromWatchlist(${item.id})" class="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-red-500 bg-white rounded-full shadow-sm">✕</button></div>`).join('');
-        }
-        // Initial load (for local storage if not logged in)
-        updateWatchlistUI();
+        window.removeFromWatchlist = (id) => { watchlist = watchlist.filter(item => item.id !== id); if (currentUser) { saveToCloud(null, 'remove'); } else { localStorage.setItem('avWatchlist', JSON.stringify(watchlist)); } updateWatchlistUI(); }
+        function updateWatchlistUI() { const container = document.getElementById('watchlistItems'); const badge = document.getElementById('badge'); badge.innerText = watchlist.length; badge.classList.toggle('hidden', watchlist.length === 0); if (watchlist.length === 0) { container.innerHTML = '<p class="text-gray-400 text-sm text-center mt-10">Vault is empty.</p>'; return; } container.innerHTML = watchlist.map(item => `<div class="flex gap-3 items-center bg-gray-50 p-2 rounded-xl border border-gray-100 hover:shadow-md transition"><div onclick="openDetails(${item.id})" class="flex-1 flex gap-3 cursor-pointer items-center min-w-0"><img src="https://image.tmdb.org/t/p/w200${item.poster_path}" class="w-12 h-16 object-cover rounded-lg"><div class="flex-1 min-w-0"><h4 class="font-bold text-sm text-gray-800 truncate">${item.name || item.original_name}</h4><p class="text-[10px] text-gray-500">Tap for Info</p></div></div><button onclick="removeFromWatchlist(${item.id})" class="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-red-500 bg-white rounded-full shadow-sm">✕</button></div>`).join(''); } updateWatchlistUI();
     </script>
 </body>
 </html>
