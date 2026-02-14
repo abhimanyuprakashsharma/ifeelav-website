@@ -5,29 +5,29 @@ export default async function handler(req, res) {
     try {
         let url;
         if (query) {
-            url = `https://api.themoviedb.org/3/search/tv?language=en-US&page=1&query=${encodeURIComponent(query)}&include_adult=false`;
+            // Search Update: Include adult false, but sort isn't supported in search directly.
+            // We rely on TMDB relevance.
+            url = `https://api.themoviedb.org/3/search/multi?language=en-US&page=1&query=${encodeURIComponent(query)}&include_adult=false`;
         } else {
-            // --- SMART LOGIC FOR BOLLYWOOD ---
-            let maxPage = 20;
-            let voteCount = 50; // Standard strictness
+            // --- SMART DISCOVER LOGIC ---
             let sort = "popularity.desc";
+            let voteCount = 50;
+            let page = Math.floor(Math.random() * 10) + 1;
 
-            // Agar Bollywood (Hi) hai, toh filter thoda loose karo taaki content dikhe
+            // Bollywood Fix: Filters hata diye taaki content dikhe
             if (lang === 'hi') {
-                maxPage = 5;       // Kam pages dhoondo
-                voteCount = 2;     // Kam votes wale bhi chalenge (Action movies ke liye zaroori)
-            } else if (lang === 'ja' || lang === 'ko') {
-                maxPage = 3;
+                voteCount = 0; // Show everything
+                page = Math.floor(Math.random() * 3) + 1; // Safe pages
             }
 
-            const randomPage = Math.floor(Math.random() * maxPage) + 1;
-
-            // Date filter hata diya hai taaki purani classic movies bhi aayein
-            url = `https://api.themoviedb.org/3/discover/tv?language=en-US&sort_by=${sort}&vote_count.gte=${voteCount}&include_null_first_air_dates=false&page=${randomPage}`;
+            url = `https://api.themoviedb.org/3/discover/tv?language=en-US&sort_by=${sort}&vote_count.gte=${voteCount}&include_null_first_air_dates=false&page=${page}`;
+            
+            // Movies vs TV logic handled by frontend usually, but here we prioritize TV discovery
+            // If genre implies movies (like Action 28 is movie, 10759 is TV Action), handle gracefully
             
             if (genre) url += `&with_genres=${genre}`;
             if (lang) url += `&with_original_language=${lang}`;
-            if (lang === 'ja') url += `&with_genres=16`; 
+            if (lang === 'ja') url += `&with_genres=16`; // Anime
         }
 
         const options = {
@@ -38,11 +38,13 @@ export default async function handler(req, res) {
         let response = await fetch(url, options);
         let data = await response.json();
         
-        // Backup Plan: Agar result zero hai, toh bina page number ke try karo (Page 1)
+        // FAILSAFE: Agar result khali hai, toh Page 1 se uthao
         if (!data.results || data.results.length === 0) {
-            const fallbackUrl = url.replace(/&page=\d+/, '&page=1');
-            response = await fetch(fallbackUrl, options);
-            data = await response.json();
+            if(!query) {
+                const fallbackUrl = url.replace(/&page=\d+/, '&page=1');
+                response = await fetch(fallbackUrl, options);
+                data = await response.json();
+            }
         }
 
         res.status(200).json(data);
