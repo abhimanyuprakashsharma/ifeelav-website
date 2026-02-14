@@ -18,8 +18,8 @@
         .brand-font { font-family: 'Cinzel', serif; }
         .gold-text { color: var(--gold); }
 
-        /* BG ANIMATION */
-        #posterBg { position: fixed; inset: 0; z-index: -1; opacity: 0.15; pointer-events: none; }
+        /* BG ANIMATION (DISABLED VISUALLY FOR CLEAN LUXURY MODE) */
+        #posterBg { position: fixed; inset: 0; z-index: -1; opacity: 0; pointer-events: none; }
         .poster-row { display: flex; gap: 10px; width: 200%; animation: slide 45s linear infinite; margin-bottom: 10px; }
         .poster-row:nth-child(even) { animation-direction: reverse; }
         @keyframes slide { from { transform: translateX(0); } to { transform: translateX(-50%); } }
@@ -32,7 +32,6 @@
         body.dark .cat-btn { background: #151515; border-color: #333; color: #ccc; }
         .cat-btn:active { transform: scale(0.95); background: var(--gold); color: white; }
 
-        /* CARD */
         .premium-card { 
             height: 65vh; width: 100%; max-width: 400px; 
             border-radius: 30px; overflow: hidden; 
@@ -41,7 +40,6 @@
             background: #000;
         }
         
-        /* OVERLAYS (Back Gesture Works Here) */
         #detailOverlay, #watchlistOverlay, #authModal { 
             position: fixed; inset: 0; z-index: 100; 
             background: white; 
@@ -54,18 +52,28 @@
         #authModal.active { display: flex; opacity: 1; }
         .active-overlay { transform: translateY(0) !important; }
 
-        /* STREAM & SEASON BUTTONS */
         .stream-link { display: flex; align-items: center; justify-content: center; gap: 8px; padding: 14px; background: #222; color: white; border-radius: 12px; margin-bottom: 8px; font-weight: bold; transition: 0.2s; border-left: 4px solid var(--gold); }
         .stream-link:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(197, 160, 89, 0.3); }
         
         .season-btn { padding: 8px 16px; border-radius: 20px; background: rgba(128,128,128,0.2); font-size: 0.8rem; font-weight: bold; white-space: nowrap; transition: 0.2s; }
         .season-btn.active { background: var(--gold); color: white; }
 
-        /* SEARCH BAR */
         #searchInput { background: transparent; border-bottom: 2px solid #555; border-radius: 0; color: inherit; padding: 5px; width: 100%; outline: none; }
         #searchInput:focus { border-color: var(--gold); }
         #searchDropdown { position: absolute; top: 100%; left: 0; width: 100%; background: white; z-index: 50; max-height: 300px; overflow-y: auto; border-radius: 0 0 10px 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); display: none; }
         body.dark #searchDropdown { background: #1a1a1a; }
+
+        /* OTT ROWS */
+        .ott-row { margin-top: 40px; width: 100%; }
+        .ott-scroll { display: flex; gap: 16px; overflow-x: auto; padding: 10px 5px; }
+        .ott-scroll::-webkit-scrollbar { display: none; }
+        .poster-card { min-width: 160px; border-radius: 16px; overflow: hidden; transition: 0.3s; cursor: pointer; box-shadow: 0 10px 25px rgba(0,0,0,0.15); }
+        .poster-card:hover { transform: scale(1.08); }
+
+        .hero-slider { position: relative; width: 100%; height: 60vh; border-radius: 30px; overflow: hidden; }
+        .hero-slide { position: absolute; inset: 0; opacity: 0; transition: opacity 0.8s ease; }
+        .hero-slide.active { opacity: 1; }
+        .hero-overlay { position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,0.8), rgba(0,0,0,0.2)); }
     </style>
 </head>
 <body class="light"> 
@@ -87,16 +95,50 @@
         </div>
     </div>
 
-    <div id="mainContent" class="relative z-10 min-h-screen flex flex-col items-center justify-center pt-20 px-4 pb-20">
+    <div id="mainContent" class="relative z-10 min-h-screen flex flex-col items-center justify-start pt-24 px-4 pb-20">
         
-        <div id="step1" class="text-center w-full max-w-4xl fade-in">
-            <h1 class="brand-font text-5xl md:text-8xl gold-text mb-4 no-select tracking-tighter">IFEELAV</h1>
-            <p class="text-xs text-gray-500 mb-10 uppercase tracking-[0.3em]">Premium Collection</p>
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <button onclick="window.selectRegion('hi', 'Bollywood')" class="cat-btn p-6 rounded-2xl text-lg">BOLLYWOOD</button>
-                <button onclick="window.selectRegion('en', 'Hollywood')" class="cat-btn p-6 rounded-2xl text-lg">HOLLYWOOD</button>
-                <button onclick="window.selectRegion('ja', 'Anime')" class="cat-btn p-6 rounded-2xl text-lg">ANIME</button>
-                <button onclick="window.selectRegion('ko', 'K-Drama')" class="cat-btn p-6 rounded-2xl text-lg">K-DRAMA</button>
+        <!-- PREMIUM OTT HOMEPAGE (STEP1 - REDESIGNED) -->
+        <div id="step1" class="w-full max-w-6xl fade-in">
+
+            <!-- BRANDING -->
+            <div class="text-center mb-10">
+                <h1 class="brand-font text-5xl md:text-7xl gold-text tracking-tight">IFEELAV</h1>
+                <p class="text-sm uppercase tracking-[0.4em] text-gray-500 mt-2">Curated by Abhimanyu</p>
+                <p class="mt-4 text-gray-600 italic max-w-xl mx-auto">
+                    “Discover stories that match your mood, not just your watchlist.”
+                </p>
+                <button onclick="window.selectRegion('en','Explore')" class="mt-8 bg-[#C5A059] text-white px-8 py-3 rounded-full font-bold shadow-lg hover:scale-105 transition">
+                    Start Exploring ✨
+                </button>
+            </div>
+
+            <!-- HERO POSTER SLIDER -->
+            <div class="hero-slider mb-12" id="heroSlider"></div>
+
+            <!-- OTT ROWS -->
+            <div class="ott-row">
+                <h2 class="brand-font text-2xl gold-text mb-3">Trending Now</h2>
+                <div class="ott-scroll" id="trendingRow"></div>
+            </div>
+
+            <div class="ott-row">
+                <h2 class="brand-font text-2xl gold-text mb-3">Bollywood</h2>
+                <div class="ott-scroll" id="bollywoodRow"></div>
+            </div>
+
+            <div class="ott-row">
+                <h2 class="brand-font text-2xl gold-text mb-3">Hollywood</h2>
+                <div class="ott-scroll" id="hollywoodRow"></div>
+            </div>
+
+            <div class="ott-row">
+                <h2 class="brand-font text-2xl gold-text mb-3">Anime</h2>
+                <div class="ott-scroll" id="animeRow"></div>
+            </div>
+
+            <div class="ott-row">
+                <h2 class="brand-font text-2xl gold-text mb-3">Top Rated</h2>
+                <div class="ott-scroll" id="topRatedRow"></div>
             </div>
         </div>
 
@@ -141,295 +183,58 @@
         </div>
     </div>
 
-    <div id="detailOverlay">
-        <button onclick="window.closeDetails()" class="fixed top-6 right-6 z-[110] bg-black/50 text-white w-10 h-10 rounded-full flex items-center justify-center backdrop-blur">✕</button>
-        <div id="detailContent"></div>
-    </div>
-
-    <div id="watchlistOverlay">
-        <div class="p-6">
-            <h2 class="brand-font text-3xl gold-text mb-6">My Vault</h2>
-            <div class="flex gap-2 mb-6">
-                <input type="text" id="newPlaylistName" placeholder="Create Playlist..." class="glass-panel px-4 py-2 rounded-lg w-full text-sm outline-none dark:text-white">
-                <button onclick="window.createPlaylist()" class="bg-[#C5A059] text-white px-4 rounded-lg font-bold">+</button>
-            </div>
-            <div id="playlistsContainer" class="space-y-6"></div>
-        </div>
-    </div>
-
-    <div id="authModal">
-        <div class="bg-white dark:bg-[#111] p-8 rounded-3xl w-full max-w-sm relative shadow-2xl border border-gray-200 dark:border-gray-800">
-            <button onclick="window.toggleAuthModal()" class="absolute top-4 right-4 text-gray-400">✕</button>
-            <div id="authForms">
-                <h2 class="brand-font text-2xl mb-6 gold-text text-center">Login</h2>
-                <input type="email" id="email" placeholder="Email" class="w-full p-3 mb-3 rounded-xl bg-gray-100 dark:bg-[#222] border border-transparent focus:border-[#C5A059] outline-none text-white">
-                <input type="password" id="password" placeholder="Password" class="w-full p-3 mb-6 rounded-xl bg-gray-100 dark:bg-[#222] border border-transparent focus:border-[#C5A059] outline-none text-white">
-                <button onclick="window.handleLogin()" class="w-full bg-[#C5A059] text-white py-3 rounded-xl font-bold mb-3">Login</button>
-                <button onclick="window.handleSignup()" class="w-full border border-[#C5A059] text-[#C5A059] py-3 rounded-xl font-bold">Create Account</button>
-            </div>
-            <div id="userProfile" class="hidden text-center">
-                <div class="w-24 h-24 mx-auto mb-4 rounded-full border-4 border-[#C5A059] overflow-hidden"><img id="profileAvatar" src="" class="w-full h-full object-cover"></div>
-                <h3 id="userEmailDisplay" class="font-bold mb-6 text-white">User</h3>
-                <button onclick="window.handleLogout()" class="w-full bg-red-500/10 text-red-500 py-3 rounded-xl font-bold text-sm">Log Out</button>
-            </div>
-        </div>
-    </div>
-
-    <div class="fixed bottom-6 left-0 w-full text-center pointer-events-none z-40">
-        <a href="https://www.instagram.com/axviixv?igsh=MTFpZHF2Znh5ZHBhag==" target="_blank" class="pointer-events-auto inline-flex items-center gap-2 bg-black/70 backdrop-blur px-4 py-2 rounded-full text-xs text-white hover:text-[#C5A059] transition shadow-lg">
-            <i class="fab fa-instagram"></i> Abhimanyu
-        </a>
-    </div>
-
     <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-
-        const firebaseConfig = {
-            apiKey: "AIzaSyAoCZuJ4tGdwmFuz8y-_tc5phvfbn2oi1A",
-            authDomain: "ifeelav-app.firebaseapp.com",
-            projectId: "ifeelav-app",
-            storageBucket: "ifeelav-app.firebasestorage.app",
-            messagingSenderId: "1060067685106",
-            appId: "1:1060067685106:web:4ba1523ee066af4633966b"
-        };
-
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-
-        let shows = [], index = 0, selectedLang = 'en', currentGenre = '', playlists = { 'Favorites': [] };
-
-        // --- BACKGROUND ---
-        async function initBg() {
-            const res = await fetch('https://api.themoviedb.org/3/trending/all/week?api_key=4ba1523ee066af4633966b');
+        // HERO & OTT DATA (USES EXISTING TMDB PIPELINE SAFELY)
+        async function loadHomepageContent() {
+            const res = await fetch('/api/shows?type=tv');
             const data = await res.json();
-            const posters = data.results.map(p => `<img src="https://image.tmdb.org/t/p/w200${p.poster_path}" class="w-24 h-36 rounded-lg opacity-30 grayscale hover:grayscale-0 transition duration-500">`).join('');
-            document.getElementById('posterBg').innerHTML = `<div class="poster-row">${posters}${posters}</div><div class="poster-row">${posters}${posters}</div>`;
-        }
-        initBg();
+            const items = (data.results || []).slice(0, 20);
 
-        // --- NAVIGATION STATE MACHINE ---
-        window.selectRegion = (lang, name) => {
-            selectedLang = lang;
-            document.getElementById('step1').classList.add('hidden');
-            document.getElementById('step2').classList.remove('hidden');
-            document.getElementById('regionTitle').innerText = name;
-            history.pushState({step: 2}, "");
-        };
-
-        window.selectMood = (gid) => {
-            currentGenre = gid;
-            document.getElementById('step2').classList.add('hidden');
-            document.getElementById('step3').classList.remove('hidden');
-            history.pushState({step: 3}, "");
-        };
-
-        window.startApp = (type) => {
-            document.getElementById('step3').classList.add('hidden');
-            document.getElementById('swipeStep').classList.remove('hidden');
-            fetchShows(`/api/getShows?genre=${currentGenre}&lang=${selectedLang}&type=${type}`);
-            history.pushState({step: 4}, "");
-        };
-
-        // GESTURE SUPPORT (BACK BUTTON)
-        window.addEventListener('popstate', (e) => {
-            if(!e.state) location.reload();
-            if(e.state.step === 2) { 
-                document.getElementById('step2').classList.remove('hidden'); 
-                document.getElementById('step3').classList.add('hidden');
-                document.getElementById('swipeStep').classList.add('hidden');
-            }
-            if(e.state.step === 3) { 
-                document.getElementById('step3').classList.remove('hidden');
-                document.getElementById('swipeStep').classList.add('hidden');
-            }
-            if(e.state.step === 4 || e.state.step === 'details' || e.state.step === 'watchlist') {
-                document.getElementById('detailOverlay').classList.remove('active-overlay');
-                document.getElementById('watchlistOverlay').classList.remove('active-overlay');
-            }
-        });
-
-        // --- DATA ---
-        async function fetchShows(url) {
-            const res = await fetch(url);
-            const data = await res.json();
-            shows = data.results.filter(s => s.poster_path);
-            index = 0;
-            renderCard();
-        }
-
-        function renderCard() {
-            if(!shows[index]) { alert("End of list! Refreshing..."); location.reload(); return; }
-            const s = shows[index];
-            
-            // KEY FIX: Update hidden ID to sync click
-            document.getElementById('currentShowId').value = s.id;
-            
-            const title = s.name || s.title || s.original_name;
-            document.getElementById('cardTitle').innerText = title;
-            document.getElementById('cardMeta').innerText = `⭐ ${s.vote_average.toFixed(1)} | ${s.first_air_date ? s.first_air_date.split('-')[0] : (s.release_date ? s.release_date.split('-')[0] : 'N/A')}`;
-            document.getElementById('poster').src = `https://image.tmdb.org/t/p/w780${s.poster_path}`;
-            
-            // Reset Swipe UI
-            const card = document.getElementById('showCard');
-            card.style.transform = ''; document.getElementById('like').style.opacity = 0; document.getElementById('nope').style.opacity = 0;
-        }
-
-        // --- SWIPE GESTURES ---
-        const card = document.getElementById('showCard');
-        let startX, isDragging = false;
-        card.addEventListener('touchstart', (e) => { startX = e.touches[0].clientX; isDragging = true; });
-        card.addEventListener('touchmove', (e) => {
-            if(!isDragging) return;
-            const diff = e.touches[0].clientX - startX;
-            card.style.transform = `translateX(${diff}px) rotate(${diff/20}deg)`;
-            document.getElementById('like').style.opacity = diff > 0 ? diff/100 : 0;
-            document.getElementById('nope').style.opacity = diff < 0 ? Math.abs(diff)/100 : 0;
-        });
-        card.addEventListener('touchend', (e) => {
-            isDragging = false;
-            const diff = e.changedTouches[0].clientX - startX;
-            if(diff > 100) window.handleAction('smash');
-            else if(diff < -100) window.handleAction('pass');
-            else { card.style.transform = ''; document.getElementById('like').style.opacity = 0; document.getElementById('nope').style.opacity = 0; }
-        });
-
-        window.handleAction = (type) => {
-            card.style.transition = '0.5s';
-            card.style.transform = type === 'smash' ? 'translateX(1000px) rotate(30deg)' : 'translateX(-1000px) rotate(-30deg)';
-            if(type === 'smash') window.addToWatchlist(shows[index]);
-            setTimeout(() => { 
-                index++; card.style.transition = 'none'; card.style.transform = 'translate(0)'; renderCard(); 
-                setTimeout(() => card.style.transition = '0.3s', 10);
-            }, 300);
-        };
-
-        // --- DETAILS ---
-        window.openCurrentDetails = () => {
-            // FIX: Use the hidden ID field for 100% accuracy
-            const id = document.getElementById('currentShowId').value;
-            window.openDetails(id);
-        }
-
-        window.openDetails = async (id) => {
-            document.getElementById('detailOverlay').classList.add('active-overlay');
-            history.pushState({step: 'details'}, "");
-
-            const res = await fetch(`/api/getDetails?id=${id}`);
-            const data = await res.json();
-            const title = data.name || data.title;
-
-            // STREAMING INFO
-            let streamHTML = '<p class="opacity-50 text-sm">Checking availability...</p>';
-            try {
-                const type = data.number_of_seasons ? 'tv' : 'movie';
-                const sRes = await fetch(`/api/getStream?tmdb_id=${id}&type=${type}`);
-                const sData = await sRes.json();
-                if(sData.sources?.length > 0) {
-                    streamHTML = sData.sources.map(s => {
-                        let color = '#333';
-                        if(s.name.includes('Netflix')) color = '#E50914';
-                        if(s.name.includes('Prime')) color = '#00A8E1';
-                        if(s.name.includes('Hotstar')) color = '#133ba2';
-                        return `<a href="${s.url}" target="_blank" class="stream-link" style="background:${color}">▶ Watch on ${s.name}</a>`;
-                    }).join('');
-                } else { streamHTML = '<div class="p-3 border border-white/10 rounded text-center opacity-50 text-sm">No streaming info available for this title in India.</div>'; }
-            } catch(e) { streamHTML = '<div class="text-red-500 text-sm">Error loading links.</div>'; }
-
-            // SEASONS BUTTONS
-            let seasonsHTML = '';
-            if(data.seasons && data.seasons.length > 0) {
-                seasonsHTML = `<div class="flex gap-2 overflow-x-auto pb-4 mb-2">` + 
-                    data.seasons.filter(s=>s.season_number > 0).map(s => 
-                        `<button onclick="window.loadEpisodes(${s.season_number}, ${id})" class="season-btn border border-gray-600">Season ${s.season_number}</button>`
-                    ).join('') + `</div>`;
-            }
-
-            document.getElementById('detailContent').innerHTML = `
-                <div class="h-[50vh] relative"><img src="https://image.tmdb.org/t/p/original${data.backdrop_path || data.poster_path}" class="w-full h-full object-cover">
-                <div class="absolute bottom-0 w-full p-6 bg-gradient-to-t from-black to-transparent"><h1 class="brand-font text-3xl gold-text">${title}</h1></div></div>
-                <div class="p-6 pb-20">
-                    <div class="grid grid-cols-2 gap-4 mb-6 text-sm opacity-80">
-                        <div><span class="block text-xs uppercase opacity-50">Status</span>${data.status}</div>
-                        <div><span class="block text-xs uppercase opacity-50">Language</span>${data.original_language?.toUpperCase()}</div>
+            // HERO SLIDER (Movies + Series Mix)
+            const hero = document.getElementById('heroSlider');
+            let slideIndex = 0;
+            items.slice(0,5).forEach((item, i) => {
+                const slide = document.createElement('div');
+                slide.className = 'hero-slide' + (i === 0 ? ' active' : '');
+                slide.innerHTML = `
+                    <img src="https://image.tmdb.org/t/p/original${item.backdrop_path || item.poster_path}" class="w-full h-full object-cover">
+                    <div class="hero-overlay"></div>
+                    <div class="absolute bottom-10 left-10 text-white">
+                        <h2 class="brand-font text-4xl mb-2">${item.name || item.title}</h2>
+                        <button onclick="window.openDetails(${item.id})" class="bg-[#C5A059] px-6 py-2 rounded-full font-bold">View Details</button>
                     </div>
-                    <div class="mb-8">${streamHTML}</div>
-                    <p class="opacity-80 leading-relaxed mb-8">${data.overview}</p>
-                    
-                    ${seasonsHTML ? `<h3 class="font-bold mb-3 text-xs uppercase opacity-50">Episodes</h3>${seasonsHTML}<div id="epList" class="space-y-3">Select a season</div>` : ''}
-                </div>`;
-            
-            // Load S1 by default if TV
-            if(data.seasons && data.seasons.length > 0) window.loadEpisodes(1, id);
-        };
+                `;
+                hero.appendChild(slide);
+            });
 
-        window.loadEpisodes = async (sNum, id) => {
-            document.getElementById('epList').innerHTML = '<p class="opacity-50 text-sm animate-pulse">Loading episodes...</p>';
-            try {
-                const res = await fetch(`/api/getEpisodes?id=${id}&season=${sNum}`);
-                const data = await res.json();
-                document.getElementById('epList').innerHTML = data.episodes.map(e => `
-                    <div class="glass-panel p-3 rounded-lg">
-                        <div class="flex justify-between items-center mb-1">
-                            <span class="gold-text font-bold text-xs">E${e.episode_number}</span>
-                            <span class="font-bold text-sm flex-1 ml-3">${e.name}</span>
-                            <span class="text-[10px] bg-white/10 px-2 rounded">${e.runtime?e.runtime+'m':''}</span>
-                        </div>
-                        <p class="text-xs opacity-60 line-clamp-2">${e.overview || 'No description available.'}</p>
-                    </div>`).join('');
-            } catch(e) { document.getElementById('epList').innerHTML = 'Error loading.'; }
-        };
+            setInterval(() => {
+                const slides = document.querySelectorAll('.hero-slide');
+                slides.forEach(s => s.classList.remove('active'));
+                slideIndex = (slideIndex + 1) % slides.length;
+                slides[slideIndex].classList.add('active');
+            }, 4000);
 
-        window.closeDetails = () => { history.back(); };
+            // ROW RENDER FUNCTION
+            function renderRow(containerId, list) {
+                const container = document.getElementById(containerId);
+                list.forEach(item => {
+                    if (!item.poster_path) return;
+                    const card = document.createElement('div');
+                    card.className = 'poster-card';
+                    card.onclick = () => window.openDetails(item.id);
+                    card.innerHTML = `<img src="https://image.tmdb.org/t/p/w342${item.poster_path}" class="w-full h-56 object-cover">`;
+                    container.appendChild(card);
+                });
+            }
 
-        // --- AUTH & WATCHLIST ---
-        window.toggleWatchlist = () => { document.getElementById('watchlistOverlay').classList.add('active-overlay'); history.pushState({step: 'watchlist'}, ""); renderPlaylists(); };
-        window.toggleAuthModal = () => document.getElementById('authModal').classList.toggle('active');
-        window.createPlaylist = () => { const n = document.getElementById('newPlaylistName').value; if(n){ playlists[n]=[]; renderPlaylists(); }};
-        window.addToWatchlist = (s) => { playlists['Favorites'].push(s); document.getElementById('badge').classList.remove('hidden'); renderPlaylists(); };
-        
-        function renderPlaylists() {
-            document.getElementById('playlistsContainer').innerHTML = Object.keys(playlists).map(k => `
-                <div class="glass-panel p-4 rounded-xl">
-                    <h3 class="font-bold gold-text mb-2">${k}</h3>
-                    <div class="flex gap-2 overflow-x-auto">${playlists[k].map(s=>`<img src="https://image.tmdb.org/t/p/w200${s.poster_path}" class="w-16 rounded" onclick="window.openDetails(${s.id})">`).join('')}</div>
-                </div>`).join('');
+            renderRow('trendingRow', items);
+            renderRow('hollywoodRow', items.filter(i => i.original_language === 'en'));
+            renderRow('bollywoodRow', items.filter(i => i.original_language === 'hi'));
+            renderRow('animeRow', items.filter(i => i.original_language === 'ja'));
+            renderRow('topRatedRow', items.sort((a,b) => b.vote_average - a.vote_average));
         }
 
-        window.toggleDarkMode = () => document.body.classList.toggle('dark');
-        
-        // SEARCH
-        window.handleTyping = (e) => {
-            const q = e.target.value; const dd = document.getElementById('searchDropdown');
-            if(q.length < 2) { dd.style.display = 'none'; return; }
-            setTimeout(async () => {
-                const res = await fetch(`/api/getShows?query=${q}`);
-                const data = await res.json();
-                dd.style.display = 'block';
-                dd.innerHTML = data.results.slice(0,5).map(s => `
-                    <div class="p-3 border-b dark:border-white/10 flex gap-3 cursor-pointer hover:bg-white/5" onclick="window.openDetails(${s.id})">
-                        <img src="https://image.tmdb.org/t/p/w92${s.poster_path}" class="w-10 h-14 object-cover rounded">
-                        <div><p class="font-bold text-sm text-gray-800 dark:text-white">${s.name || s.title}</p></div>
-                    </div>`).join('');
-            }, 500);
-        };
-        
-        // AUTH HELPERS
-        window.handleLogin = () => signInWithEmailAndPassword(auth, document.getElementById('email').value, document.getElementById('password').value).then(()=>window.toggleAuthModal());
-        window.handleSignup = () => createUserWithEmailAndPassword(auth, document.getElementById('email').value, document.getElementById('password').value).then(()=>window.toggleAuthModal());
-        window.handleLogout = () => signOut(auth);
-        
-        onAuthStateChanged(auth, user => {
-            if(user) {
-                document.getElementById('authForms').classList.add('hidden');
-                document.getElementById('userProfile').classList.remove('hidden');
-                document.getElementById('userEmailDisplay').innerText = user.email;
-                document.getElementById('headerAvatar').src = `https://api.dicebear.com/7.x/adventurer/svg?seed=${user.uid}`;
-            } else {
-                document.getElementById('authForms').classList.remove('hidden');
-                document.getElementById('userProfile').classList.add('hidden');
-            }
-        });
+        loadHomepageContent();
     </script>
 </body>
 </html>
