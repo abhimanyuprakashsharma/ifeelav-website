@@ -16,26 +16,40 @@
         .gold-text { color: var(--gold); }
         .no-select { user-select: none; }
 
-        /* BANNER FIX FOR MOBILE */
+        /* HERO SLIDER (Low Z-Index) */
         .hero-banner-container {
-            position: relative;
+            position: fixed; /* Fixed karke piche bhej diya */
+            top: 0; left: 0;
             width: 100%;
-            /* Mobile: Aspect Ratio 2/3 (Poster style) or 16/9 depending on pref */
-            height: 50vh; 
+            height: 75vh; 
+            z-index: 0; /* Sabse piche */
+            mask-image: linear-gradient(to bottom, black 40%, transparent 100%);
         }
-        @media (min-width: 768px) {
-            .hero-banner-container { height: 70vh; }
-        }
-
-        /* HERO SLIDER */
+        
         .hero-slide { position: absolute; inset: 0; opacity: 0; transition: opacity 1s ease-in-out; }
         .hero-slide.active { opacity: 1; }
-        .hero-content { position: absolute; bottom: 0; left: 0; width: 100%; padding: 20px; background: linear-gradient(to top, black 10%, transparent); z-index: 10; }
+        /* Hero Content clickable but won't block rows */
+        .hero-content { position: absolute; bottom: 20%; left: 5%; max-width: 600px; z-index: 10; pointer-events: auto; }
+
+        /* CONTENT WRAPPER (High Z-Index) */
+        .main-scroll-area {
+            position: relative;
+            z-index: 20; /* Hero se upar */
+            margin-top: 55vh; /* Hero dikhane ke liye jagah chhodi */
+            background: linear-gradient(to bottom, transparent, #000 100px, #000 100%);
+            min-height: 100vh;
+            padding-bottom: 50px;
+        }
 
         /* ROWS */
-        .row-container { padding: 15px 0 15px 15px; }
+        .row-container { padding: 15px 0 15px 15px; position: relative; }
         .row-title { font-size: 1.1rem; font-weight: 600; margin-bottom: 10px; color: #e5e5e5; border-left: 3px solid var(--gold); padding-left: 10px; }
-        .row-scroll { display: flex; gap: 10px; overflow-x: auto; padding-right: 20px; scroll-behavior: smooth; -webkit-overflow-scrolling: touch; }
+        
+        .row-scroll { 
+            display: flex; gap: 12px; overflow-x: auto; padding-right: 20px; 
+            scroll-behavior: smooth; -webkit-overflow-scrolling: touch; 
+            padding-bottom: 10px;
+        }
         .row-scroll::-webkit-scrollbar { display: none; }
         
         .poster-card { 
@@ -43,9 +57,10 @@
             border-radius: 8px; overflow: hidden; 
             transition: transform 0.2s ease; cursor: pointer; position: relative;
             background: #222;
+            z-index: 25; /* Ensure clicks hit this */
         }
         .poster-card:active { transform: scale(0.95); }
-        .poster-card img { width: 100%; height: 100%; object-fit: cover; }
+        .poster-card img { width: 100%; height: 100%; object-fit: cover; pointer-events: none; }
 
         /* MODALS */
         #detailOverlay, #authModal { 
@@ -62,11 +77,11 @@
 </head>
 <body>
 
-    <div class="fixed top-0 w-full z-50 flex justify-between items-center px-4 py-3 bg-gradient-to-b from-black/90 to-transparent">
+    <div class="fixed top-0 w-full z-50 flex justify-between items-center px-4 py-3 bg-gradient-to-b from-black/90 to-transparent transition-all duration-300" id="navbar">
         <div class="text-xl font-bold brand-font gold-text cursor-pointer" onclick="location.reload()">IFEELAV</div>
         <div class="flex items-center gap-3">
             <div class="relative">
-                <input type="text" id="searchInput" oninput="window.handleTyping(event)" placeholder="Search..." class="bg-black/50 border border-white/30 rounded-full px-3 py-1 text-xs focus:border-gold outline-none w-24 md:w-64 transition-all focus:w-32 md:focus:w-72 text-white">
+                <input type="text" id="searchInput" oninput="window.handleTyping(event)" placeholder="Search..." class="bg-black/50 border border-white/30 rounded-full px-3 py-1 text-xs focus:border-gold outline-none w-28 transition-all focus:w-40 text-white">
                 <div id="searchDropdown"></div>
             </div>
             <button onclick="window.toggleAuthModal()" class="w-8 h-8 rounded-full overflow-hidden border border-white/50">
@@ -78,31 +93,36 @@
     <div id="heroSlider" class="hero-banner-container">
         </div>
 
-    <div class="relative z-10 pb-20 bg-black">
+    <div class="main-scroll-area">
+        
         <div class="row-container">
             <h2 class="row-title">Trending Now 🔥</h2>
             <div id="trendingRow" class="row-scroll"></div>
         </div>
+
         <div class="row-container">
             <h2 class="row-title">Hollywood Action 🎬</h2>
             <div id="hollywoodRow" class="row-scroll"></div>
         </div>
+
         <div class="row-container">
             <h2 class="row-title">Bollywood Hits 🇮🇳</h2>
             <div id="bollywoodRow" class="row-scroll"></div>
         </div>
+
         <div class="row-container">
             <h2 class="row-title">Anime World 🇯🇵</h2>
             <div id="animeRow" class="row-scroll"></div>
         </div>
+
         <div class="row-container">
             <h2 class="row-title">K-Drama ❤️</h2>
             <div id="kdramaRow" class="row-scroll"></div>
         </div>
-    </div>
 
-    <div class="text-center pb-8 text-xs text-gray-500 uppercase tracking-widest bg-black">
-        Curated by Abhimanyu | <a href="https://instagram.com/axviixv" target="_blank" class="hover:text-gold">Instagram</a>
+        <div class="text-center py-10 text-xs text-gray-500 uppercase tracking-widest">
+            Curated by Abhimanyu | <a href="https://instagram.com/axviixv" target="_blank" class="hover:text-gold">Instagram</a>
+        </div>
     </div>
 
     <div id="detailOverlay">
@@ -113,7 +133,6 @@
     <div id="authModal" class="flex items-center justify-center p-4">
         <div class="bg-[#181818] p-6 rounded-2xl w-full max-w-sm border border-[#333] relative mt-20">
             <button onclick="window.toggleAuthModal()" class="absolute top-4 right-4 text-gray-400">✕</button>
-            
             <div id="authForms">
                 <h2 class="text-2xl mb-6 font-bold text-center gold-text">Sign In</h2>
                 <input type="email" id="email" placeholder="Email Address" class="w-full p-3 mb-4 bg-[#333] rounded text-white outline-none border border-transparent focus:border-gold">
@@ -121,7 +140,6 @@
                 <button onclick="window.handleLogin()" class="w-full bg-[#C5A059] text-black font-bold py-3 rounded hover:bg-white transition">Sign In</button>
                 <button onclick="window.handleSignup()" class="w-full mt-4 py-2 border border-white/20 rounded text-sm text-gray-400 hover:text-white hover:border-white">Create Account</button>
             </div>
-
             <div id="userProfile" class="hidden text-center">
                 <img id="profileAvatar" src="" class="w-20 h-20 rounded-full mx-auto mb-4 border-2 border-gold">
                 <h3 id="userEmail" class="text-lg font-bold mb-6">User</h3>
@@ -150,14 +168,14 @@
         window.toggleAuthModal = () => document.getElementById('authModal').classList.toggle('active');
         
         window.handleLogin = () => {
-            const e = document.getElementById('email').value.trim(); // TRIM FIX
+            const e = document.getElementById('email').value.trim();
             const p = document.getElementById('password').value;
             if(!e || !p) { alert("Please enter details"); return; }
             signInWithEmailAndPassword(auth, e, p).then(()=>window.toggleAuthModal()).catch(err=>alert(err.message));
         };
 
         window.handleSignup = () => {
-            const e = document.getElementById('email').value.trim(); // TRIM FIX
+            const e = document.getElementById('email').value.trim();
             const p = document.getElementById('password').value;
             if(!e || !p) { alert("Please enter details"); return; }
             createUserWithEmailAndPassword(auth, e, p).then(()=>window.toggleAuthModal()).catch(err=>alert(err.message));
@@ -188,8 +206,9 @@
                 const container = document.getElementById(elementId);
                 const items = data.results || [];
                 
+                // IMPORTANT: Pass ID as string to prevent integer issues
                 container.innerHTML = items.map(item => `
-                    <div class="poster-card" onclick="window.openDetails(${item.id})">
+                    <div class="poster-card" onclick="window.openDetails('${item.id}')">
                         <img src="https://image.tmdb.org/t/p/w500${item.poster_path}" loading="lazy">
                     </div>
                 `).join('');
@@ -215,7 +234,7 @@
                     <div class="hero-content">
                         <h1 class="text-3xl md:text-5xl font-bold mb-2 brand-font gold-text drop-shadow-lg">${item.name || item.original_name}</h1>
                         <p class="text-xs md:text-base text-gray-200 line-clamp-2 mb-4 drop-shadow-md max-w-lg">${item.overview}</p>
-                        <button onclick="window.openDetails(${item.id})" class="bg-white text-black px-6 py-2 rounded font-bold hover:bg-gold transition text-sm md:text-base shadow-lg">Play Now</button>
+                        <button onclick="window.openDetails('${item.id}')" class="bg-white text-black px-6 py-2 rounded font-bold hover:bg-gold transition text-sm md:text-base shadow-lg">Play Now</button>
                     </div>
                 </div>
             `).join('');
@@ -231,7 +250,7 @@
             }, 5000);
         }
 
-        // --- DETAILS (Mobile Optimized) ---
+        // --- DETAILS ---
         window.openDetails = async (id) => {
             const overlay = document.getElementById('detailOverlay');
             const content = document.getElementById('detailContent');
@@ -242,7 +261,6 @@
                 const res = await fetch(`/api/getDetails?id=${id}`);
                 const data = await res.json();
                 
-                // MOBILE HERO FIX: Use Poster if on mobile, Backdrop if on Desktop
                 const isMobile = window.innerWidth < 768;
                 const heroImage = isMobile ? data.poster_path : (data.backdrop_path || data.poster_path);
 
@@ -250,12 +268,13 @@
                 try {
                     const sRes = await fetch(`/api/getStream?tmdb_id=${id}&type=tv`);
                     const sData = await sRes.json();
-                    if(sData.sources?.length) streamHTML = sData.sources.map(s => `<span class="px-2 py-1 bg-gray-800 border border-gray-600 rounded text-[10px] whitespace-nowrap">${s.name}</span>`).join(' ');
-                    else streamHTML = '<span class="text-[10px] text-gray-500">Check local listings</span>';
+                    if(sData.sources?.length) streamHTML = sData.sources.map(s => `<span class="px-2 py-1 bg-gray-800 border border-gray-600 rounded text-[10px] whitespace-nowrap text-gold">${s.name}</span>`).join(' ');
+                    else streamHTML = '<span class="text-[10px] text-gray-500">Not Streaming Yet</span>';
                 } catch(e) {}
 
                 content.innerHTML = `
-                    <div class="relative w-full" style="height: 50vh;"> <img src="https://image.tmdb.org/t/p/original${heroImage}" class="w-full h-full object-cover">
+                    <div class="relative w-full" style="height: 50vh;">
+                        <img src="https://image.tmdb.org/t/p/original${heroImage}" class="w-full h-full object-cover">
                         <div class="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent"></div>
                         <div class="absolute bottom-0 p-6 w-full">
                             <h1 class="text-3xl md:text-5xl font-bold mb-2 gold-text brand-font leading-tight drop-shadow-xl">${data.name}</h1>
@@ -268,7 +287,10 @@
                     </div>
                     
                     <div class="p-6 pb-20 max-w-4xl mx-auto bg-black min-h-[50vh]">
-                        <div class="flex flex-wrap gap-2 mb-6 overflow-x-auto no-scrollbar">${streamHTML}</div>
+                        <div class="mb-6">
+                            <h3 class="text-xs uppercase tracking-widest text-gray-500 mb-2">Watch On</h3>
+                            <div class="flex flex-wrap gap-2 overflow-x-auto no-scrollbar">${streamHTML}</div>
+                        </div>
                         
                         <p class="text-sm md:text-lg leading-relaxed text-gray-300 mb-8 font-light">${data.overview}</p>
                         
@@ -325,7 +347,7 @@
                 const data = await res.json();
                 dd.style.display = 'block';
                 dd.innerHTML = data.results.slice(0,5).map(s => `
-                    <div class="flex items-center gap-3 p-3 hover:bg-gray-800 cursor-pointer border-b border-gray-700 transition" onclick="window.openDetails(${s.id})">
+                    <div class="flex items-center gap-3 p-3 hover:bg-gray-800 cursor-pointer border-b border-gray-700 transition" onclick="window.openDetails('${s.id}')">
                         <img src="https://image.tmdb.org/t/p/w92${s.poster_path}" class="w-8 h-12 object-cover rounded">
                         <span class="text-xs font-bold text-gray-300 line-clamp-1">${s.name || s.original_name}</span>
                     </div>
