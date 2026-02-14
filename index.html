@@ -16,50 +16,29 @@
         .gold-text { color: var(--gold); }
         .no-select { user-select: none; }
 
-        /* --- HERO BANNER FIX FOR MOBILE --- */
+        /* HERO SLIDER (Low Z-Index) */
         .hero-banner-container {
-            position: fixed;
+            position: fixed; /* Fixed karke piche bhej diya */
             top: 0; left: 0;
             width: 100%;
-            z-index: 0;
-            /* Mobile Default: Shorter height & less aggressive fade */
-            height: 55vh; 
-            mask-image: linear-gradient(to bottom, black 60%, transparent 100%);
-        }
-
-        /* Desktop Override: Taller height */
-        @media (min-width: 768px) {
-            .hero-banner-container {
-                height: 80vh;
-                mask-image: linear-gradient(to bottom, black 40%, transparent 100%);
-            }
+            height: 75vh; 
+            z-index: 0; /* Sabse piche */
+            mask-image: linear-gradient(to bottom, black 40%, transparent 100%);
         }
         
         .hero-slide { position: absolute; inset: 0; opacity: 0; transition: opacity 1s ease-in-out; }
         .hero-slide.active { opacity: 1; }
-        
-        .hero-content { 
-            position: absolute; 
-            bottom: 15%; 
-            left: 5%; 
-            right: 5%;
-            z-index: 10; 
-            pointer-events: auto; 
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
-        }
+        /* Hero Content clickable but won't block rows */
+        .hero-content { position: absolute; bottom: 20%; left: 5%; max-width: 600px; z-index: 10; pointer-events: auto; }
 
-        /* --- CONTENT WRAPPER --- */
+        /* CONTENT WRAPPER (High Z-Index) */
         .main-scroll-area {
             position: relative;
-            z-index: 20;
-            /* Match margin to mobile hero height */
-            margin-top: 45vh; 
-            background: linear-gradient(to bottom, transparent, #000 50px, #000 100%);
+            z-index: 20; /* Hero se upar */
+            margin-top: 55vh; /* Hero dikhane ke liye jagah chhodi */
+            background: linear-gradient(to bottom, transparent, #000 100px, #000 100%);
             min-height: 100vh;
-            padding-bottom: 80px;
-        }
-        @media (min-width: 768px) {
-            .main-scroll-area { margin-top: 60vh; }
+            padding-bottom: 50px;
         }
 
         /* ROWS */
@@ -78,7 +57,7 @@
             border-radius: 8px; overflow: hidden; 
             transition: transform 0.2s ease; cursor: pointer; position: relative;
             background: #222;
-            z-index: 25;
+            z-index: 25; /* Ensure clicks hit this */
         }
         .poster-card:active { transform: scale(0.95); }
         .poster-card img { width: 100%; height: 100%; object-fit: cover; pointer-events: none; }
@@ -98,7 +77,7 @@
 </head>
 <body>
 
-    <div class="fixed top-0 w-full z-50 flex justify-between items-center px-4 py-3 bg-gradient-to-b from-black/90 to-transparent transition-all duration-300">
+    <div class="fixed top-0 w-full z-50 flex justify-between items-center px-4 py-3 bg-gradient-to-b from-black/90 to-transparent transition-all duration-300" id="navbar">
         <div class="text-xl font-bold brand-font gold-text cursor-pointer" onclick="location.reload()">IFEELAV</div>
         <div class="flex items-center gap-3">
             <div class="relative">
@@ -151,8 +130,8 @@
         <div id="detailContent"></div>
     </div>
 
-    <div id="authModal" class="flex items-center justify-center p-4 min-h-screen">
-        <div class="bg-[#181818] p-6 rounded-2xl w-full max-w-sm border border-[#333] relative">
+    <div id="authModal" class="flex items-center justify-center p-4">
+        <div class="bg-[#181818] p-6 rounded-2xl w-full max-w-sm border border-[#333] relative mt-20">
             <button onclick="window.toggleAuthModal()" class="absolute top-4 right-4 text-gray-400">✕</button>
             <div id="authForms">
                 <h2 class="text-2xl mb-6 font-bold text-center gold-text">Sign In</h2>
@@ -189,17 +168,17 @@
         window.toggleAuthModal = () => document.getElementById('authModal').classList.toggle('active');
         
         window.handleLogin = () => {
-            const e = document.getElementById('email').value.trim(); // TRIM ADDED HERE
+            const e = document.getElementById('email').value.trim();
             const p = document.getElementById('password').value;
-            if(!e || !p) { alert("Please enter email and password"); return; }
-            signInWithEmailAndPassword(auth, e, p).then(()=>window.toggleAuthModal()).catch(err=>alert("Login Error: " + err.message));
+            if(!e || !p) { alert("Please enter details"); return; }
+            signInWithEmailAndPassword(auth, e, p).then(()=>window.toggleAuthModal()).catch(err=>alert(err.message));
         };
 
         window.handleSignup = () => {
-            const e = document.getElementById('email').value.trim(); // TRIM ADDED HERE
+            const e = document.getElementById('email').value.trim();
             const p = document.getElementById('password').value;
-            if(!e || !p) { alert("Please enter email and password"); return; }
-            createUserWithEmailAndPassword(auth, e, p).then(()=>window.toggleAuthModal()).catch(err=>alert("Signup Error: " + err.message));
+            if(!e || !p) { alert("Please enter details"); return; }
+            createUserWithEmailAndPassword(auth, e, p).then(()=>window.toggleAuthModal()).catch(err=>alert(err.message));
         };
 
         window.handleLogout = () => signOut(auth);
@@ -227,7 +206,7 @@
                 const container = document.getElementById(elementId);
                 const items = data.results || [];
                 
-                // Pass ID as string to prevent int issues
+                // IMPORTANT: Pass ID as string to prevent integer issues
                 container.innerHTML = items.map(item => `
                     <div class="poster-card" onclick="window.openDetails('${item.id}')">
                         <img src="https://image.tmdb.org/t/p/w500${item.poster_path}" loading="lazy">
@@ -254,7 +233,7 @@
                     <img src="https://image.tmdb.org/t/p/original${item.backdrop_path || item.poster_path}" class="w-full h-full object-cover opacity-70">
                     <div class="hero-content">
                         <h1 class="text-3xl md:text-5xl font-bold mb-2 brand-font gold-text drop-shadow-lg">${item.name || item.original_name}</h1>
-                        <p class="text-xs md:text-sm text-gray-200 line-clamp-2 mb-4 drop-shadow-md max-w-lg">${item.overview}</p>
+                        <p class="text-xs md:text-base text-gray-200 line-clamp-2 mb-4 drop-shadow-md max-w-lg">${item.overview}</p>
                         <button onclick="window.openDetails('${item.id}')" class="bg-white text-black px-6 py-2 rounded font-bold hover:bg-gold transition text-sm md:text-base shadow-lg">Play Now</button>
                     </div>
                 </div>
@@ -271,12 +250,12 @@
             }, 5000);
         }
 
-        // --- DETAILS + TRAILER LOGIC ---
+        // --- DETAILS ---
         window.openDetails = async (id) => {
             const overlay = document.getElementById('detailOverlay');
             const content = document.getElementById('detailContent');
             overlay.classList.add('active');
-            content.innerHTML = '<div class="flex h-screen items-center justify-center text-gold animate-pulse">Loading Details...</div>';
+            content.innerHTML = '<div class="flex h-screen items-center justify-center text-gold">Loading...</div>';
 
             try {
                 const res = await fetch(`/api/getDetails?id=${id}`);
@@ -285,62 +264,46 @@
                 const isMobile = window.innerWidth < 768;
                 const heroImage = isMobile ? data.poster_path : (data.backdrop_path || data.poster_path);
 
-                // Fetch Trailer
-                let trailerKey = null;
-                try {
-                    const type = data.number_of_seasons ? 'tv' : 'movie';
-                    const vidRes = await fetch(`https://api.themoviedb.org/3/${type}/${id}/videos?api_key=4ba1523ee066af4633966b`);
-                    const vidData = await vidRes.json();
-                    const trailer = vidData.results.find(v => v.type === "Trailer" && v.site === "YouTube");
-                    if(trailer) trailerKey = trailer.key;
-                } catch(e) {}
-
-                // Fetch Streaming
                 let streamHTML = '';
                 try {
                     const sRes = await fetch(`/api/getStream?tmdb_id=${id}&type=tv`);
                     const sData = await sRes.json();
                     if(sData.sources?.length) streamHTML = sData.sources.map(s => `<span class="px-2 py-1 bg-gray-800 border border-gray-600 rounded text-[10px] whitespace-nowrap text-gold">${s.name}</span>`).join(' ');
-                    else streamHTML = '<span class="text-[10px] text-gray-500">Check local listings</span>';
+                    else streamHTML = '<span class="text-[10px] text-gray-500">Not Streaming Yet</span>';
                 } catch(e) {}
 
-                // Hero Section: Video or Image
-                const heroSection = trailerKey 
-                    ? `<div class="aspect-video w-full bg-black"><iframe class="w-full h-full" src="https://www.youtube.com/embed/${trailerKey}?autoplay=1&mute=0&rel=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe></div>`
-                    : `<div class="relative w-full h-[50vh]"><img src="https://image.tmdb.org/t/p/original${heroImage}" class="w-full h-full object-cover"><div class="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent"></div></div>`;
-
                 content.innerHTML = `
-                    <div class="bg-black min-h-screen">
-                        ${heroSection}
-                        
-                        <div class="p-6 pb-20 max-w-4xl mx-auto">
-                            <h1 class="text-3xl md:text-5xl font-bold mb-2 gold-text brand-font leading-tight">${data.name || data.title}</h1>
-                            
-                            <div class="flex gap-3 text-xs font-bold text-gray-300 mb-4 items-center">
+                    <div class="relative w-full" style="height: 50vh;">
+                        <img src="https://image.tmdb.org/t/p/original${heroImage}" class="w-full h-full object-cover">
+                        <div class="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent"></div>
+                        <div class="absolute bottom-0 p-6 w-full">
+                            <h1 class="text-3xl md:text-5xl font-bold mb-2 gold-text brand-font leading-tight drop-shadow-xl">${data.name}</h1>
+                            <div class="flex gap-3 text-xs font-bold text-gray-300 mb-3 items-center">
                                 <span class="text-green-400">★ ${data.vote_average.toFixed(1)}</span>
-                                <span>${data.first_air_date ? data.first_air_date.split('-')[0] : 'N/A'}</span>
+                                <span>${data.first_air_date?.split('-')[0]}</span>
                                 <span class="border border-gray-500 px-1 rounded text-[10px]">HD</span>
                             </div>
-
-                            <div class="mb-6">
-                                <h3 class="text-xs uppercase tracking-widest text-gray-500 mb-2">Available On</h3>
-                                <div class="flex flex-wrap gap-2">${streamHTML}</div>
-                            </div>
-                            
-                            <p class="text-sm md:text-lg text-gray-300 leading-relaxed mb-8 font-light">${data.overview}</p>
-                            
-                            ${data.seasons ? `
-                            <div class="mb-8">
-                                <h3 class="text-lg font-bold mb-4 gold-text border-l-4 border-gold pl-3">Seasons</h3>
-                                <div class="flex gap-2 overflow-x-auto pb-2 no-scrollbar">
-                                    ${data.seasons.filter(s=>s.season_number>0).map(s => 
-                                        `<button onclick="window.loadEpisodes(${id}, ${s.season_number})" class="px-4 py-2 bg-[#222] rounded-lg text-xs font-bold border border-transparent hover:border-gold whitespace-nowrap transition">S${s.season_number}</button>`
-                                    ).join('')}
-                                </div>
-                            </div>` : ''}
-
-                            <div id="episodeList" class="space-y-3"></div>
                         </div>
+                    </div>
+                    
+                    <div class="p-6 pb-20 max-w-4xl mx-auto bg-black min-h-[50vh]">
+                        <div class="mb-6">
+                            <h3 class="text-xs uppercase tracking-widest text-gray-500 mb-2">Watch On</h3>
+                            <div class="flex flex-wrap gap-2 overflow-x-auto no-scrollbar">${streamHTML}</div>
+                        </div>
+                        
+                        <p class="text-sm md:text-lg leading-relaxed text-gray-300 mb-8 font-light">${data.overview}</p>
+                        
+                        <div class="mb-8">
+                            <h3 class="text-lg font-bold mb-4 gold-text border-l-4 border-gold pl-3">Seasons</h3>
+                            <div class="flex gap-2 overflow-x-auto pb-2 no-scrollbar">
+                                ${data.seasons?.filter(s=>s.season_number>0).map(s => 
+                                    `<button onclick="window.loadEpisodes(${id}, ${s.season_number})" class="px-4 py-2 bg-[#222] rounded-lg text-xs font-bold border border-transparent hover:border-gold whitespace-nowrap transition">Season ${s.season_number}</button>`
+                                ).join('') || '<p class="text-xs text-gray-500">No Seasons Info</p>'}
+                            </div>
+                        </div>
+
+                        <div id="episodeList" class="space-y-3"></div>
                     </div>
                 `;
 
@@ -375,4 +338,24 @@
         // --- SEARCH ---
         window.handleTyping = (e) => {
             const q = e.target.value.trim();
-            const dd = document.getElementById('searchDrop
+            const dd = document.getElementById('searchDropdown');
+            if(q.length < 2) { dd.style.display = 'none'; return; }
+            
+            clearTimeout(window.searchTimer);
+            window.searchTimer = setTimeout(async () => {
+                const res = await fetch(`/api/getShows?query=${q}`);
+                const data = await res.json();
+                dd.style.display = 'block';
+                dd.innerHTML = data.results.slice(0,5).map(s => `
+                    <div class="flex items-center gap-3 p-3 hover:bg-gray-800 cursor-pointer border-b border-gray-700 transition" onclick="window.openDetails('${s.id}')">
+                        <img src="https://image.tmdb.org/t/p/w92${s.poster_path}" class="w-8 h-12 object-cover rounded">
+                        <span class="text-xs font-bold text-gray-300 line-clamp-1">${s.name || s.original_name}</span>
+                    </div>
+                `).join('');
+            }, 300);
+        }
+
+        initApp();
+    </script>
+</body>
+</html>
