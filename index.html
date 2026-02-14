@@ -2,162 +2,121 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
     <title>IFEELAV | Curated by Abhimanyu</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    
+
     <style>
-        :root { --gold: #C5A059; --dark-bg: #050505; }
-        .no-select { -webkit-user-select: none; user-select: none; }
+        :root { --gold: #C5A059; --bg-dark: #141414; }
         
-        body { font-family: 'Inter', sans-serif; background: var(--dark-bg); color: #f5f5f5; overflow-x: hidden; }
+        body { font-family: 'Inter', sans-serif; background: var(--bg-dark); color: #fff; overflow-x: hidden; }
         .brand-font { font-family: 'Cinzel', serif; }
         .gold-text { color: var(--gold); }
+        .no-select { user-select: none; }
 
-        /* BACKGROUND ANIMATION */
-        #posterBg { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; opacity: 0.12; overflow: hidden; pointer-events: none; }
-        .marquee-col { display: flex; flex-direction: column; gap: 15px; animation: scroll 60s linear infinite; }
-        @keyframes scroll { 0% { transform: translateY(0); } 100% { transform: translateY(-50%); } }
+        /* HERO SLIDER */
+        .hero-container { position: relative; height: 70vh; width: 100%; mask-image: linear-gradient(to bottom, black 80%, transparent 100%); }
+        .hero-slide { position: absolute; inset: 0; opacity: 0; transition: opacity 1s ease-in-out; }
+        .hero-slide.active { opacity: 1; }
+        .hero-content { position: absolute; bottom: 20%; left: 5%; max-width: 600px; z-index: 10; text-shadow: 2px 2px 4px rgba(0,0,0,0.8); }
 
-        /* GLASS & CARDS */
-        .glass-panel { background: rgba(20, 20, 20, 0.85); backdrop-filter: blur(15px); border: 1px solid rgba(255, 255, 255, 0.1); transition: 0.3s; }
-        .cat-btn { background: #111; border: 1px solid #333; color: #ddd; transition: 0.3s; }
-        .cat-btn:active { transform: scale(0.95); background: var(--gold); color: black; }
-
-        .premium-card { 
-            height: 60vh; width: 100%; max-width: 380px; 
-            border-radius: 30px; overflow: hidden; 
-            box-shadow: 0 30px 60px -12px rgba(0, 0, 0, 0.6); 
-            position: relative; cursor: pointer; touch-action: none;
-            border: 1px solid rgba(255,255,255,0.1);
+        /* ROWS */
+        .row-container { padding: 20px 0 20px 20px; }
+        .row-title { font-size: 1.2rem; font-weight: 600; margin-bottom: 10px; color: #e5e5e5; border-left: 3px solid var(--gold); padding-left: 10px; }
+        .row-scroll { display: flex; gap: 12px; overflow-x: auto; padding-right: 20px; scroll-behavior: smooth; }
+        .row-scroll::-webkit-scrollbar { display: none; } /* Hide Scrollbar */
+        
+        .poster-card { 
+            flex: 0 0 auto; width: 140px; height: 210px; 
+            border-radius: 8px; overflow: hidden; 
+            transition: transform 0.3s ease; cursor: pointer;
+            position: relative;
         }
+        .poster-card:hover { transform: scale(1.1); z-index: 5; box-shadow: 0 10px 20px rgba(0,0,0,0.5); }
+        .poster-card img { width: 100%; height: 100%; object-fit: cover; }
 
-        /* TRENDING STORIES (New Feature) */
-        .story-ring { padding: 2px; border-radius: 50%; border: 2px solid var(--gold); transition: 0.2s; }
-        .story-ring:hover { transform: scale(1.1); box-shadow: 0 0 10px var(--gold); }
-        .no-scrollbar::-webkit-scrollbar { display: none; }
-        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-
-        /* OVERLAYS */
-        #detailOverlay { position: fixed; inset: 0; z-index: 100; background: #000; transform: translateY(100%); transition: transform 0.3s ease-out; overflow-y: auto; }
-        #detailOverlay.active { transform: translateY(0); }
-
-        #authModal { position: fixed; inset: 0; z-index: 200; background: rgba(0,0,0,0.9); backdrop-filter: blur(10px); display: none; align-items: center; justify-content: center; }
-        #authModal.active { display: flex; }
-
-        /* DIALOGUE & SEARCH */
-        .dialogue-box { border-left: 3px solid var(--gold); padding-left: 10px; margin-bottom: 10px; animation: fadeIn 1s ease; }
-        #searchDropdown { position: absolute; top: 110%; left: 0; width: 100%; background: #111; border: 1px solid #333; border-radius: 15px; z-index: 50; display: none; max-height: 300px; overflow-y: auto; }
-        #searchDropdown.active { display: block; }
+        /* MODALS (Login & Details) */
+        #detailOverlay, #authModal { 
+            position: fixed; inset: 0; z-index: 100; 
+            background: rgba(0,0,0,0.95); backdrop-filter: blur(5px);
+            display: none; overflow-y: auto;
+        }
+        #detailOverlay.active, #authModal.active { display: block; }
+        
+        /* SEARCH DROPDOWN */
+        #searchDropdown { position: absolute; top: 100%; right: 0; width: 250px; background: #222; border: 1px solid #444; border-radius: 8px; z-index: 60; display: none; max-height: 300px; overflow-y: auto; }
     </style>
 </head>
 <body>
-    
-    <div id="posterBg" class="flex justify-center gap-6"></div>
 
-    <div class="fixed top-0 left-0 w-full z-50 p-4 flex justify-between items-center bg-black/80 backdrop-blur-md border-b border-white/10">
-        <div class="text-xl font-bold brand-font gold-text no-select cursor-pointer" onclick="location.reload()">IFEELAV</div>
-        <div class="flex gap-2 items-center">
+    <div class="fixed top-0 w-full z-50 flex justify-between items-center px-6 py-4 bg-gradient-to-b from-black/90 to-transparent">
+        <div class="text-2xl font-bold brand-font gold-text cursor-pointer" onclick="location.reload()">IFEELAV</div>
+        <div class="flex items-center gap-4">
             <div class="relative">
-                <input type="text" id="searchInput" oninput="window.handleTyping(event)" placeholder="Search..." class="glass-panel rounded-full px-4 py-2 w-32 md:w-64 text-sm outline-none focus:border-[#C5A059] text-white">
+                <input type="text" id="searchInput" oninput="window.handleTyping(event)" placeholder="Search..." class="bg-black/50 border border-white/30 rounded-full px-3 py-1 text-sm focus:border-gold outline-none w-32 md:w-64 transition-all focus:w-40 md:focus:w-72">
                 <div id="searchDropdown"></div>
             </div>
-            <button onclick="window.toggleAuthModal()" class="glass-panel w-10 h-10 rounded-full overflow-hidden relative border border-transparent hover:border-[#C5A059]">
-                <img id="headerAvatar" src="https://api.dicebear.com/7.x/adventurer/svg?seed=Guest" class="w-full h-full object-cover">
+            <button onclick="window.toggleAuthModal()" class="w-8 h-8 rounded-full overflow-hidden border border-white/50">
+                <img id="navAvatar" src="https://api.dicebear.com/7.x/adventurer/svg?seed=Guest" class="w-full h-full object-cover">
             </button>
         </div>
     </div>
 
-    <div id="mainContent" class="relative z-10 min-h-screen flex flex-col items-center justify-center pt-20 px-4 pb-20">
-        
-        <div id="step1" class="text-center w-full max-w-4xl fade-in">
-            <h1 class="brand-font text-5xl md:text-8xl gold-text mb-4 no-select tracking-tighter drop-shadow-lg">IFEELAV</h1>
-            <p class="text-xs md:text-sm text-gray-500 mb-10 uppercase tracking-[0.3em] no-select">Curated by Abhimanyu</p>
-            
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <button onclick="window.selectRegion('hi', 'Bollywood')" class="cat-btn p-6 rounded-2xl font-bold text-sm md:text-lg">BOLLYWOOD</button>
-                <button onclick="window.selectRegion('en', 'Hollywood')" class="cat-btn p-6 rounded-2xl font-bold text-sm md:text-lg">HOLLYWOOD</button>
-                <button onclick="window.selectRegion('ja', 'Anime')" class="cat-btn p-6 rounded-2xl font-bold text-sm md:text-lg">ANIME</button>
-                <button onclick="window.selectRegion('ko', 'K-Drama')" class="cat-btn p-6 rounded-2xl font-bold text-sm md:text-lg">K-DRAMA</button>
-            </div>
+    <div id="heroSlider" class="hero-container">
         </div>
 
-        <div id="step2" class="hidden text-center w-full max-w-3xl fade-in">
-            <h1 id="regionTitle" class="brand-font text-3xl gold-text mb-2 no-select"></h1>
-            <p class="text-xs uppercase tracking-widest opacity-50 mb-8">Select your mood</p>
-            <div class="grid grid-cols-2 md:grid-cols-3 gap-4 mb-8">
-                <button onclick="window.startApp('28')" class="glass-panel p-4 rounded-xl font-bold hover:border-[#C5A059] hover:text-[#C5A059]">Action</button>
-                <button onclick="window.startApp('35')" class="glass-panel p-4 rounded-xl font-bold hover:border-[#C5A059] hover:text-[#C5A059]">Comedy</button>
-                <button onclick="window.startApp('18')" class="glass-panel p-4 rounded-xl font-bold hover:border-[#C5A059] hover:text-[#C5A059]">Drama</button>
-                <button onclick="window.startApp('9648')" class="glass-panel p-4 rounded-xl font-bold hover:border-[#C5A059] hover:text-[#C5A059]">Mystery</button>
-                <button onclick="window.startApp('10765')" class="glass-panel p-4 rounded-xl font-bold hover:border-[#C5A059] hover:text-[#C5A059]">Sci-Fi</button>
-            </div>
-            <button onclick="history.back()" class="text-gray-500 text-xs uppercase tracking-widest p-4">← Go Back</button>
+    <div class="relative z-10 -mt-20 pb-20">
+        <div class="row-container">
+            <h2 class="row-title">Trending Now</h2>
+            <div id="trendingRow" class="row-scroll"></div>
         </div>
-
-        <div id="swipeStep" class="hidden w-full flex flex-col items-center">
-            
-            <div class="w-full max-w-md mb-4">
-                <div class="flex items-center gap-2 mb-2 px-2">
-                    <span class="text-xs font-bold text-[#C5A059] uppercase tracking-widest">Trending Now</span>
-                    <div class="h-[1px] bg-white/10 flex-1"></div>
-                </div>
-                <div id="trendingStories" class="flex gap-4 overflow-x-auto pb-2 px-2 no-scrollbar">
-                    </div>
-            </div>
-
-            <div id="dialogueArea" class="h-12 mb-2 w-full max-w-md"></div>
-
-            <div id="showCard" onclick="window.openCurrentCard()" class="premium-card bg-[#111]">
-                <img id="poster" src="" class="w-full h-full object-cover select-none pointer-events-none">
-                <div class="absolute bottom-0 w-full p-6 bg-gradient-to-t from-black via-black/80 to-transparent text-white">
-                    <h2 id="cardTitle" class="brand-font text-3xl leading-none mb-2 no-select"></h2>
-                    <p id="cardMeta" class="text-xs opacity-70 font-sans"></p>
-                    <p class="text-[10px] mt-2 uppercase tracking-widest text-[#C5A059] font-bold opacity-90 animate-pulse">Tap for Info</p>
-                </div>
-                
-                <div id="nope" class="absolute top-10 right-10 border-4 border-red-500 text-red-500 font-bold px-4 py-2 rounded transform rotate-12 opacity-0 text-2xl bg-black/50">NOPE</div>
-                <div id="like" class="absolute top-10 left-10 border-4 border-green-500 text-green-500 font-bold px-4 py-2 rounded transform -rotate-12 opacity-0 text-2xl bg-black/50">YEAH</div>
-            </div>
-
-            <div class="flex gap-8 mt-6">
-                <button onclick="window.handleAction('pass')" class="w-16 h-16 rounded-full glass-panel flex items-center justify-center text-2xl text-red-500 hover:bg-red-500/20 transition">✕</button>
-                <button onclick="window.handleAction('smash')" class="w-16 h-16 rounded-full bg-[#C5A059] text-white text-3xl shadow-xl hover:scale-110 transition">♥</button>
-            </div>
+        <div class="row-container">
+            <h2 class="row-title">Bollywood Hits 🇮🇳</h2>
+            <div id="bollywoodRow" class="row-scroll"></div>
+        </div>
+        <div class="row-container">
+            <h2 class="row-title">Hollywood Action 🎬</h2>
+            <div id="hollywoodRow" class="row-scroll"></div>
+        </div>
+        <div class="row-container">
+            <h2 class="row-title">Anime World 🇯🇵</h2>
+            <div id="animeRow" class="row-scroll"></div>
+        </div>
+        <div class="row-container">
+            <h2 class="row-title">K-Drama ❤️</h2>
+            <div id="kdramaRow" class="row-scroll"></div>
         </div>
     </div>
 
-    <div class="w-full text-center py-6 opacity-80 text-xs no-select fixed bottom-0 left-0 pointer-events-none z-40">
-        <a href="https://instagram.com/axviixv" target="_blank" class="pointer-events-auto inline-flex items-center justify-center gap-2 text-gray-400 hover:text-[#C5A059] transition bg-black/50 px-4 py-2 rounded-full backdrop-blur-md">
-            <i class="fab fa-instagram text-lg"></i>
-            <span class="font-bold tracking-wider">ABHIMANYU</span>
-        </a>
+    <div class="text-center pb-8 text-xs text-gray-500 uppercase tracking-widest">
+        Curated by Abhimanyu | <a href="https://instagram.com/axviixv" target="_blank" class="hover:text-gold">Instagram</a>
     </div>
 
     <div id="detailOverlay">
-        <button onclick="window.closeDetails()" class="fixed top-6 right-6 z-[110] bg-black/60 text-white w-10 h-10 rounded-full flex items-center justify-center backdrop-blur text-xl">✕</button>
+        <button onclick="window.closeDetails()" class="fixed top-6 right-6 z-[110] bg-white/10 text-white w-10 h-10 rounded-full flex items-center justify-center backdrop-blur text-xl hover:bg-red-600 transition">✕</button>
         <div id="detailContent"></div>
     </div>
 
     <div id="authModal">
-        <div class="bg-[#111] p-8 rounded-3xl w-full max-w-sm relative shadow-2xl border border-gray-800">
-            <button onclick="window.toggleAuthModal()" class="absolute top-4 right-4 text-gray-400">✕</button>
-            <div id="authForms">
-                <h2 class="brand-font text-2xl mb-6 gold-text text-center">Member Access</h2>
-                <input type="email" id="email" placeholder="Email" class="w-full p-3 mb-3 rounded-xl bg-[#222] border border-[#333] text-white outline-none focus:border-[#C5A059]">
-                <input type="password" id="password" placeholder="Password" class="w-full p-3 mb-6 rounded-xl bg-[#222] border border-[#333] text-white outline-none focus:border-[#C5A059]">
-                <button onclick="window.handleLogin()" class="w-full bg-[#C5A059] text-white py-3 rounded-xl font-bold mb-3 hover:bg-[#b08d4b]">Login</button>
-                <button onclick="window.handleSignup()" class="w-full border border-[#C5A059] text-[#C5A059] py-3 rounded-xl font-bold hover:bg-[#C5A059] hover:text-white transition">Create Account</button>
-            </div>
-            <div id="userProfile" class="hidden text-center">
-                <div class="w-24 h-24 mx-auto mb-3 rounded-full overflow-hidden border-4 border-[#C5A059] shadow-lg">
-                    <img id="profileAvatar" src="" class="w-full h-full object-cover">
+        <div class="flex items-center justify-center min-h-screen p-4">
+            <div class="bg-[#181818] p-8 rounded-2xl w-full max-w-sm border border-[#333] relative">
+                <button onclick="window.toggleAuthModal()" class="absolute top-4 right-4 text-gray-400">✕</button>
+                
+                <div id="authForms">
+                    <h2 class="text-2xl mb-6 font-bold text-center gold-text">Sign In</h2>
+                    <input type="email" id="email" placeholder="Email" class="w-full p-3 mb-4 bg-[#333] rounded text-white outline-none">
+                    <input type="password" id="password" placeholder="Password" class="w-full p-3 mb-6 bg-[#333] rounded text-white outline-none">
+                    <button onclick="window.handleLogin()" class="w-full bg-[#C5A059] text-black font-bold py-3 rounded hover:bg-white transition">Sign In</button>
+                    <button onclick="window.handleSignup()" class="w-full mt-3 text-sm text-gray-400 hover:text-white">New to IFEELAV? Sign up now.</button>
                 </div>
-                <h3 id="userEmailDisplay" class="font-bold mb-6 text-white">User</h3>
-                <div class="grid grid-cols-5 gap-2 mb-6" id="avatarGrid"></div>
-                <button onclick="window.handleLogout()" class="w-full bg-red-900/20 text-red-500 py-3 rounded-xl font-bold text-sm">Log Out</button>
+
+                <div id="userProfile" class="hidden text-center">
+                    <img id="profileAvatar" src="" class="w-20 h-20 rounded-full mx-auto mb-4 border-2 border-gold">
+                    <h3 id="userEmail" class="text-lg font-bold mb-6">User</h3>
+                    <button onclick="window.handleLogout()" class="w-full bg-red-600 py-2 rounded font-bold">Sign Out</button>
+                </div>
             </div>
         </div>
     </div>
@@ -165,7 +124,6 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-        import { getFirestore, doc, setDoc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyAoCZuJ4tGdwmFuz8y-_tc5phvfbn2oi1A",
@@ -178,130 +136,186 @@
 
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
-        const db = getFirestore(app);
 
-        // --- DIALOGUES ---
-        const dialogues = {
-            '28': [{t: "Rishte mein toh hum tumhare baap lagte hain...", c: "Shahenshah"}, {t: "Don't angry me!", c: "Rowdy Rathore"}, {t: "Ab tera kya hoga Kaaliya?", c: "Sholay"}],
-            '35': [{t: "Utha le re baba, utha le!", c: "Hera Pheri"}, {t: "Babu Rao ka style hai!", c: "Hera Pheri"}, {t: "Control Uday Control!", c: "Welcome"}],
-            '18': [{t: "Thappad se darr nahi lagta sahab...", c: "Dabangg"}, {t: "Zindagi badi honi chahiye, lambi nahi.", c: "Anand"}],
-            '9648': [{t: "Kuch toh gadbad hai Daya...", c: "CID"}, {t: "Dushman dikhai nahi deta...", c: "Lakshya"}],
-            '10765': [{t: "Jaadoo...", c: "Koi Mil Gaya"}, {t: "May the force be with you.", c: "Star Wars"}]
-        };
-
-        const avatars = ['Male:micah:Leo', 'Cool:avataaars:Jack', 'Girl:adventurer:Chloe', 'Pro:micah:Nora', 'Vibe:adventurer:Felix', 'Bot:bottts:Robo', 'Smile:open-peeps:Smile', 'Boss:personas:Boss'];
-
-        let shows = [], index = 0, selectedLang = '', searchTimer, currentTvId = null;
-
-        // --- BACKGROUND INIT ---
-        function initBg() {
-            const container = document.getElementById('posterBg');
-            const cols = 3; 
-            // Fallback content while loading
-            let html = '';
-            for(let i=0; i<cols; i++) html += `<div class="marquee-col" style="animation-duration:${60+i*10}s">${Array(10).fill(0).map(()=>`<div class="w-32 h-48 bg-gray-800 rounded-lg opacity-30"></div>`).join('')}</div>`;
-            container.innerHTML = html;
-            
-            fetch('https://api.themoviedb.org/3/trending/tv/week?api_key=4ba1523ee066af4633966b').then(r=>r.json()).then(d=>{
-                const posters = d.results;
-                let newHtml = '';
-                for(let i=0; i<cols; i++) {
-                    const colPosters = [...posters].sort(()=>0.5-Math.random()).map(p=>`<img src="https://image.tmdb.org/t/p/w200${p.poster_path}" class="w-32 h-48 rounded-lg opacity-40">`).join('');
-                    newHtml += `<div class="marquee-col" style="animation-duration:${50+i*15}s; margin-top:-${i*50}px">${colPosters}${colPosters}</div>`;
-                }
-                container.innerHTML = newHtml;
-            });
-        }
-        initBg();
-
-        // --- LOAD TRENDING STORIES ---
-        async function loadTrendingStories() {
-            const res = await fetch('https://api.themoviedb.org/3/trending/tv/day?api_key=4ba1523ee066af4633966b');
-            const data = await res.json();
-            const container = document.getElementById('trendingStories');
-            container.innerHTML = data.results.slice(0, 10).map(s => `
-                <div class="flex flex-col items-center gap-1 cursor-pointer shrink-0" onclick="window.openDetails(${s.id})">
-                    <div class="story-ring p-[2px]">
-                        <img src="https://image.tmdb.org/t/p/w200${s.poster_path}" class="w-14 h-14 rounded-full object-cover border-2 border-black">
-                    </div>
-                    <span class="text-[9px] w-14 text-center truncate text-gray-400">${s.name || s.original_name}</span>
-                </div>
-            `).join('');
-        }
-        loadTrendingStories();
-
-        // --- AUTH & AVATAR ---
+        // --- AUTH LOGIC ---
         window.toggleAuthModal = () => document.getElementById('authModal').classList.toggle('active');
         window.handleLogin = () => signInWithEmailAndPassword(auth, document.getElementById('email').value, document.getElementById('password').value).then(()=>window.toggleAuthModal()).catch(e=>alert(e.message));
         window.handleSignup = () => createUserWithEmailAndPassword(auth, document.getElementById('email').value, document.getElementById('password').value).then(()=>window.toggleAuthModal()).catch(e=>alert(e.message));
         window.handleLogout = () => signOut(auth);
-        
-        window.changeAvatar = async (str) => {
-            const [l,s,seed] = str.split(':');
-            const url = `https://api.dicebear.com/7.x/${s}/svg?seed=${seed}`;
-            document.getElementById('profileAvatar').src = url;
-            document.getElementById('headerAvatar').src = url;
-            if(auth.currentUser) {
-                const ref = doc(db, "users", auth.currentUser.uid);
-                await setDoc(ref, { avatar: url }, { merge: true });
-            }
-        };
 
-        // Render Avatar Grid
-        document.getElementById('avatarGrid').innerHTML = avatars.map(a => {
-            const [l,s,seed] = a.split(':');
-            const url = `https://api.dicebear.com/7.x/${s}/svg?seed=${seed}`;
-            return `<img src="${url}" class="w-10 h-10 rounded-full border border-gray-700 cursor-pointer hover:scale-110 transition" onclick="window.changeAvatar('${a}')">`;
-        }).join('');
-
-        onAuthStateChanged(auth, async (user) => {
-            if(user) {
+        onAuthStateChanged(auth, user => {
+            if(user){
                 document.getElementById('authForms').classList.add('hidden');
                 document.getElementById('userProfile').classList.remove('hidden');
-                document.getElementById('userEmailDisplay').innerText = user.email.split('@')[0];
-                const ref = doc(db, "users", user.uid);
-                const snap = await getDoc(ref);
-                const av = snap.exists() && snap.data().avatar ? snap.data().avatar : `https://api.dicebear.com/7.x/notionists/svg?seed=${user.uid}`;
-                document.getElementById('headerAvatar').src = av;
+                document.getElementById('userEmail').innerText = user.email.split('@')[0];
+                const av = `https://api.dicebear.com/7.x/adventurer/svg?seed=${user.uid}`;
+                document.getElementById('navAvatar').src = av;
                 document.getElementById('profileAvatar').src = av;
             } else {
                 document.getElementById('authForms').classList.remove('hidden');
                 document.getElementById('userProfile').classList.add('hidden');
-                document.getElementById('headerAvatar').src = "https://api.dicebear.com/7.x/notionists/svg?seed=Guest";
+                document.getElementById('navAvatar').src = "https://api.dicebear.com/7.x/adventurer/svg?seed=Guest";
             }
         });
 
-        // --- APP LOGIC ---
-        window.selectRegion = (lang, name) => {
-            selectedLang = lang;
-            document.getElementById('step1').classList.add('hidden');
-            document.getElementById('step2').classList.remove('hidden');
-            document.getElementById('regionTitle').innerText = name;
-            history.pushState({step: 2}, "");
+        // --- FETCH LOGIC ---
+        async function fetchRow(url, elementId) {
+            try {
+                const res = await fetch(url);
+                const data = await res.json();
+                const container = document.getElementById(elementId);
+                
+                // Backup if backend returns empty (rare case)
+                const items = data.results || [];
+                
+                container.innerHTML = items.map(item => `
+                    <div class="poster-card" onclick="window.openDetails(${item.id})">
+                        <img src="https://image.tmdb.org/t/p/w500${item.poster_path}" loading="lazy">
+                    </div>
+                `).join('');
+
+                return items; // Return for Hero Slider usage
+            } catch(e) { console.error(e); }
+        }
+
+        // --- INIT HERO & ROWS ---
+        async function initApp() {
+            // 1. Trending Row & Hero
+            const trending = await fetchRow('/api/getShows?query=', 'trendingRow');
+            if(trending) initHero(trending);
+
+            // 2. Other Categories
+            fetchRow('/api/getShows?lang=hi', 'bollywoodRow');
+            fetchRow('/api/getShows?lang=en&genre=28', 'hollywoodRow');
+            fetchRow('/api/getShows?lang=ja', 'animeRow');
+            fetchRow('/api/getShows?lang=ko', 'kdramaRow');
+        }
+
+        function initHero(items) {
+            const container = document.getElementById('heroSlider');
+            container.innerHTML = items.slice(0, 5).map((item, index) => `
+                <div class="hero-slide ${index === 0 ? 'active' : ''}">
+                    <img src="https://image.tmdb.org/t/p/original${item.backdrop_path || item.poster_path}" class="w-full h-full object-cover opacity-60">
+                    <div class="hero-content">
+                        <h1 class="text-4xl md:text-6xl font-bold mb-4 brand-font gold-text">${item.name || item.original_name}</h1>
+                        <p class="text-sm md:text-lg text-gray-200 line-clamp-3 mb-6">${item.overview}</p>
+                        <button onclick="window.openDetails(${item.id})" class="bg-white text-black px-8 py-3 rounded font-bold hover:bg-gold transition">Play Now</button>
+                    </div>
+                </div>
+            `).join('');
+
+            // Auto Slide
+            let current = 0;
+            setInterval(() => {
+                const slides = document.querySelectorAll('.hero-slide');
+                slides[current].classList.remove('active');
+                current = (current + 1) % slides.length;
+                slides[current].classList.add('active');
+            }, 5000);
+        }
+
+        // --- DETAILS LOGIC (The Magic Part) ---
+        window.openDetails = async (id) => {
+            const overlay = document.getElementById('detailOverlay');
+            const content = document.getElementById('detailContent');
+            overlay.classList.add('active');
+            content.innerHTML = '<div class="flex h-screen items-center justify-center text-gold">Loading Details...</div>';
+
+            try {
+                // Fetch Details
+                const res = await fetch(`/api/getDetails?id=${id}`);
+                const data = await res.json();
+
+                // Streaming (Safe Fetch)
+                let streamHTML = '';
+                try {
+                    const sRes = await fetch(`/api/getStream?tmdb_id=${id}&type=tv`);
+                    const sData = await sRes.json();
+                    if(sData.sources?.length) streamHTML = sData.sources.map(s => `<span class="px-3 py-1 bg-gray-800 border border-gray-600 rounded text-xs">${s.name}</span>`).join(' ');
+                    else streamHTML = '<span class="text-xs text-gray-500">Check local listings</span>';
+                } catch(e) {}
+
+                content.innerHTML = `
+                    <div class="relative h-[60vh]">
+                        <img src="https://image.tmdb.org/t/p/original${data.backdrop_path || data.poster_path}" class="w-full h-full object-cover">
+                        <div class="absolute inset-0 bg-gradient-to-t from-[#000] via-black/40 to-transparent"></div>
+                        <div class="absolute bottom-0 p-8 w-full">
+                            <h1 class="text-4xl md:text-6xl font-bold mb-2 gold-text brand-font">${data.name}</h1>
+                            <div class="flex gap-4 text-sm font-bold text-gray-300 mb-4">
+                                <span class="text-green-400">${data.vote_average.toFixed(1)} Match</span>
+                                <span>${data.first_air_date?.split('-')[0]}</span>
+                                <span class="border border-gray-500 px-1 rounded text-xs p-0.5">HD</span>
+                            </div>
+                            <div class="flex flex-wrap gap-2 mb-4">${streamHTML}</div>
+                        </div>
+                    </div>
+                    <div class="p-8 max-w-5xl mx-auto">
+                        <div class="grid md:grid-cols-3 gap-8">
+                            <div class="md:col-span-2">
+                                <p class="text-lg leading-relaxed text-gray-300 mb-8">${data.overview}</p>
+                                <h3 class="text-xl font-bold mb-4 border-l-4 border-gold pl-3">Episodes</h3>
+                                <div id="episodeList" class="space-y-3"></div>
+                            </div>
+                            <div class="space-y-4 text-sm text-gray-400">
+                                <p><span class="text-gray-500">Genres:</span> ${data.genres.map(g=>g.name).join(', ')}</p>
+                                <p><span class="text-gray-500">Network:</span> ${data.networks[0]?.name || 'N/A'}</p>
+                                <p><span class="text-gray-500">Seasons:</span> ${data.number_of_seasons}</p>
+                            </div>
+                        </div>
+                    </div>
+                `;
+
+                // Load Episodes (Season 1)
+                if(data.seasons?.length > 0) window.loadEpisodes(id, 1);
+
+            } catch(e) { content.innerHTML = '<p class="text-center mt-20 text-red-500">Error loading content.</p>'; }
         };
 
-        window.startApp = (gid) => {
-            document.getElementById('step2').classList.add('hidden');
-            document.getElementById('swipeStep').classList.remove('hidden');
+        window.loadEpisodes = async (id, s) => {
+            const list = document.getElementById('episodeList');
+            list.innerHTML = '<p class="text-sm opacity-50">Loading episodes...</p>';
+            try {
+                const res = await fetch(`/api/getEpisodes?id=${id}&season=${s}`);
+                const data = await res.json();
+                list.innerHTML = data.episodes.map(e => `
+                    <div class="flex items-center gap-4 p-3 hover:bg-gray-800 rounded transition border-b border-gray-800">
+                        <div class="text-xl font-bold text-gray-500 w-8">${e.episode_number}</div>
+                        <div class="flex-1">
+                            <div class="flex justify-between">
+                                <h4 class="font-bold text-white">${e.name}</h4>
+                                <span class="text-xs text-gray-400">${e.runtime ? e.runtime+'m' : ''}</span>
+                            </div>
+                            <p class="text-xs text-gray-400 line-clamp-2 mt-1">${e.overview || 'No description'}</p>
+                        </div>
+                    </div>
+                `).join('');
+            } catch(e) { list.innerHTML = '<p class="text-xs">Episode info unavailable</p>'; }
+        }
+
+        window.closeDetails = () => document.getElementById('detailOverlay').classList.remove('active');
+
+        // --- SEARCH ---
+        window.handleTyping = (e) => {
+            const q = e.target.value; const dd = document.getElementById('searchDropdown');
+            if(q.length < 2) { dd.style.display = 'none'; return; }
             
-            // Dialogue
-            const genreData = dialogues[gid] || dialogues['28'];
-            const rand = genreData[Math.floor(Math.random()*genreData.length)];
-            document.getElementById('dialogueArea').innerHTML = `<div class="dialogue-box"><p class="italic text-sm text-gray-300">"${rand.t}"</p><p class="char-name text-xs text-gold uppercase mt-1">— ${rand.c}</p></div>`;
+            clearTimeout(window.searchTimer);
+            window.searchTimer = setTimeout(async () => {
+                const res = await fetch(`/api/getShows?query=${q}`);
+                const data = await res.json();
+                dd.style.display = 'block';
+                dd.innerHTML = data.results.slice(0,5).map(s => `
+                    <div class="flex items-center gap-3 p-3 hover:bg-gray-700 cursor-pointer border-b border-gray-700" onclick="window.openDetails(${s.id})">
+                        <img src="https://image.tmdb.org/t/p/w92${s.poster_path}" class="w-10 h-14 object-cover rounded">
+                        <span class="text-sm font-bold text-gray-200">${s.name || s.original_name}</span>
+                    </div>
+                `).join('');
+            }, 300);
+        }
 
-            fetchShows(`/api/getShows?genre=${gid}&lang=${selectedLang}`);
-            history.pushState({step: 3}, "");
-        };
+        // Start the app
+        initApp();
 
-        window.addEventListener('popstate', (e) => {
-            if(!e.state) location.reload();
-            else if(e.state.step === 2) {
-                document.getElementById('swipeStep').classList.add('hidden');
-                document.getElementById('step2').classList.remove('hidden');
-            }
-        });
-
-        // Swipe
-        const card = document.getElementById('showCard');
-        let startX, isDragging = false;
-        card.addEventListener('touchstart', (e) => { startX = e.touches[0].clie
+    </script>
+</body>
+</html>
