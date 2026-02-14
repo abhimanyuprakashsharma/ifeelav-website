@@ -3,197 +3,125 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>IFEELAV | The Collection</title>
+    <title>IFEELAV | Premium Streaming Hub</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,700&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
     
     <style>
-        :root { --gold: #C5A059; --bg-center: #ffffff; --bg-edge: #f2eee5; }
-        ::-webkit-scrollbar { width: 6px; }
-        ::-webkit-scrollbar-thumb { background: #C5A059; border-radius: 10px; }
+        :root { --gold: #C5A059; --gold-glow: rgba(197, 160, 89, 0.5); }
+        body { transition: background 0.5s ease; font-family: 'Inter', sans-serif; background: #ffffff; color: #1a1a1a; overflow-x: hidden; }
+        body.dark { background: #050505; color: #ffffff; }
         
-        body { margin: 0; font-family: 'Inter', sans-serif; background: radial-gradient(circle at center, var(--bg-center) 20%, var(--bg-edge) 100%); overflow-x: hidden; }
-        #bgCanvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; }
+        #bgCanvas { position: fixed; inset: 0; z-index: -1; pointer-events: none; }
         .premium-font { font-family: 'Playfair Display', serif; }
         .gold-text { color: var(--gold); }
         
-        .glass-panel { background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(12px); border: 1px solid rgba(197, 160, 89, 0.2); box-shadow: 0 8px 32px rgba(197, 160, 89, 0.1); }
-        .cat-btn { background: linear-gradient(145deg, #fff, #f9f9f9); border: 1px solid rgba(197, 160, 89, 0.3); color: #444; font-family: 'Playfair Display', serif; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; transition: all 0.3s; }
-        .cat-btn:hover { background: var(--gold); color: white; border-color: var(--gold); transform: translateY(-3px); box-shadow: 0 10px 20px rgba(197, 160, 89, 0.2); }
+        .glass-panel { background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(12px); border: 1px solid rgba(197, 160, 89, 0.2); transition: all 0.3s; }
+        body.dark .glass-panel { background: rgba(20, 20, 20, 0.8); border-color: var(--gold); }
         
-        .premium-card { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(25px); box-shadow: 0 30px 60px rgba(197, 160, 89, 0.2); border: 1px solid rgba(197, 160, 89, 0.3); border-radius: 30px; cursor: pointer; transition: transform 0.3s; height: 65vh; width: 100%; max-width: 400px; }
-        @media (min-width: 768px) { .premium-card { height: 75vh; } }
-
-        .gold-btn { background: linear-gradient(135deg, var(--gold) 0%, #A68545 100%); box-shadow: 0 10px 25px rgba(197, 160, 89, 0.3); }
-        .slide-right { transform: translateX(120%) rotate(15deg); opacity: 0; }
-        .slide-left { transform: translateX(-120%) rotate(-15deg); opacity: 0; }
-        .fade-in { animation: fadeIn 0.6s ease-out forwards; }
+        .cat-btn { background: white; border: 1px solid rgba(197, 160, 89, 0.3); transition: 0.4s; }
+        body.dark .cat-btn { background: #111; color: white; border-color: var(--gold); }
         
-        #detailOverlay { transition: opacity 0.4s ease, transform 0.4s ease; opacity: 0; pointer-events: none; transform: translateY(50px); }
-        #detailOverlay.active { opacity: 1; pointer-events: auto; transform: translateY(0); }
-        #watchlistPanel { transition: transform 0.3s ease-in-out; transform: translateX(100%); }
-        #watchlistPanel.open { transform: translateX(0); }
+        .premium-card { cursor: pointer; height: 65vh; width: 100%; max-width: 400px; border-radius: 30px; overflow: hidden; box-shadow: 0 20px 40px rgba(0,0,0,0.3); }
+        
+        /* Streaming Buttons */
+        .stream-btn { display: flex; align-items: center; gap: 8px; padding: 10px 15px; border-radius: 12px; font-weight: bold; font-size: 0.9rem; transition: transform 0.2s; color: white; text-decoration: none; margin-bottom: 8px; }
+        .stream-btn:hover { transform: translateY(-3px); }
+        .stream-netflix { background: #E50914; }
+        .stream-prime { background: #00A8E1; }
+        .stream-hotstar { background: #133ba2; }
+        .stream-jiocinema { background: #d32f90; }
+        .stream-default { background: #333; }
 
-        /* Search Dropdown */
-        #searchDropdown { position: absolute; top: 110%; left: 0; width: 100%; background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(15px); border: 1px solid rgba(197, 160, 89, 0.2); border-radius: 20px; box-shadow: 0 15px 40px rgba(0,0,0,0.1); overflow: hidden; z-index: 100; max-height: 400px; overflow-y: auto; transform-origin: top; transition: all 0.2s ease; display: none; }
-        #searchDropdown.active { display: block; animation: dropDown 0.3s ease forwards; }
-        @keyframes dropDown { from { opacity: 0; transform: scaleY(0.9); } to { opacity: 1; transform: scaleY(1); } }
-        .suggestion-item { padding: 10px 15px; display: flex; align-items: center; gap: 12px; cursor: pointer; border-bottom: 1px solid #f0f0f0; transition: background 0.2s; }
-        .suggestion-item:hover { background: #fcf8f0; }
-
-        /* Login Modal & Avatar Grid */
-        #authModal { transition: opacity 0.3s ease; opacity: 0; pointer-events: none; }
+        #detailOverlay { position: fixed; inset: 0; z-index: 200; background: white; transform: translateY(100%); transition: transform 0.4s ease; overflow-y: auto; }
+        #detailOverlay.active { transform: translateY(0); }
+        body.dark #detailOverlay { background: #050505; }
+        
+        #authModal { transition: opacity 0.3s ease; opacity: 0; pointer-events: none; z-index: 300; }
         #authModal.active { opacity: 1; pointer-events: auto; }
-        .auth-input { width: 100%; padding: 12px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 10px; outline: none; transition: border 0.3s; }
-        .auth-input:focus { border-color: var(--gold); }
         
-        .avatar-option { width: 50px; height: 50px; border-radius: 50%; border: 2px solid transparent; cursor: pointer; transition: transform 0.2s; }
-        .avatar-option:hover { transform: scale(1.1); }
-        .avatar-option.selected { border-color: var(--gold); transform: scale(1.1); box-shadow: 0 0 10px var(--gold); }
+        #searchDropdown { position: absolute; top: 110%; left: 0; width: 100%; background: white; border-radius: 20px; z-index: 150; display: none; }
+        body.dark #searchDropdown { background: #1a1a1a; border: 1px solid var(--gold); }
+        #searchDropdown.active { display: block; }
     </style>
 </head>
-<body class="text-gray-800" onclick="closeSearchDropdown()">
+<body class="dark">
     <canvas id="bgCanvas"></canvas>
 
-    <div class="fixed top-0 left-0 w-full z-50 p-4 flex justify-between items-center bg-white/80 backdrop-blur-md border-b border-[#C5A059]/10">
+    <div class="fixed top-0 left-0 w-full z-[150] p-4 flex justify-between items-center backdrop-blur-md border-b border-white/5">
         <div class="text-xl md:text-2xl font-bold italic premium-font gold-text cursor-pointer" onclick="location.reload()">IFEELAV</div>
-        <div class="flex gap-3 items-center">
-            
-            <div class="relative group z-50">
-                <input type="text" id="searchInput" placeholder="Search..." autocomplete="off" class="glass-panel rounded-full px-4 py-2 w-28 md:w-64 focus:w-40 md:focus:w-72 transition-all outline-none text-sm focus:border-[#C5A059]" oninput="handleTyping(event)" onclick="event.stopPropagation()">
-                <div id="searchDropdown"></div>
+        <div class="flex gap-2 items-center">
+            <button onclick="toggleDarkMode()" class="glass-panel w-10 h-10 rounded-full flex items-center justify-center">🌓</button>
+            <div class="relative">
+                <input type="text" id="searchInput" oninput="handleTyping(event)" placeholder="Search..." autocomplete="off" class="glass-panel rounded-full px-4 py-2 w-32 md:w-64 text-sm outline-none focus:border-[#C5A059]">
+                <div id="searchDropdown" class="overflow-hidden"></div>
             </div>
-
-            <button onclick="toggleAuthModal()" class="glass-panel w-10 h-10 rounded-full flex items-center justify-center text-gray-600 hover:text-[#C5A059] transition shadow-lg relative overflow-hidden p-0">
-                <img id="headerAvatar" src="" class="w-full h-full object-cover hidden">
-                <span id="headerIconDefault">👤</span>
-                <span id="loginStatus" class="absolute top-0 right-0 w-3 h-3 bg-gray-400 rounded-full border-2 border-white z-10"></span>
-            </button>
-
-            <button onclick="toggleWatchlist()" class="glass-panel w-10 h-10 rounded-full flex items-center justify-center text-gray-600 hover:text-red-500 transition shadow-lg relative">
-                ❤️ <span id="badge" class="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] w-4 h-4 rounded-full flex items-center justify-center hidden">0</span>
+            <button onclick="toggleAuthModal()" class="glass-panel w-10 h-10 rounded-full overflow-hidden relative border-2 border-gold/30">
+                <img id="headerAvatar" src="https://api.dicebear.com/7.x/adventurer/svg?seed=Felix" class="w-full h-full object-cover">
             </button>
         </div>
     </div>
 
-    <div id="authModal" class="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm">
-        <div class="bg-white p-8 rounded-3xl shadow-2xl w-full max-w-sm relative max-h-[90vh] overflow-y-auto">
-            <button onclick="toggleAuthModal()" class="absolute top-4 right-4 text-gray-400 hover:text-red-500">✕</button>
-            
+    <div id="authModal" class="fixed inset-0 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+        <div class="bg-white dark:bg-zinc-900 p-8 rounded-3xl w-full max-w-sm relative">
+            <button onclick="toggleAuthModal()" class="absolute top-4 right-4 text-gray-400">✕</button>
             <div id="loggedOutView">
-                <h2 class="premium-font text-2xl mb-2">Welcome</h2>
-                <p class="text-xs text-gray-400 mb-6 uppercase tracking-wider">Sign in to sync your vault</p>
-                <input type="email" id="email" placeholder="Email Address" class="auth-input">
-                <input type="password" id="password" placeholder="Password" class="auth-input">
-                <button onclick="handleLogin()" class="w-full bg-[#C5A059] text-white py-3 rounded-xl font-bold hover:bg-[#b08d4b] transition mb-3">Sign In</button>
-                <button onclick="handleSignup()" class="w-full border border-[#C5A059] text-[#C5A059] py-3 rounded-xl font-bold hover:bg-[#fcf8f0] transition mb-4">Create Account</button>
-                <div class="text-center border-t pt-4">
-                    <button onclick="handleGoogleLogin()" class="text-sm text-gray-500 hover:text-gray-800 flex items-center justify-center gap-2 w-full">
-                        <span class="text-lg">G</span> Continue with Google
-                    </button>
-                </div>
+                <h2 class="premium-font text-2xl mb-4 gold-text">Account</h2>
+                <input type="email" id="email" placeholder="Email" class="w-full p-3 mb-3 rounded-xl border dark:bg-zinc-800 dark:border-zinc-700 outline-none">
+                <input type="password" id="password" placeholder="Password" class="w-full p-3 mb-6 rounded-xl border dark:bg-zinc-800 dark:border-zinc-700 outline-none">
+                <button onclick="window.handleLogin()" class="w-full bg-gold text-white py-3 rounded-xl font-bold mb-3">Sign In</button>
+                <button onclick="window.handleSignup()" class="w-full border border-gold text-gold py-3 rounded-xl font-bold">Sign Up</button>
             </div>
-
             <div id="loggedInView" class="hidden text-center">
-                <div class="w-24 h-24 mx-auto mb-4 relative">
-                    <img id="profileAvatar" src="" class="w-full h-full rounded-full object-cover border-4 border-[#C5A059] shadow-lg">
-                    <div class="absolute bottom-0 right-0 bg-green-500 w-6 h-6 rounded-full border-4 border-white"></div>
-                </div>
-                
-                <h2 id="userNameDisplay" class="premium-font text-xl mb-1">User</h2>
-                <p id="userEmailDisplay" class="text-sm text-gray-400 mb-6">user@example.com</p>
-
-                <div class="mb-6 bg-gray-50 p-4 rounded-xl border border-gray-100">
-                    <p class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">Choose Your Vibe</p>
-                    <div class="grid grid-cols-5 gap-2 justify-items-center" id="avatarGrid">
-                        </div>
-                </div>
-
-                <button onclick="handleLogout()" class="w-full bg-red-50 text-red-500 py-3 rounded-xl font-bold hover:bg-red-100 transition">Sign Out</button>
+                <div class="w-20 h-20 bg-gold/10 rounded-full mx-auto mb-4 flex items-center justify-center text-3xl">👤</div>
+                <h3 id="userDisplay" class="font-bold mb-6 text-xl">User</h3>
+                <button onclick="window.handleLogout()" class="w-full bg-red-500/10 text-red-500 py-3 rounded-xl font-bold">Sign Out</button>
             </div>
         </div>
     </div>
 
-    <div class="relative z-10 min-h-screen flex flex-col items-center justify-center pt-20 px-4 pb-10">
-        <div id="step1" class="text-center w-full max-w-3xl fade-in">
-            <h1 class="premium-font italic text-5xl md:text-7xl gold-text mb-2 tracking-tighter">IFEELAV</h1>
-            <p class="text-gray-400 uppercase tracking-[6px] text-[10px] mb-12 italic">The Abhimanyu Collection</p>
-            <p class="text-[#C5A059] text-xs font-bold uppercase tracking-widest mb-6">Step 1: Choose Region</p>
+    <div id="mainContent" class="relative z-10 min-h-screen flex flex-col items-center justify-center pt-20 px-4">
+        <div id="step1" class="text-center w-full max-w-3xl">
+            <h1 class="premium-font italic text-5xl md:text-7xl gold-text mb-12">IFEELAV</h1>
             <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <button onclick="selectRegion('hi', 'Bollywood')" class="cat-btn p-6 rounded-2xl text-lg">Bollywood</button>
-                <button onclick="selectRegion('en', 'Hollywood')" class="cat-btn p-6 rounded-2xl text-lg">Hollywood</button>
-                <button onclick="selectRegion('ja', 'Anime')" class="cat-btn p-6 rounded-2xl text-lg">Anime</button>
-                <button onclick="selectRegion('ko', 'K-Drama')" class="cat-btn p-6 rounded-2xl text-lg">K-Drama</button>
+                <button onclick="selectRegion('hi', 'Bollywood')" class="cat-btn p-6 rounded-2xl font-bold glass-panel">BOLLYWOOD</button>
+                <button onclick="selectRegion('en', 'Hollywood')" class="cat-btn p-6 rounded-2xl font-bold glass-panel">HOLLYWOOD</button>
+                <button onclick="selectRegion('ja', 'Anime')" class="cat-btn p-6 rounded-2xl font-bold glass-panel">ANIME</button>
+                <button onclick="selectRegion('ko', 'K-Drama')" class="cat-btn p-6 rounded-2xl font-bold glass-panel">K-DRAMA</button>
             </div>
         </div>
-        <div id="step2" class="hidden text-center w-full max-w-3xl fade-in">
-            <h1 class="premium-font italic text-4xl md:text-6xl gold-text mb-4 tracking-tighter" id="regionTitle">Exploring...</h1>
-            <p class="text-gray-400 uppercase tracking-[4px] text-[10px] mb-12 italic">Step 2: Select Your Vibe</p>
+        <div id="step2" class="hidden text-center w-full max-w-3xl">
+            <h1 id="regionTitle" class="premium-font text-4xl gold-text mb-8"></h1>
             <div class="grid grid-cols-2 md:grid-cols-3 gap-4 mb-8">
-                <button onclick="startApp('28')" class="glass-panel p-4 rounded-xl hover:text-[#C5A059] font-bold">Action & Adv.</button>
-                <button onclick="startApp('35')" class="glass-panel p-4 rounded-xl hover:text-[#C5A059] font-bold">Comedy</button>
-                <button onclick="startApp('18')" class="glass-panel p-4 rounded-xl hover:text-[#C5A059] font-bold">Drama</button>
-                <button onclick="startApp('9648')" class="glass-panel p-4 rounded-xl hover:text-[#C5A059] font-bold">Mystery</button>
-                <button onclick="startApp('10765')" class="glass-panel p-4 rounded-xl hover:text-[#C5A059] font-bold">Sci-Fi</button>
-                <button onclick="startApp('27')" class="glass-panel p-4 rounded-xl hover:text-[#C5A059] font-bold">Horror</button>
+                <button onclick="startApp('28')" class="glass-panel p-4 rounded-xl font-bold">Action</button>
+                <button onclick="startApp('35')" class="glass-panel p-4 rounded-xl font-bold">Comedy</button>
+                <button onclick="startApp('18')" class="glass-panel p-4 rounded-xl font-bold">Drama</button>
+                <button onclick="startApp('9648')" class="glass-panel p-4 rounded-xl font-bold">Mystery</button>
+                <button onclick="startApp('10765')" class="glass-panel p-4 rounded-xl font-bold">Sci-Fi</button>
             </div>
-            <button onclick="resetToStep1()" class="text-gray-400 text-sm hover:text-[#C5A059] uppercase tracking-widest">← Go Back</button>
         </div>
         <div id="swipeStep" class="hidden w-full flex flex-col items-center">
-            <div id="showCard" onclick="openDetails(shows[index].id)" class="premium-card overflow-hidden relative mb-6">
+            <div id="showCard" onclick="openDetails(shows[index].id, shows[index].media_type)" class="premium-card relative">
                 <img id="poster" src="" class="w-full h-full object-cover">
-                <div class="absolute bottom-0 left-0 w-full h-48 bg-gradient-to-t from-black via-black/50 to-transparent"></div>
-                <div class="absolute bottom-6 left-6 right-6 text-white">
-                    <div class="flex items-center gap-2 mb-2">
-                        <span id="matchRate" class="bg-[#C5A059] text-white text-[10px] font-bold px-2 py-1 rounded">MATCH</span>
-                        <span class="text-xs opacity-80 uppercase tracking-widest">Tap for Info</span>
-                    </div>
-                    <h2 id="title" class="premium-font text-3xl md:text-4xl leading-none mb-2"></h2>
-                    <p id="genres" class="text-sm opacity-70"></p>
+                <div class="absolute bottom-0 w-full p-6 bg-gradient-to-t from-black to-transparent text-white">
+                    <h2 id="cardTitle" class="premium-font text-3xl"></h2>
                 </div>
             </div>
-            <div class="flex gap-8">
-                <button onclick="handleAction('pass')" class="w-16 h-16 rounded-full bg-white text-gray-400 border border-gray-200 text-2xl shadow-lg hover:scale-110 transition">✕</button>
-                <button onclick="handleAction('smash')" class="w-20 h-20 rounded-full gold-btn text-white text-4xl shadow-xl hover:scale-110 transition">♥</button>
-            </div>
-            <button onclick="location.reload()" class="mt-6 text-xs text-gray-400 uppercase tracking-widest hover:text-[#C5A059]">Start Over</button>
-        </div>
-    </div>
-    <div id="detailOverlay" class="fixed inset-0 z-[60] bg-white overflow-y-auto hidden">
-        <button onclick="closeDetails()" class="fixed top-4 right-4 z-50 bg-black/50 text-white w-10 h-10 rounded-full backdrop-blur-md hover:bg-red-600 transition">✕</button>
-        <div class="relative h-[65vh] md:h-[60vh]">
-            <img id="detailBackdrop" src="" class="w-full h-full object-cover object-top">
-            <div class="absolute inset-0 bg-gradient-to-t from-white via-transparent to-black/30"></div>
-            <div class="absolute bottom-0 left-0 w-full p-6 md:p-12">
-                <h1 id="detailTitle" class="premium-font text-4xl md:text-6xl text-gray-900 mb-2 leading-tight"></h1>
-                <div class="flex flex-wrap gap-3 text-sm font-semibold text-gray-600">
-                    <span id="detailYear" class="border border-gray-300 px-2 py-0.5 rounded"></span>
-                    <span id="detailSeasons" class="text-[#C5A059]"></span>
-                    <span id="detailRating" class="bg-green-100 text-green-800 px-2 py-0.5 rounded"></span>
-                </div>
-            </div>
-        </div>
-        <div class="max-w-5xl mx-auto px-6 py-8 grid grid-cols-1 md:grid-cols-3 gap-12">
-            <div class="md:col-span-2 space-y-8">
-                <div><h3 class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Synopsis</h3><p id="detailOverview" class="text-lg text-gray-700 leading-relaxed"></p></div>
-                <div><h3 class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4">Cast (Click to Google)</h3><div id="castList" class="flex flex-wrap gap-4"></div></div>
-                <div><h3 class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4">Screenshots</h3><div id="screenshotGrid" class="grid grid-cols-2 gap-2"></div></div>
-            </div>
-            <div class="space-y-6">
-                <div class="bg-gray-50 p-6 rounded-2xl border border-gray-100"><h3 class="premium-font text-xl mb-4">Info</h3><div class="space-y-3 text-sm"><div class="flex justify-between"><span class="text-gray-500">Language</span><span id="detailLang" class="font-bold"></span></div><div class="flex justify-between"><span class="text-gray-500">Status</span><span id="detailStatus" class="font-bold"></span></div><div class="flex justify-between"><span class="text-gray-500">Network</span><span id="detailNetwork" class="font-bold"></span></div></div></div>
-                <button onclick="addToWatchlistCurrent()" class="w-full py-4 bg-[#C5A059] text-white font-bold rounded-xl shadow-lg hover:bg-[#b08d4b] transition">ADD TO WATCHLIST</button>
+            <div class="flex gap-8 mt-8">
+                <button onclick="handleAction('pass')" class="w-16 h-16 rounded-full glass-panel flex items-center justify-center">✕</button>
+                <button onclick="handleAction('smash')" class="w-16 h-16 rounded-full bg-gold text-white text-3xl shadow-xl">♥</button>
             </div>
         </div>
     </div>
-    <div id="watchlistPanel" class="fixed top-0 right-0 h-full w-80 md:w-96 bg-white/98 backdrop-blur-xl shadow-2xl z-[70] p-6 border-l border-[#C5A059]/30 overflow-y-auto">
-        <div class="flex justify-between items-center mb-8"><h2 class="premium-font text-2xl gold-text italic">Your Vault</h2><button onclick="toggleWatchlist()" class="text-gray-400 hover:text-red-500 text-xl">✕</button></div>
-        <div id="watchlistItems" class="space-y-3"></div>
+
+    <div id="detailOverlay">
+        <button onclick="closeDetails()" class="fixed top-6 right-6 z-[210] bg-black/50 text-white w-10 h-10 rounded-full">✕</button>
+        <div id="detailContent"></div>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-        import { getFirestore, doc, setDoc, getDoc, updateDoc, arrayUnion } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyAoCZuJ4tGdwmFuz8y-_tc5phvfbn2oi1A",
@@ -201,128 +129,163 @@
             projectId: "ifeelav-app",
             storageBucket: "ifeelav-app.firebasestorage.app",
             messagingSenderId: "1060067685106",
-            appId: "1:1060067685106:web:4ba1523ee066af4633966b",
-            measurementId: "G-K7YJRZS854"
+            appId: "1:1060067685106:web:4ba1523ee066af4633966b"
         };
 
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
-        const db = getFirestore(app);
-        
-        let currentUser = null;
-        let shows = []; let index = 0; let watchlist = []; let currentDetailId = null;
-        let selectedLang = ''; let searchTimer;
-        
-        // --- COOL AVATAR LIST ---
-        // Ye sab alag-alag styles hain
-        const avatarList = [
-            "https://api.dicebear.com/7.x/adventurer/svg?seed=Felix", // Cool
-            "https://api.dicebear.com/7.x/adventurer/svg?seed=Abby", // Girl
-            "https://api.dicebear.com/7.x/micah/svg?seed=Leo", // Professional
-            "https://api.dicebear.com/7.x/bottts/svg?seed=Robo", // Hacker/Bot
-            "https://api.dicebear.com/7.x/avataaars/svg?seed=Gangster", // Gangster
-            "https://api.dicebear.com/7.x/avataaars/svg?seed=Cute", // Cute
-            "https://api.dicebear.com/7.x/notionists/svg?seed=Bear", // Sketch
-            "https://api.dicebear.com/7.x/lorelei/svg?seed=Artist", // Artist
-            "https://api.dicebear.com/7.x/fun-emoji/svg?seed=Love", // Emoji
-            "https://api.dicebear.com/7.x/personas/svg?seed=Boss" // Boss
-        ];
 
-        window.toggleAuthModal = () => { document.getElementById('authModal').classList.toggle('active'); }
+        window.handleLogin = () => signInWithEmailAndPassword(auth, document.getElementById('email').value, document.getElementById('password').value).then(() => toggleAuthModal()).catch(err => alert(err.message));
+        window.handleSignup = () => createUserWithEmailAndPassword(auth, document.getElementById('email').value, document.getElementById('password').value).then(() => toggleAuthModal()).catch(err => alert(err.message));
+        window.handleLogout = () => signOut(auth);
 
-        onAuthStateChanged(auth, async (user) => {
-            currentUser = user;
+        onAuthStateChanged(auth, user => {
             if (user) {
-                // LOGIN HONE PAR
-                document.getElementById('loginStatus').classList.remove('bg-gray-400'); document.getElementById('loginStatus').classList.add('bg-green-500');
-                document.getElementById('loggedOutView').classList.add('hidden'); document.getElementById('loggedInView').classList.remove('hidden');
-                document.getElementById('userNameDisplay').innerText = user.displayName || user.email.split('@')[0];
-                document.getElementById('userEmailDisplay').innerText = user.email;
-                document.getElementById('headerIconDefault').classList.add('hidden');
-                document.getElementById('headerAvatar').classList.remove('hidden');
-                
-                // Cloud se Avatar aur Watchlist lao
-                await loadUserData();
+                document.getElementById('loggedOutView').classList.add('hidden');
+                document.getElementById('loggedInView').classList.remove('hidden');
+                document.getElementById('userDisplay').innerText = user.email.split('@')[0];
             } else {
-                // LOGOUT HONE PAR
-                document.getElementById('loginStatus').classList.remove('bg-green-500'); document.getElementById('loginStatus').classList.add('bg-gray-400');
-                document.getElementById('loggedOutView').classList.remove('hidden'); document.getElementById('loggedInView').classList.add('hidden');
-                document.getElementById('headerAvatar').classList.add('hidden'); document.getElementById('headerIconDefault').classList.remove('hidden');
-                watchlist = JSON.parse(localStorage.getItem('avWatchlist')) || []; updateWatchlistUI();
+                document.getElementById('loggedOutView').classList.remove('hidden');
+                document.getElementById('loggedInView').classList.add('hidden');
             }
         });
 
-        // --- AVATAR LOGIC ---
-        function renderAvatars() {
-            const grid = document.getElementById('avatarGrid');
-            grid.innerHTML = avatarList.map(url => `
-                <img src="${url}" class="avatar-option" onclick="changeAvatar('${url}')" title="Choose this vibe">
-            `).join('');
-        }
-        renderAvatars();
+        // --- APP LOGIC ---
+        let shows = [], index = 0, selectedLang = '';
+        window.toggleDarkMode = () => document.body.classList.toggle('dark');
+        window.toggleAuthModal = () => document.getElementById('authModal').classList.toggle('active');
 
-        window.changeAvatar = async (url) => {
-            if(!currentUser) return;
-            // Turant photo badal do (User ko wait na karna pade)
-            document.getElementById('profileAvatar').src = url;
-            document.getElementById('headerAvatar').src = url;
-            
-            // Cloud pe save kar do
-            const docRef = doc(db, "users", currentUser.uid);
-            await updateDoc(docRef, { avatar: url });
+        // Navigation
+        window.selectRegion = (lang, name) => {
+            selectedLang = lang;
+            document.getElementById('step1').classList.add('hidden');
+            document.getElementById('step2').classList.remove('hidden');
+            document.getElementById('regionTitle').innerText = name;
+            history.pushState({step: 2}, "");
         };
 
-        async function loadUserData() {
-            if (!currentUser) return;
-            const docRef = doc(db, "users", currentUser.uid);
-            const docSnap = await getDoc(docRef);
-            if (docSnap.exists()) {
-                const data = docSnap.data();
-                watchlist = data.watchlist || [];
-                const savedAvatar = data.avatar || avatarList[0];
-                document.getElementById('profileAvatar').src = savedAvatar;
-                document.getElementById('headerAvatar').src = savedAvatar;
-                updateWatchlistUI();
-            } else {
-                // First time user init
-                const defaultAv = avatarList[0];
-                await setDoc(docRef, { email: currentUser.email, watchlist: [], avatar: defaultAv });
-                document.getElementById('profileAvatar').src = defaultAv;
-                document.getElementById('headerAvatar').src = defaultAv;
-                watchlist = [];
-                updateWatchlistUI();
+        window.startApp = (gid) => {
+            document.getElementById('step2').classList.add('hidden');
+            document.getElementById('swipeStep').classList.remove('hidden');
+            fetchShows(`/api/getShows?genre=${gid}&lang=${selectedLang}`);
+            history.pushState({step: 3}, "");
+        };
+
+        // Back Button Fix
+        window.addEventListener('popstate', (event) => {
+            if (!event.state) location.reload();
+            else if (event.state.step === 2) {
+                document.getElementById('swipeStep').classList.add('hidden');
+                document.getElementById('step2').classList.remove('hidden');
             }
+        });
+
+        async function fetchShows(url) {
+            const res = await fetch(url); const data = await res.json();
+            shows = data.results.filter(s => s.poster_path); index = 0; renderCard();
         }
 
-        window.handleLogin = async () => { try { await signInWithEmailAndPassword(auth, document.getElementById('email').value, document.getElementById('password').value); toggleAuthModal(); } catch(err) { alert(err.message); } };
-        window.handleSignup = async () => { try { await createUserWithEmailAndPassword(auth, document.getElementById('email').value, document.getElementById('password').value); toggleAuthModal(); } catch(err) { alert(err.message); } };
-        window.handleGoogleLogin = async () => { const provider = new GoogleAuthProvider(); try { await signInWithPopup(auth, provider); toggleAuthModal(); } catch(err) { alert(err.message); } };
-        window.handleLogout = async () => { await signOut(auth); toggleAuthModal(); };
-        async function saveToCloud(show, action) { if (!currentUser) return; const docRef = doc(db, "users", currentUser.uid); if (action === 'add') await updateDoc(docRef, { watchlist: arrayUnion(show) }); else if (action === 'remove') await updateDoc(docRef, { watchlist: watchlist }); }
+        function renderCard() {
+            if(!shows[index]) return;
+            document.getElementById('cardTitle').innerText = shows[index].name || shows[index].original_name;
+            document.getElementById('poster').src = `https://image.tmdb.org/t/p/w780${shows[index].poster_path}`;
+        }
 
-        // --- STANDARD APP LOGIC ---
-        const canvas = document.getElementById('bgCanvas'); const ctx = canvas.getContext('2d');
-        function initCanvas() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
-        window.onresize = initCanvas; initCanvas();
-        let particles = Array.from({length: 50}, () => ({x:Math.random()*canvas.width, y:Math.random()*canvas.height, r:Math.random()*2, vx:Math.random()*0.5-0.25, vy:Math.random()*0.5-0.25}));
-        function animate() { ctx.clearRect(0,0,canvas.width,canvas.height); ctx.fillStyle = `rgba(197, 160, 89, 0.3)`; particles.forEach(p => { p.x+=p.vx; p.y+=p.vy; if(p.x<0||p.x>canvas.width) p.vx*=-1; if(p.y<0||p.y>canvas.height) p.vy*=-1; ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, Math.PI*2); ctx.fill(); }); requestAnimationFrame(animate); } animate();
+        window.handleAction = (type) => {
+            const card = document.getElementById('showCard');
+            card.style.transform = type === 'smash' ? 'translateX(100%) rotate(20deg)' : 'translateX(-100%) rotate(-20deg)';
+            card.style.opacity = '0';
+            setTimeout(() => { index++; card.style.transform = ''; card.style.opacity = '1'; renderCard(); }, 300);
+        };
 
-        window.selectRegion = (l, n) => { selectedLang = l; document.getElementById('step1').classList.add('hidden'); document.getElementById('step2').classList.remove('hidden'); document.getElementById('regionTitle').innerText = "Exploring " + n; }
-        window.resetToStep1 = () => { document.getElementById('step2').classList.add('hidden'); document.getElementById('step1').classList.remove('hidden'); selectedLang = ''; }
-        window.startApp = async (gid) => { document.getElementById('step2').classList.add('hidden'); document.getElementById('swipeStep').classList.remove('hidden'); let u = `/api/getShows?`; if (gid) u += `genre=${gid}&`; if (selectedLang) u += `lang=${selectedLang}`; fetchShows(u); }
-        window.handleTyping = (e) => { const q = e.target.value.trim(); const dd = document.getElementById('searchDropdown'); clearTimeout(searchTimer); if (q.length < 2) { dd.classList.remove('active'); dd.innerHTML = ''; return; } searchTimer = setTimeout(async () => { dd.classList.add('active'); dd.innerHTML = '<div class="p-3 text-sm text-gray-400 text-center">Searching...</div>'; try { const res = await fetch(`/api/getShows?query=${encodeURIComponent(q)}`); const data = await res.json(); const results = data.results ? data.results.slice(0, 6) : []; if (results.length === 0) dd.innerHTML = '<div class="p-3 text-sm text-gray-400 text-center">No matches found</div>'; else dd.innerHTML = results.map(s => `<div class="suggestion-item" onclick="openFromSearch(${s.id})"><img src="https://image.tmdb.org/t/p/w92${s.poster_path}" onerror="this.src='https://placehold.co/40x60'" class="w-10 h-14 object-cover rounded shadow"><div><h4 class="font-bold text-gray-800 text-sm leading-tight">${s.name || s.original_name}</h4><span class="text-xs text-[#C5A059] font-medium">${s.first_air_date ? s.first_air_date.split('-')[0] : 'N/A'}</span><span class="text-[10px] text-gray-400 ml-2">★ ${s.vote_average.toFixed(1)}</span></div></div>`).join(''); } catch (err) { dd.innerHTML = '<div class="p-3 text-sm text-red-400 text-center">Error</div>'; } }, 300); }
-        window.openFromSearch = (id) => { window.closeSearchDropdown(); window.openDetails(id); }
-        window.closeSearchDropdown = () => { document.getElementById('searchDropdown').classList.remove('active'); }
-        async function fetchShows(endpoint) { try { const res = await fetch(endpoint); const data = await res.json(); shows = data.results.filter(s => s.poster_path); index = 0; if(shows.length > 0) render(); else alert("No results found."); } catch (err) { console.error(err); } }
-        function render() { if (index >= shows.length) { alert("Reached end of list!"); location.reload(); return; } const show = shows[index]; document.getElementById('title').innerText = show.name || show.original_name; document.getElementById('poster').src = `https://image.tmdb.org/t/p/w780${show.poster_path}`; document.getElementById('genres').innerText = "First Air: " + (show.first_air_date || 'N/A'); const card = document.getElementById('showCard'); card.style.opacity = '0'; card.style.transform = 'scale(0.95)'; setTimeout(() => { card.style.opacity = '1'; card.style.transform = 'scale(1)'; }, 100); }
-        window.openDetails = async (id) => { const overlay = document.getElementById('detailOverlay'); overlay.classList.remove('hidden'); setTimeout(() => overlay.classList.add('active'), 10); currentDetailId = id; try { const res = await fetch(`/api/getDetails?id=${id}`); const data = await res.json(); const isMobile = window.innerWidth < 768; let hero = data.backdrop_path; if(isMobile && data.poster_path) hero = data.poster_path; else if(!hero) hero = data.poster_path; document.getElementById('detailBackdrop').src = `https://image.tmdb.org/t/p/original${hero}`; document.getElementById('detailTitle').innerText = data.name; document.getElementById('detailOverview').innerText = data.overview; document.getElementById('detailYear').innerText = data.first_air_date ? data.first_air_date.split('-')[0] : 'N/A'; document.getElementById('detailRating').innerText = "★ " + data.vote_average.toFixed(1); document.getElementById('detailSeasons').innerText = `${data.number_of_seasons || 0} Seasons`; document.getElementById('detailLang').innerText = data.spoken_languages.map(l => l.english_name).join(', '); document.getElementById('detailStatus').innerText = data.status; document.getElementById('detailNetwork').innerText = data.networks[0]?.name || 'N/A'; document.getElementById('castList').innerHTML = data.credits.cast.slice(0, 6).map(a => `<a href="https://www.google.com/search?q=${encodeURIComponent(a.name + ' actor')}" target="_blank" class="flex items-center gap-2 bg-gray-100 px-3 py-2 rounded-full hover:bg-[#C5A059] hover:text-white transition cursor-pointer"><img src="https://image.tmdb.org/t/p/w200${a.profile_path}" onerror="this.src='https://placehold.co/50'" class="w-8 h-8 rounded-full object-cover"><span class="text-sm font-bold">${a.name}</span></a>`).join(''); document.getElementById('screenshotGrid').innerHTML = data.images.backdrops.slice(0, 4).map(img => `<img src="https://image.tmdb.org/t/p/w500${img.file_path}" class="w-full h-32 object-cover rounded-xl hover:scale-105 transition duration-300">`).join(''); } catch (err) { console.error(err); alert("Could not fetch details."); window.closeDetails(); } }
-        window.closeDetails = () => { const o = document.getElementById('detailOverlay'); o.classList.remove('active'); setTimeout(() => o.classList.add('hidden'), 400); }
-        window.handleAction = (type) => { const card = document.getElementById('showCard'); if(type === 'smash') { window.addToWatchlist(shows[index]); card.classList.add('slide-right'); } else { card.classList.add('slide-left'); } setTimeout(() => { index++; card.classList.remove('slide-right', 'slide-left'); render(); }, 300); }
-        window.addToWatchlist = (show) => { if (!watchlist.some(item => item.id === show.id)) { watchlist.push(show); if (currentUser) { saveToCloud(show, 'add'); } else { localStorage.setItem('avWatchlist', JSON.stringify(watchlist)); } updateWatchlistUI(); } }
-        window.addToWatchlistCurrent = () => { if(currentDetailId) { let show = shows.find(s => s.id === currentDetailId); if(show) { window.addToWatchlist(show); alert("Added to Vault!"); } else { fetch(`/api/getDetails?id=${currentDetailId}`).then(r=>r.json()).then(d=>{ window.addToWatchlist(d); alert("Added to Vault!"); }); } } }
-        window.toggleWatchlist = () => { document.getElementById('watchlistPanel').classList.toggle('open'); updateWatchlistUI(); }
-        window.removeFromWatchlist = (id) => { watchlist = watchlist.filter(item => item.id !== id); if (currentUser) { saveToCloud(null, 'remove'); } else { localStorage.setItem('avWatchlist', JSON.stringify(watchlist)); } updateWatchlistUI(); }
-        function updateWatchlistUI() { const container = document.getElementById('watchlistItems'); const badge = document.getElementById('badge'); badge.innerText = watchlist.length; badge.classList.toggle('hidden', watchlist.length === 0); if (watchlist.length === 0) { container.innerHTML = '<p class="text-gray-400 text-sm text-center mt-10">Vault is empty.</p>'; return; } container.innerHTML = watchlist.map(item => `<div class="flex gap-3 items-center bg-gray-50 p-2 rounded-xl border border-gray-100 hover:shadow-md transition"><div onclick="openDetails(${item.id})" class="flex-1 flex gap-3 cursor-pointer items-center min-w-0"><img src="https://image.tmdb.org/t/p/w200${item.poster_path}" class="w-12 h-16 object-cover rounded-lg"><div class="flex-1 min-w-0"><h4 class="font-bold text-sm text-gray-800 truncate">${item.name || item.original_name}</h4><p class="text-[10px] text-gray-500">Tap for Info</p></div></div><button onclick="removeFromWatchlist(${item.id})" class="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-red-500 bg-white rounded-full shadow-sm">✕</button></div>`).join(''); } updateWatchlistUI();
+        // --- STREAMING & DETAILS LOGIC ---
+        window.openDetails = async (id, mediaType) => {
+            document.getElementById('detailOverlay').classList.add('active');
+            
+            // 1. Fetch TMDB Details
+            const res = await fetch(`/api/getDetails?id=${id}`); 
+            const data = await res.json();
+            
+            // 2. Fetch Streaming Links (Watchmode)
+            let streamingHTML = '<p class="opacity-50 text-sm">Checking availability...</p>';
+            try {
+                // Determine type (tv/movie) for watchmode
+                // Note: IFEELAV mostly fetches 'tv' shows but let's be safe
+                const type = data.number_of_seasons ? 'tv' : 'movie';
+                const streamRes = await fetch(`/api/getStream?tmdb_id=${id}&type=${type}`);
+                const streamData = await streamRes.json();
+                
+                if (streamData.sources && streamData.sources.length > 0) {
+                    streamingHTML = streamData.sources.map(s => {
+                        let btnClass = 'stream-default';
+                        if(s.name.includes('Netflix')) btnClass = 'stream-netflix';
+                        else if(s.name.includes('Prime')) btnClass = 'stream-prime';
+                        else if(s.name.includes('Hotstar')) btnClass = 'stream-hotstar';
+                        else if(s.name.includes('Jio')) btnClass = 'stream-jiocinema';
+                        
+                        return `<a href="${s.url}" target="_blank" class="stream-btn ${btnClass}">▶ Watch on ${s.name}</a>`;
+                    }).join('');
+                } else {
+                    streamingHTML = '<p class="opacity-50 text-sm">No streaming data found for India.</p>';
+                }
+            } catch(e) { console.log(e); }
+
+            document.getElementById('detailContent').innerHTML = `
+                <div class="h-[50vh] relative"><img src="https://image.tmdb.org/t/p/original${data.backdrop_path || data.poster_path}" class="w-full h-full object-cover"></div>
+                <div class="p-6">
+                    <h1 class="premium-font text-4xl mb-4 gold-text">${data.name || data.original_title}</h1>
+                    
+                    <div class="mb-6 p-4 rounded-xl border border-gold/20 bg-gold/5">
+                        <h3 class="font-bold mb-3 text-sm uppercase tracking-widest opacity-70">Available Now</h3>
+                        <div class="flex flex-wrap gap-2">${streamingHTML}</div>
+                    </div>
+
+                    <p class="opacity-80 mb-8 leading-relaxed">${data.overview}</p>
+                    
+                    <h3 class="font-bold mb-4 text-xl">Cast</h3>
+                    <div class="flex gap-4 overflow-x-auto pb-4">
+                        ${data.credits.cast.slice(0,6).map(c => `
+                            <div class="min-w-[80px] text-center">
+                                <img src="https://image.tmdb.org/t/p/w200${c.profile_path}" class="w-16 h-16 rounded-full object-cover mx-auto mb-2 border-2 border-gold/50">
+                                <p class="text-xs font-bold truncate">${c.name}</p>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>`;
+            history.pushState({step: 'details'}, "");
+        };
+
+        window.closeDetails = () => { document.getElementById('detailOverlay').classList.remove('active'); history.back(); };
+
+        window.handleTyping = (e) => {
+            const q = e.target.value; const dd = document.getElementById('searchDropdown');
+            if(q.length < 2) { dd.innerHTML = ''; return; }
+            fetch(`/api/getShows?query=${q}`).then(r => r.json()).then(data => {
+                dd.innerHTML = data.results.slice(0, 5).map(s => `
+                    <div class="p-3 border-b dark:border-zinc-800 cursor-pointer hover:bg-gold/10 flex items-center gap-3" onclick="openDetails(${s.id})">
+                        <img src="https://image.tmdb.org/t/p/w92${s.poster_path}" class="w-8 h-12 object-cover rounded">
+                        <span class="text-sm font-bold">${s.name || s.original_name}</span>
+                    </div>`).join('');
+            });
+        };
+        
+        // Background Animation
+        const canvas = document.getElementById('bgCanvas'), ctx = canvas.getContext('2d');
+        function init() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
+        window.onresize = init; init();
+        let particles = Array.from({length: 40}, () => ({x:Math.random()*canvas.width, y:Math.random()*canvas.height, vx:Math.random()*0.4-0.2, vy:Math.random()*0.4-0.2}));
+        function animate() {
+            ctx.clearRect(0,0,canvas.width,canvas.height);
+            ctx.fillStyle = "rgba(197, 160, 89, 0.4)";
+            particles.forEach(p => {
+                p.x += p.vx; p.y += p.vy;
+                if(p.x<0 || p.x>canvas.width) p.vx*=-1;
+                if(p.y<0 || p.y>canvas.height) p.vy*=-1;
+                ctx.beginPath(); ctx.arc(p.x, p.y, 2, 0, Math.PI*2); ctx.fill();
+            });
+            requestAnimationFrame(animate);
+        }
+        animate();
     </script>
 </body>
 </html>
