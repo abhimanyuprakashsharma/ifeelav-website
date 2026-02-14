@@ -8,161 +8,196 @@
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,700&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
     
     <style>
-        :root { --gold: #C5A059; --bg-light: #ffffff; --text-light: #1a1a1a; --bg-dark: #0f0f0f; --text-dark: #f5f5f5; }
-        body { transition: background 0.4s, color 0.4s; font-family: 'Inter', sans-serif; background: var(--bg-light); color: var(--text-light); }
-        body.dark { background: var(--bg-dark); color: var(--text-dark); }
+        :root { --gold: #C5A059; --bg-light: #ffffff; --bg-dark: #0f0f0f; }
         
-        /* Dark Mode Specific Styles */
-        body.dark .glass-panel { background: rgba(30, 30, 30, 0.8); border-color: rgba(197, 160, 89, 0.2); color: white; }
-        body.dark .premium-card { background: #1a1a1a; border-color: #333; }
-        body.dark #detailOverlay { background: #0f0f0f; color: white; }
+        /* Smooth Transitions */
+        body { transition: background 0.5s cubic-bezier(0.4, 0, 0.2, 1), color 0.5s; font-family: 'Inter', sans-serif; background: radial-gradient(circle at center, #ffffff 20%, #f2eee5 100%); overflow-x: hidden; }
+        body.dark { background: radial-gradient(circle at center, #1a1a1a 0%, #000000 100%); color: #f5f5f5; }
         
+        #bgCanvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; pointer-events: none; }
         .premium-font { font-family: 'Playfair Display', serif; }
         .gold-text { color: var(--gold); }
-        .glass-panel { background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(12px); border: 1px solid rgba(197, 160, 89, 0.2); }
-        .premium-card { transition: transform 0.3s; height: 65vh; max-width: 400px; border-radius: 30px; overflow: hidden; }
         
-        #detailOverlay { transition: 0.4s; opacity: 0; pointer-events: none; transform: translateY(50px); background: white; }
-        #detailOverlay.active { opacity: 1; pointer-events: auto; transform: translateY(0); }
+        /* Glassmorphism Animations */
+        .glass-panel { background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(197, 160, 89, 0.2); transition: all 0.3s ease; }
+        body.dark .glass-panel { background: rgba(20, 20, 20, 0.6); border-color: rgba(197, 160, 89, 0.1); color: white; }
         
-        .ep-card { background: rgba(197, 160, 89, 0.05); border-left: 4px solid var(--gold); }
-        .avatar-option { width: 45px; height: 45px; border-radius: 50%; cursor: pointer; border: 2px solid transparent; }
-        .avatar-option.selected { border-color: var(--gold); transform: scale(1.1); }
+        .cat-btn { background: white; border: 1px solid rgba(197, 160, 89, 0.3); transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        .cat-btn:hover { transform: translateY(-5px) scale(1.02); box-shadow: 0 15px 30px rgba(197, 160, 89, 0.2); border-color: var(--gold); }
+        
+        /* Card & Detail Overlays */
+        .premium-card { cursor: pointer; height: 65vh; width: 100%; max-width: 400px; border-radius: 30px; overflow: hidden; transition: transform 0.3s ease; box-shadow: 0 20px 50px rgba(0,0,0,0.1); }
+        #detailOverlay { position: fixed; inset: 0; z-index: 60; background: white; transform: translateY(100%); transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1); overflow-y: auto; }
+        #detailOverlay.active { transform: translateY(0); }
+        body.dark #detailOverlay { background: #0a0a0a; }
+
+        .fade-in { animation: fadeIn 0.8s ease-out forwards; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        
+        /* Avatar Styles */
+        .avatar-option { width: 45px; height: 45px; border-radius: 50%; cursor: pointer; border: 2px solid transparent; transition: all 0.2s; }
+        .avatar-option:hover { transform: scale(1.1); }
+        .avatar-option.selected { border-color: var(--gold); box-shadow: 0 0 10px var(--gold); }
     </style>
 </head>
-<body class="dark"> <canvas id="bgCanvas" class="fixed inset-0 z-[-1]"></canvas>
+<body class="dark">
+    <canvas id="bgCanvas"></canvas>
 
-    <div class="fixed top-0 left-0 w-full z-50 p-4 flex justify-between items-center bg-transparent backdrop-blur-md">
-        <div class="text-xl font-bold italic premium-font gold-text" onclick="location.reload()">IFEELAV</div>
+    <div class="fixed top-0 left-0 w-full z-50 p-4 flex justify-between items-center backdrop-blur-md border-b border-white/5">
+        <div class="text-xl md:text-2xl font-bold italic premium-font gold-text cursor-pointer" onclick="location.reload()">IFEELAV</div>
         <div class="flex gap-2 items-center">
-            <button onclick="toggleDarkMode()" class="glass-panel w-10 h-10 rounded-full flex items-center justify-center">🌓</button>
-            
-            <div class="relative">
-                <input type="text" id="searchInput" oninput="handleTyping(event)" placeholder="Search..." class="glass-panel rounded-full px-4 py-2 w-32 md:w-64 text-sm outline-none">
-                <div id="searchDropdown" class="absolute top-full left-0 w-full mt-2 hidden glass-panel rounded-2xl overflow-hidden shadow-2xl"></div>
+            <button onclick="toggleDarkMode()" class="glass-panel w-10 h-10 rounded-full flex items-center justify-center shadow-lg">🌓</button>
+            <div class="relative group">
+                <input type="text" id="searchInput" oninput="handleTyping(event)" placeholder="Search..." class="glass-panel rounded-full px-4 py-2 w-32 md:w-64 text-sm outline-none focus:border-[#C5A059]">
+                <div id="searchDropdown" class="absolute top-full left-0 w-full mt-2 hidden glass-panel rounded-2xl overflow-hidden shadow-2xl z-[100]"></div>
             </div>
-
-            <button onclick="toggleAuthModal()" class="glass-panel w-10 h-10 rounded-full overflow-hidden">
+            <button onclick="toggleAuthModal()" class="glass-panel w-10 h-10 rounded-full overflow-hidden relative">
                 <img id="headerAvatar" src="https://api.dicebear.com/7.x/adventurer/svg?seed=Felix" class="w-full h-full object-cover">
+                <span id="loginStatus" class="absolute top-0 right-0 w-2.5 h-2.5 bg-gray-400 rounded-full border-2 border-white"></span>
+            </button>
+            <button onclick="toggleWatchlist()" class="glass-panel w-10 h-10 rounded-full flex items-center justify-center relative">
+                ❤️ <span id="badge" class="absolute -top-1 -right-1 bg-red-500 text-[10px] text-white w-4 h-4 rounded-full hidden flex items-center justify-center">0</span>
             </button>
         </div>
     </div>
 
-    <div id="appBody" class="relative z-10 min-h-screen flex flex-col items-center justify-center p-6">
-        <div id="step1" class="text-center fade-in">
-            <h1 class="premium-font italic text-6xl gold-text mb-8">IFEELAV</h1>
-            <div class="grid grid-cols-2 gap-4">
-                <button onclick="selectRegion('hi', 'Bollywood')" class="glass-panel p-6 rounded-2xl font-bold hover:scale-105 transition">BOLLYWOOD</button>
-                <button onclick="selectRegion('en', 'Hollywood')" class="glass-panel p-6 rounded-2xl font-bold hover:scale-105 transition">HOLLYWOOD</button>
-                <button onclick="selectRegion('ja', 'Anime')" class="glass-panel p-6 rounded-2xl font-bold hover:scale-105 transition">ANIME</button>
-                <button onclick="selectRegion('ko', 'K-Drama')" class="glass-panel p-6 rounded-2xl font-bold hover:scale-105 transition">K-Drama</button>
+    <div id="appContainer" class="relative z-10 min-h-screen flex flex-col items-center justify-center pt-20 px-4 pb-10">
+        
+        <div id="step1" class="text-center w-full max-w-3xl fade-in">
+            <h1 class="premium-font italic text-5xl md:text-7xl gold-text mb-2 tracking-tighter">IFEELAV</h1>
+            <p class="text-gray-400 uppercase tracking-[6px] text-[10px] mb-12 italic">The Abhimanyu Collection</p>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <button onclick="selectRegion('hi', 'Bollywood')" class="cat-btn p-6 rounded-2xl font-bold glass-panel">BOLLYWOOD</button>
+                <button onclick="selectRegion('en', 'Hollywood')" class="cat-btn p-6 rounded-2xl font-bold glass-panel">HOLLYWOOD</button>
+                <button onclick="selectRegion('ja', 'Anime')" class="cat-btn p-6 rounded-2xl font-bold glass-panel">ANIME</button>
+                <button onclick="selectRegion('ko', 'K-Drama')" class="cat-btn p-6 rounded-2xl font-bold glass-panel">K-DRAMA</button>
             </div>
         </div>
 
-        <div id="step2" class="hidden text-center fade-in">
+        <div id="step2" class="hidden text-center w-full max-w-3xl fade-in">
             <h1 id="regionTitle" class="premium-font text-4xl gold-text mb-8"></h1>
-            <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
-                <button onclick="startApp('28')" class="glass-panel p-4 rounded-xl font-bold">Action</button>
-                <button onclick="startApp('35')" class="glass-panel p-4 rounded-xl font-bold">Comedy</button>
-                <button onclick="startApp('9648')" class="glass-panel p-4 rounded-xl font-bold">Mystery</button>
-                <button onclick="startApp('10765')" class="glass-panel p-4 rounded-xl font-bold">Sci-Fi</button>
+            <div class="grid grid-cols-2 md:grid-cols-3 gap-4 mb-8">
+                <button onclick="startApp('28')" class="glass-panel p-4 rounded-xl font-bold hover:scale-105">Action</button>
+                <button onclick="startApp('35')" class="glass-panel p-4 rounded-xl font-bold hover:scale-105">Comedy</button>
+                <button onclick="startApp('18')" class="glass-panel p-4 rounded-xl font-bold hover:scale-105">Drama</button>
+                <button onclick="startApp('9648')" class="glass-panel p-4 rounded-xl font-bold hover:scale-105">Mystery</button>
+                <button onclick="startApp('10765')" class="glass-panel p-4 rounded-xl font-bold hover:scale-105">Sci-Fi</button>
+                <button onclick="startApp('27')" class="glass-panel p-4 rounded-xl font-bold hover:scale-105">Horror</button>
             </div>
+            <button onclick="resetToStep1()" class="text-gray-400 text-sm hover:text-gold uppercase tracking-widest">← Back</button>
         </div>
 
         <div id="swipeStep" class="hidden w-full flex flex-col items-center">
-            <div id="showCard" onclick="openDetails(shows[index].id)" class="premium-card relative shadow-2xl border border-white/10">
+            <div id="showCard" onclick="openDetails(shows[index].id)" class="premium-card relative">
                 <img id="poster" src="" class="w-full h-full object-cover">
-                <div class="absolute bottom-0 p-6 bg-gradient-to-t from-black to-transparent w-full text-white">
-                    <h2 id="title" class="premium-font text-3xl"></h2>
+                <div class="absolute bottom-0 w-full p-6 bg-gradient-to-t from-black to-transparent text-white">
+                    <h2 id="cardTitle" class="premium-font text-3xl"></h2>
                 </div>
             </div>
-            <div class="flex gap-6 mt-6">
-                <button onclick="handleAction('pass')" class="w-16 h-16 rounded-full glass-panel text-2xl">✕</button>
-                <button onclick="handleAction('smash')" class="w-16 h-16 rounded-full bg-[#C5A059] text-white text-2xl">♥</button>
+            <div class="flex gap-8 mt-8">
+                <button onclick="handleAction('pass')" class="w-16 h-16 rounded-full glass-panel text-2xl flex items-center justify-center hover:bg-red-500/20">✕</button>
+                <button onclick="handleAction('smash')" class="w-16 h-16 rounded-full bg-[#C5A059] text-white text-3xl flex items-center justify-center hover:scale-110 transition shadow-xl">♥</button>
             </div>
         </div>
     </div>
 
-    <div id="detailOverlay" class="fixed inset-0 z-[60] overflow-y-auto hidden">
-        <button onclick="closeDetails()" class="fixed top-6 right-6 z-[70] text-3xl">✕</button>
-        <div class="relative h-[50vh]">
+    <div id="detailOverlay">
+        <button onclick="closeDetails()" class="fixed top-6 right-6 z-[70] bg-black/50 text-white w-10 h-10 rounded-full">✕</button>
+        <div class="relative h-[50vh] md:h-[60vh]">
             <img id="detailBackdrop" src="" class="w-full h-full object-cover">
             <div class="absolute inset-0 bg-gradient-to-t from-current to-transparent"></div>
         </div>
-        
         <div class="max-w-4xl mx-auto p-6 -mt-20 relative z-10">
-            <h1 id="detailTitle" class="premium-font text-5xl mb-4"></h1>
-            <p id="detailOverview" class="text-lg opacity-80 mb-8"></p>
+            <h1 id="detailTitle" class="premium-font text-5xl mb-4 leading-tight"></h1>
+            <p id="detailOverview" class="text-lg opacity-80 leading-relaxed mb-10"></p>
             
-            <div id="episodeSection" class="mb-12">
-                <h3 class="gold-text premium-font text-2xl mb-6 flex items-center gap-2">
-                    📺 Episode Ratings (Season 1)
-                </h3>
-                <div id="episodeList" class="grid gap-4">
-                    </div>
+            <div id="episodeSection" class="mt-12">
+                <h3 class="gold-text premium-font text-2xl mb-6 flex items-center gap-2">📺 Episode Ratings (S1)</h3>
+                <div id="episodeList" class="grid gap-4"></div>
             </div>
         </div>
     </div>
 
     <script type="module">
-        // Firebase Config and Auth Logic same as before...
-        // [Add your firebaseConfig here as provided in previous turns]
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-        window.toggleDarkMode = () => { document.body.classList.toggle('dark'); }
+        const firebaseConfig = {
+            apiKey: "AIzaSyAoCZuJ4tGdwmFuz8y-_tc5phvfbn2oi1A",
+            authDomain: "ifeelav-app.firebaseapp.com",
+            projectId: "ifeelav-app",
+            storageBucket: "ifeelav-app.firebasestorage.app",
+            messagingSenderId: "1060067685106",
+            appId: "1:1060067685106:web:4ba1523ee066af4633966b"
+        };
 
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        // Global Variables
+        let shows = [], index = 0, selectedLang = '';
+        window.shows = shows; window.index = index;
+
+        // Dark Mode Function
+        window.toggleDarkMode = () => { document.body.classList.toggle('dark'); };
+
+        // Animation Canvas
+        const canvas = document.getElementById('bgCanvas'), ctx = canvas.getContext('2d');
+        function initCanvas() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
+        window.onresize = initCanvas; initCanvas();
+        let particles = Array.from({length: 40}, () => ({x:Math.random()*canvas.width, y:Math.random()*canvas.height, r:Math.random()*2, vx:Math.random()*0.4-0.2, vy:Math.random()*0.4-0.2}));
+        function animate() { ctx.clearRect(0,0,canvas.width,canvas.height); ctx.fillStyle = "rgba(197, 160, 89, 0.3)"; particles.forEach(p => { p.x+=p.vx; p.y+=p.vy; if(p.x<0||p.x>canvas.width) p.vx*=-1; if(p.y<0||p.y>canvas.height) p.vy*=-1; ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, Math.PI*2); ctx.fill(); }); requestAnimationFrame(animate); }
+        animate();
+
+        // Step Navigation Logic
+        window.selectRegion = (lang, name) => { selectedLang = lang; document.getElementById('step1').classList.add('hidden'); document.getElementById('step2').classList.remove('hidden'); document.getElementById('regionTitle').innerText = name; };
+        window.resetToStep1 = () => { document.getElementById('step2').classList.add('hidden'); document.getElementById('step1').classList.remove('hidden'); };
+        window.startApp = async (gid) => { document.getElementById('step2').classList.add('hidden'); document.getElementById('swipeStep').classList.remove('hidden'); fetchShows(`/api/getShows?genre=${gid}&lang=${selectedLang}`); };
+
+        async function fetchShows(url) {
+            const res = await fetch(url); const data = await res.json();
+            shows = data.results.filter(s => s.poster_path); index = 0; renderCard();
+        }
+
+        function renderCard() {
+            const s = shows[index];
+            document.getElementById('cardTitle').innerText = s.name || s.original_name;
+            document.getElementById('poster').src = `https://image.tmdb.org/t/p/w780${s.poster_path}`;
+        }
+
+        window.handleAction = (type) => {
+            const card = document.getElementById('showCard');
+            card.style.transform = type === 'smash' ? 'translateX(100%) rotate(20deg)' : 'translateX(-100%) rotate(-20deg)';
+            card.style.opacity = '0';
+            setTimeout(() => { index++; card.style.transform = ''; card.style.opacity = '1'; renderCard(); }, 300);
+        }
+
+        // Deep Detail & Episode Logic
         window.openDetails = async (id) => {
             const overlay = document.getElementById('detailOverlay');
-            overlay.classList.remove('hidden');
-            setTimeout(() => overlay.classList.add('active'), 10);
-
-            // Fetch Details
-            const res = await fetch(`/api/getDetails?id=${id}`);
-            const data = await res.json();
-            
+            overlay.classList.add('active');
+            const res = await fetch(`/api/getDetails?id=${id}`); const data = await res.json();
             document.getElementById('detailTitle').innerText = data.name;
             document.getElementById('detailOverview').innerText = data.overview;
             document.getElementById('detailBackdrop').src = `https://image.tmdb.org/t/p/original${data.backdrop_path || data.poster_path}`;
-
-            // FETCH EPISODES
-            fetchEpisodes(id, 1);
-        }
-
-        async function fetchEpisodes(id, seasonNum) {
-            const list = document.getElementById('episodeList');
-            list.innerHTML = '<p class="opacity-50 italic">Fetching episode ratings...</p>';
             
-            try {
-                const res = await fetch(`/api/getEpisodes?id=${id}&season=${seasonNum}`);
-                const data = await res.json();
-                
-                list.innerHTML = data.episodes.map(ep => `
-                    <div class="ep-card p-4 rounded-xl flex justify-between items-center glass-panel">
-                        <div class="flex gap-4 items-center">
-                            <span class="text-2xl font-bold opacity-20">E${ep.episode_number}</span>
-                            <div>
-                                <h4 class="font-bold">${ep.name}</h4>
-                                <p class="text-xs opacity-60 truncate w-48">${ep.overview || 'No synopsis available.'}</p>
-                            </div>
-                        </div>
-                        <div class="text-right shrink-0">
-                            <span class="bg-gold-text px-3 py-1 rounded-full text-xs font-bold ${ep.vote_average > 8 ? 'bg-green-500/20 text-green-500' : 'bg-gold/20 text-gold'}">
-                                ★ ${ep.vote_average.toFixed(1)}
-                            </span>
-                        </div>
+            // Fetch Episodes
+            const epList = document.getElementById('episodeList'); epList.innerHTML = '<p class="opacity-50 italic">Loading ratings...</p>';
+            const epRes = await fetch(`/api/getEpisodes?id=${id}&season=1`); const epData = await epRes.json();
+            epList.innerHTML = epData.episodes.map(e => `
+                <div class="glass-panel p-4 rounded-xl flex justify-between items-center">
+                    <div class="flex gap-4">
+                        <span class="gold-text font-bold">E${e.episode_number}</span>
+                        <span class="font-medium">${e.name}</span>
                     </div>
-                `).join('');
-            } catch (err) {
-                list.innerHTML = '<p class="text-red-500">Could not load episode ratings.</p>';
-            }
-        }
+                    <span class="bg-gold/20 text-gold px-2 py-0.5 rounded text-xs font-bold">★ ${e.vote_average.toFixed(1)}</span>
+                </div>
+            `).join('');
+        };
 
-        window.closeDetails = () => {
-            const overlay = document.getElementById('detailOverlay');
-            overlay.classList.remove('active');
-            setTimeout(() => overlay.classList.add('hidden'), 400);
-        }
-
-        // Rest of the Swipe/Search logic remains same...
+        window.closeDetails = () => { document.getElementById('detailOverlay').classList.remove('active'); };
     </script>
 </body>
 </html>
