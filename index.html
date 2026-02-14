@@ -1,203 +1,320 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>IFEELAV | Curated by Abhimanyu</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>IFEELAV | Curated by Abhimanyu</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <style>
+        :root { --gold: #C5A059; --dark-bg: #050505; }
+        .no-select { -webkit-user-select: none; user-select: none; }
+        
+        body { font-family: 'Inter', sans-serif; background: var(--dark-bg); color: #f5f5f5; overflow-x: hidden; }
+        .brand-font { font-family: 'Cinzel', serif; }
+        .gold-text { color: var(--gold); }
 
-<script src="https://cdn.tailwindcss.com"></script>
-<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+        /* BACKGROUND ANIMATION FIX */
+        #posterBg { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; opacity: 0.15; overflow: hidden; pointer-events: none; }
+        .marquee-col { display: flex; flex-direction: column; gap: 10px; animation: scroll 60s linear infinite; }
+        @keyframes scroll { 0% { transform: translateY(0); } 100% { transform: translateY(-50%); } }
 
-<style>
-:root { --gold: #C5A059; }
-body { font-family: 'Inter', sans-serif; background: #ffffff; color: #1a1a1a; }
-.brand-font { font-family: 'Cinzel', serif; }
-.gold-text { color: var(--gold); }
+        /* GLASS & CARDS */
+        .glass-panel { background: rgba(20, 20, 20, 0.85); backdrop-filter: blur(15px); border: 1px solid rgba(255, 255, 255, 0.1); transition: 0.3s; }
+        .cat-btn { background: #111; border: 1px solid #333; color: #ddd; transition: 0.3s; }
+        .cat-btn:active { transform: scale(0.95); background: var(--gold); color: black; }
 
-/* HERO */
-.hero-slider { position: relative; width: 100%; height: 60vh; border-radius: 28px; overflow: hidden; }
-.hero-slide { position: absolute; inset: 0; opacity: 0; transition: opacity 0.8s ease; }
-.hero-slide.active { opacity: 1; }
-.hero-overlay { position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,0.85), rgba(0,0,0,0.2)); }
+        .premium-card { 
+            height: 65vh; width: 100%; max-width: 400px; 
+            border-radius: 30px; overflow: hidden; 
+            box-shadow: 0 30px 60px -12px rgba(0, 0, 0, 0.5); 
+            position: relative; cursor: pointer; touch-action: none;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
 
-/* OTT ROW */
-.ott-row { margin-top: 40px; }
-.ott-scroll { display: flex; gap: 16px; overflow-x: auto; padding: 10px 0; }
-.ott-scroll::-webkit-scrollbar { display: none; }
-.poster-card { min-width: 160px; border-radius: 16px; overflow: hidden; cursor: pointer; transition: 0.3s; box-shadow: 0 8px 25px rgba(0,0,0,0.15); }
-.poster-card:hover { transform: scale(1.08); }
+        /* OVERLAYS (Higher Z-Index to fix clicking) */
+        #detailOverlay { position: fixed; inset: 0; z-index: 100; background: #000; transform: translateY(100%); transition: transform 0.3s ease-out; overflow-y: auto; }
+        #detailOverlay.active { transform: translateY(0); }
 
-.glass-panel {
-  background: rgba(255,255,255,0.9);
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(0,0,0,0.08);
-}
-</style>
+        #authModal { position: fixed; inset: 0; z-index: 200; background: rgba(0,0,0,0.9); backdrop-filter: blur(10px); display: none; align-items: center; justify-content: center; }
+        #authModal.active { display: flex; }
+
+        /* DIALOGUE STYLING */
+        .dialogue-box { border-left: 3px solid var(--gold); padding-left: 10px; margin-bottom: 20px; animation: fadeIn 1s ease; }
+        .char-name { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1px; color: #888; margin-top: 4px; }
+
+        /* SEARCH */
+        #searchDropdown { position: absolute; top: 110%; left: 0; width: 100%; background: #111; border: 1px solid #333; border-radius: 15px; z-index: 50; display: none; max-height: 300px; overflow-y: auto; }
+        #searchDropdown.active { display: block; }
+    </style>
 </head>
-
 <body>
+    
+    <div id="posterBg" class="flex justify-center gap-4">
+        </div>
 
-<!-- NAVBAR (UNCHANGED LOGIC) -->
-<div class="fixed top-0 left-0 w-full z-50 p-4 flex justify-between items-center bg-white/90 backdrop-blur border-b shadow-sm">
-  <div class="text-xl font-bold brand-font gold-text cursor-pointer" onclick="location.reload()">IFEELAV</div>
-  <div class="flex gap-4 items-center">
-    <input type="text" placeholder="Search Shows..." class="border-b outline-none">
-    <button onclick="toggleWatchlist()">❤️</button>
-    <button onclick="toggleAuthModal()">👤</button>
-  </div>
-</div>
-
-<div id="mainContent" class="pt-24 px-4 pb-20 max-w-6xl mx-auto">
-
-  <!-- ================= PREMIUM HOMEPAGE (STEP1) ================= -->
-  <div id="step1">
-
-    <!-- Branding -->
-    <div class="text-center mb-12">
-      <h1 class="brand-font text-6xl md:text-7xl gold-text">IFEELAV</h1>
-      <p class="uppercase tracking-[0.4em] text-gray-500 mt-2 text-sm">Curated by Abhimanyu</p>
-      <p class="mt-4 text-gray-600 italic max-w-xl mx-auto">
-        “Discover stories that match your mood, not just your watchlist.”
-      </p>
-
-      <!-- FIXED WORKING BUTTON -->
-      <button onclick="openRegionSelector()" 
-      class="mt-8 bg-[#C5A059] text-white px-8 py-3 rounded-full font-bold shadow-lg hover:scale-105 transition">
-        Start Exploring ✨
-      </button>
+    <div class="fixed top-0 left-0 w-full z-50 p-4 flex justify-between items-center bg-black/80 backdrop-blur-md border-b border-white/10">
+        <div class="text-xl font-bold brand-font gold-text no-select cursor-pointer" onclick="location.reload()">IFEELAV</div>
+        <div class="flex gap-2 items-center">
+            <div class="relative">
+                <input type="text" id="searchInput" oninput="window.handleTyping(event)" placeholder="Search..." class="glass-panel rounded-full px-4 py-2 w-32 md:w-64 text-sm outline-none focus:border-[#C5A059] text-white">
+                <div id="searchDropdown"></div>
+            </div>
+            <button onclick="window.toggleAuthModal()" class="glass-panel w-10 h-10 rounded-full overflow-hidden relative border border-transparent hover:border-[#C5A059]">
+                <img id="headerAvatar" src="https://api.dicebear.com/7.x/adventurer/svg?seed=Guest" class="w-full h-full object-cover">
+            </button>
+        </div>
     </div>
 
-    <!-- HERO SLIDER -->
-    <div class="hero-slider" id="heroSlider"></div>
+    <div id="mainContent" class="relative z-10 min-h-screen flex flex-col items-center justify-center pt-20 px-4 pb-20">
+        
+        <div id="step1" class="text-center w-full max-w-4xl fade-in">
+            <h1 class="brand-font text-5xl md:text-8xl gold-text mb-4 no-select tracking-tighter drop-shadow-lg">IFEELAV</h1>
+            <p class="text-xs md:text-sm text-gray-500 mb-10 uppercase tracking-[0.3em] no-select">Curated by Abhimanyu</p>
+            
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <button onclick="window.selectRegion('hi', 'Bollywood')" class="cat-btn p-6 rounded-2xl font-bold text-sm md:text-lg">BOLLYWOOD</button>
+                <button onclick="window.selectRegion('en', 'Hollywood')" class="cat-btn p-6 rounded-2xl font-bold text-sm md:text-lg">HOLLYWOOD</button>
+                <button onclick="window.selectRegion('ja', 'Anime')" class="cat-btn p-6 rounded-2xl font-bold text-sm md:text-lg">ANIME</button>
+                <button onclick="window.selectRegion('ko', 'K-Drama')" class="cat-btn p-6 rounded-2xl font-bold text-sm md:text-lg">K-DRAMA</button>
+            </div>
+        </div>
 
-    <!-- ROWS -->
-    <div class="ott-row">
-      <h2 class="brand-font text-2xl gold-text mb-2">Trending Now</h2>
-      <div class="ott-scroll" id="trendingRow"></div>
+        <div id="step2" class="hidden text-center w-full max-w-3xl fade-in">
+            <h1 id="regionTitle" class="brand-font text-3xl gold-text mb-2 no-select"></h1>
+            <p class="text-xs uppercase tracking-widest opacity-50 mb-8">Select your mood</p>
+            <div class="grid grid-cols-2 md:grid-cols-3 gap-4 mb-8">
+                <button onclick="window.startApp('28')" class="glass-panel p-4 rounded-xl font-bold hover:border-[#C5A059] hover:text-[#C5A059]">Action</button>
+                <button onclick="window.startApp('35')" class="glass-panel p-4 rounded-xl font-bold hover:border-[#C5A059] hover:text-[#C5A059]">Comedy</button>
+                <button onclick="window.startApp('18')" class="glass-panel p-4 rounded-xl font-bold hover:border-[#C5A059] hover:text-[#C5A059]">Drama</button>
+                <button onclick="window.startApp('9648')" class="glass-panel p-4 rounded-xl font-bold hover:border-[#C5A059] hover:text-[#C5A059]">Mystery</button>
+                <button onclick="window.startApp('10765')" class="glass-panel p-4 rounded-xl font-bold hover:border-[#C5A059] hover:text-[#C5A059]">Sci-Fi</button>
+            </div>
+            <button onclick="history.back()" class="text-gray-500 text-xs uppercase tracking-widest p-4">← Go Back</button>
+        </div>
+
+        <div id="swipeStep" class="hidden w-full flex flex-col items-center">
+            
+            <div id="dialogueArea" class="h-16 mb-4 w-full max-w-md"></div>
+
+            <div id="showCard" onclick="window.openCurrentCard()" class="premium-card bg-[#111]">
+                <img id="poster" src="" class="w-full h-full object-cover select-none pointer-events-none">
+                <div class="absolute bottom-0 w-full p-6 bg-gradient-to-t from-black via-black/80 to-transparent text-white">
+                    <h2 id="cardTitle" class="brand-font text-3xl leading-none mb-2 no-select"></h2>
+                    <p id="cardMeta" class="text-xs opacity-70 font-sans"></p>
+                    <p class="text-[10px] mt-2 uppercase tracking-widest text-[#C5A059] font-bold opacity-90 animate-pulse">Tap for Info</p>
+                </div>
+                
+                <div id="nope" class="absolute top-10 right-10 border-4 border-red-500 text-red-500 font-bold px-4 py-2 rounded transform rotate-12 opacity-0 text-2xl bg-black/50">NOPE</div>
+                <div id="like" class="absolute top-10 left-10 border-4 border-green-500 text-green-500 font-bold px-4 py-2 rounded transform -rotate-12 opacity-0 text-2xl bg-black/50">YEAH</div>
+            </div>
+
+            <div class="flex gap-8 mt-8">
+                <button onclick="window.handleAction('pass')" class="w-16 h-16 rounded-full glass-panel flex items-center justify-center text-2xl text-red-500 hover:bg-red-500/20">✕</button>
+                <button onclick="window.handleAction('smash')" class="w-16 h-16 rounded-full bg-[#C5A059] text-white text-3xl shadow-xl hover:scale-110 transition">♥</button>
+            </div>
+        </div>
     </div>
 
-    <div class="ott-row">
-      <h2 class="brand-font text-2xl gold-text mb-2">Top Rated</h2>
-      <div class="ott-scroll" id="topRatedRow"></div>
+    <div class="w-full text-center py-6 opacity-80 text-xs no-select fixed bottom-0 left-0 pointer-events-none z-40">
+        <a href="https://instagram.com/axviixv" target="_blank" class="pointer-events-auto inline-flex items-center justify-center gap-2 text-gray-400 hover:text-[#C5A059] transition bg-black/50 px-4 py-2 rounded-full backdrop-blur-md">
+            <i class="fab fa-instagram text-lg"></i>
+            <span class="font-bold tracking-wider">ABHIMANYU</span>
+        </a>
     </div>
 
-  </div>
-
-  <!-- ================= STEP2 (UNCHANGED CORE LOGIC) ================= -->
-  <div id="step2" class="hidden text-center max-w-3xl mx-auto">
-    <h1 id="regionTitle" class="brand-font text-3xl gold-text mb-6"></h1>
-    <div class="grid grid-cols-2 md:grid-cols-3 gap-4 mb-8" id="step2Grid">
-      <!-- Dynamic -->
+    <div id="detailOverlay">
+        <button onclick="window.closeDetails()" class="fixed top-6 right-6 z-[110] bg-black/60 text-white w-10 h-10 rounded-full flex items-center justify-center backdrop-blur text-xl">✕</button>
+        <div id="detailContent"></div>
     </div>
-    <button onclick="history.back()" class="text-xs opacity-60 p-4">← Go Back</button>
-  </div>
 
-  <!-- ================= STEP3 (UNCHANGED) ================= -->
-  <div id="step3" class="hidden text-center max-w-3xl mx-auto">
-    <h1 class="brand-font text-3xl gold-text mb-8">Select Format</h1>
-    <div class="flex gap-6 justify-center">
-      <button onclick="startApp('movie')" class="glass-panel p-6 rounded-xl font-bold">Movies 🎬</button>
-      <button onclick="startApp('tv')" class="glass-panel p-6 rounded-xl font-bold">Series 📺</button>
+    <div id="authModal">
+        <div class="bg-[#111] p-8 rounded-3xl w-full max-w-sm relative shadow-2xl border border-gray-800">
+            <button onclick="window.toggleAuthModal()" class="absolute top-4 right-4 text-gray-400">✕</button>
+            
+            <div id="authForms">
+                <h2 class="brand-font text-2xl mb-6 gold-text text-center">Member Access</h2>
+                <input type="email" id="email" placeholder="Email" class="w-full p-3 mb-3 rounded-xl bg-[#222] border border-[#333] text-white outline-none focus:border-[#C5A059]">
+                <input type="password" id="password" placeholder="Password" class="w-full p-3 mb-6 rounded-xl bg-[#222] border border-[#333] text-white outline-none focus:border-[#C5A059]">
+                <button onclick="window.handleLogin()" class="w-full bg-[#C5A059] text-white py-3 rounded-xl font-bold mb-3 hover:bg-[#b08d4b]">Login</button>
+                <button onclick="window.handleSignup()" class="w-full border border-[#C5A059] text-[#C5A059] py-3 rounded-xl font-bold hover:bg-[#C5A059] hover:text-white transition">Create Account</button>
+            </div>
+
+            <div id="userProfile" class="hidden">
+                <div class="text-center mb-6">
+                    <div class="w-24 h-24 mx-auto mb-3 rounded-full overflow-hidden border-4 border-[#C5A059] shadow-lg">
+                        <img id="profileAvatar" src="" class="w-full h-full object-cover">
+                    </div>
+                    <input type="text" id="usernameInput" placeholder="Set Username" class="text-center bg-transparent border-b border-gray-700 text-white outline-none font-bold text-lg w-full mb-1 focus:border-[#C5A059]" onblur="window.saveUsername()">
+                    <p id="userEmailDisplay" class="text-xs text-gray-500">user@email.com</p>
+                </div>
+
+                <p class="text-xs uppercase font-bold text-gray-500 mb-3 tracking-widest text-center">Select Avatar</p>
+                <div class="grid grid-cols-5 gap-3 mb-8" id="avatarGrid"></div>
+
+                <button onclick="window.resetPassword()" class="w-full bg-[#222] text-gray-300 py-3 rounded-xl font-bold mb-3 text-sm hover:bg-[#333]">Reset Password</button>
+                <button onclick="window.handleLogout()" class="w-full bg-red-900/20 text-red-500 py-3 rounded-xl font-bold text-sm hover:bg-red-900/40">Log Out</button>
+            </div>
+        </div>
     </div>
-  </div>
 
-  <!-- ================= SWIPE STEP (UNTOUCHED) ================= -->
-  <div id="swipeStep" class="hidden text-center">
-    <h2 class="text-xl font-bold">Swipe Engine Active</h2>
-  </div>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged, sendPasswordResetEmail, updateProfile } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-</div>
+        const firebaseConfig = {
+            apiKey: "AIzaSyAoCZuJ4tGdwmFuz8y-_tc5phvfbn2oi1A",
+            authDomain: "ifeelav-app.firebaseapp.com",
+            projectId: "ifeelav-app",
+            storageBucket: "ifeelav-app.firebasestorage.app",
+            messagingSenderId: "1060067685106",
+            appId: "1:1060067685106:web:4ba1523ee066af4633966b"
+        };
 
-<script type="module">
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
 
-/* ================= HERO + ROW DATA ================= */
-async function loadHomepageContent() {
-  const res = await fetch('/api/shows?type=tv');
-  const data = await res.json();
-  const items = (data.results || []).slice(0, 20);
+        // --- DIALOGUES ---
+        const dialogues = {
+            '28': [{t: "Rishte mein toh hum tumhare baap lagte hain...", c: "Shahenshah"}, {t: "Don't angry me!", c: "Rowdy Rathore"}, {t: "Ab tera kya hoga Kaaliya?", c: "Sholay"}],
+            '35': [{t: "Utha le re baba, utha le!", c: "Hera Pheri"}, {t: "Babu Rao ka style hai!", c: "Hera Pheri"}, {t: "Control Uday Control!", c: "Welcome"}],
+            '18': [{t: "Thappad se darr nahi lagta sahab...", c: "Dabangg"}, {t: "Zindagi badi honi chahiye, lambi nahi.", c: "Anand"}],
+            '9648': [{t: "Kuch toh gadbad hai Daya...", c: "CID"}, {t: "Dushman dikhai nahi deta...", c: "Lakshya"}],
+            '10765': [{t: "Jaadoo...", c: "Koi Mil Gaya"}, {t: "May the force be with you.", c: "Star Wars"}]
+        };
 
-  // HERO
-  const hero = document.getElementById('heroSlider');
-  let index = 0;
+        const avatars = [
+            'Male:micah:Leo', 'Cool:avataaars:Jack', 'Girl:adventurer:Chloe', 'Pro:micah:Nora', 
+            'Vibe:adventurer:Felix', 'Bot:bottts:Robo', 'Smile:open-peeps:Smile', 'Boss:personas:Boss'
+        ];
 
-  items.slice(0,5).forEach((item,i)=>{
-    const slide = document.createElement('div');
-    slide.className = 'hero-slide' + (i===0 ? ' active' : '');
-    slide.innerHTML = `
-      <img src="https://image.tmdb.org/t/p/original${item.backdrop_path || item.poster_path}" 
-      class="w-full h-full object-cover">
-      <div class="hero-overlay"></div>
-      <div class="absolute bottom-10 left-10 text-white">
-        <h2 class="text-4xl brand-font">${item.name || item.title}</h2>
-        <button onclick="openDetails(${item.id})"
-        class="bg-[#C5A059] px-6 py-2 mt-2 rounded-full font-bold">
-        View Details
-        </button>
-      </div>
-    `;
-    hero.appendChild(slide);
-  });
+        let shows = [];
+        let index = 0;
+        let selectedLang = '';
+        let searchTimer;
+        let currentTvId = null;
 
-  setInterval(()=>{
-    const slides = document.querySelectorAll('.hero-slide');
-    slides.forEach(s=>s.classList.remove('active'));
-    index = (index+1)%slides.length;
-    slides[index].classList.add('active');
-  },4000);
+        // --- ANIMATION INIT ---
+        function initBg() {
+            const container = document.getElementById('posterBg');
+            const cols = 3;
+            // Placeholders until data loads
+            let html = '';
+            for(let i=0; i<cols; i++) {
+                html += `<div class="marquee-col" style="animation-duration:${60+i*10}s">
+                    ${Array(10).fill(0).map(() => `<div class="w-32 h-48 bg-gray-800 rounded-lg opacity-50"></div>`).join('')}
+                </div>`;
+            }
+            container.innerHTML = html;
+            
+            // Load real images
+            fetch('https://api.themoviedb.org/3/trending/tv/week?api_key=4ba1523ee066af4633966b').then(r=>r.json()).then(d=>{
+                const posters = d.results;
+                let newHtml = '';
+                for(let i=0; i<cols; i++) {
+                    const colPosters = [...posters].sort(() => 0.5 - Math.random()).map(p => 
+                        `<img src="https://image.tmdb.org/t/p/w200${p.poster_path}" class="w-32 h-48 rounded-lg opacity-60">`
+                    ).join('');
+                    newHtml += `<div class="marquee-col" style="animation-duration:${50+i*15}s; margin-top: -${i*50}px">${colPosters}${colPosters}</div>`;
+                }
+                container.innerHTML = newHtml;
+            });
+        }
+        initBg();
 
-  // ROWS
-  function renderRow(id,list){
-    const container = document.getElementById(id);
-    list.forEach(item=>{
-      if(!item.poster_path) return;
-      const card = document.createElement('div');
-      card.className='poster-card';
-      card.onclick=()=>openDetails(item.id);
-      card.innerHTML=`<img src="https://image.tmdb.org/t/p/w342${item.poster_path}" class="w-full h-56 object-cover">`;
-      container.appendChild(card);
-    });
-  }
+        // --- AUTH ---
+        window.toggleAuthModal = () => document.getElementById('authModal').classList.toggle('active');
+        window.handleLogin = () => signInWithEmailAndPassword(auth, document.getElementById('email').value, document.getElementById('password').value).then(() => window.toggleAuthModal()).catch(e => alert(e.message));
+        window.handleSignup = () => createUserWithEmailAndPassword(auth, document.getElementById('email').value, document.getElementById('password').value).then(() => window.toggleAuthModal()).catch(e => alert(e.message));
+        window.handleLogout = () => signOut(auth);
+        window.resetPassword = () => sendPasswordResetEmail(auth, auth.currentUser.email).then(() => alert("Reset email sent!"));
+        
+        window.saveUsername = async () => {
+            const name = document.getElementById('usernameInput').value;
+            if(name && auth.currentUser) await updateProfile(auth.currentUser, { displayName: name });
+        };
 
-  renderRow('trendingRow', items);
-  renderRow('topRatedRow', [...items].sort((a,b)=>b.vote_average-a.vote_average));
-}
+        window.changeAvatar = async (seedStr) => {
+            const [l, s, seed] = seedStr.split(':');
+            const url = `https://api.dicebear.com/7.x/${s}/svg?seed=${seed}`;
+            document.getElementById('profileAvatar').src = url;
+            document.getElementById('headerAvatar').src = url;
+            if(auth.currentUser) {
+                const ref = doc(db, "users", auth.currentUser.uid);
+                await setDoc(ref, { avatar: url }, { merge: true });
+            }
+        };
 
-loadHomepageContent();
+        // Render Avatar Grid
+        document.getElementById('avatarGrid').innerHTML = avatars.map(a => {
+            const [l, s, seed] = a.split(':');
+            const url = `https://api.dicebear.com/7.x/${s}/svg?seed=${seed}`;
+            return `<img src="${url}" class="w-10 h-10 rounded-full border border-gray-700 cursor-pointer hover:scale-110 transition" onclick="window.changeAvatar('${a}')">`;
+        }).join('');
 
-/* ================= FIXED REGION SELECTOR (B FLOW) ================= */
-window.openRegionSelector = () => {
-  document.getElementById('step1').classList.add('hidden');
-  document.getElementById('step2').classList.remove('hidden');
-  document.getElementById('regionTitle').innerText = "Choose Your Region";
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                document.getElementById('authForms').classList.add('hidden');
+                document.getElementById('userProfile').classList.remove('hidden');
+                document.getElementById('userEmailDisplay').innerText = user.email;
+                document.getElementById('usernameInput').value = user.displayName || "User";
+                
+                const ref = doc(db, "users", user.uid);
+                const snap = await getDoc(ref);
+                const av = snap.exists() && snap.data().avatar ? snap.data().avatar : `https://api.dicebear.com/7.x/notionists/svg?seed=${user.uid}`;
+                document.getElementById('headerAvatar').src = av;
+                document.getElementById('profileAvatar').src = av;
+            } else {
+                document.getElementById('authForms').classList.remove('hidden');
+                document.getElementById('userProfile').classList.add('hidden');
+                document.getElementById('headerAvatar').src = "https://api.dicebear.com/7.x/notionists/svg?seed=Guest";
+            }
+        });
 
-  const grid = document.getElementById('step2Grid');
-  grid.innerHTML = `
-    <button onclick="selectRegion('hi','Bollywood')" class="glass-panel p-4 rounded-xl font-bold">Bollywood 🇮🇳</button>
-    <button onclick="selectRegion('en','Hollywood')" class="glass-panel p-4 rounded-xl font-bold">Hollywood 🌎</button>
-    <button onclick="selectRegion('ja','Anime')" class="glass-panel p-4 rounded-xl font-bold">Anime 🇯🇵</button>
-    <button onclick="selectRegion('ko','K-Drama')" class="glass-panel p-4 rounded-xl font-bold">K-Drama 🇰🇷</button>
-  `;
+        // --- NAVIGATION ---
+        window.selectRegion = (lang, name) => {
+            selectedLang = lang;
+            document.getElementById('step1').classList.add('hidden');
+            document.getElementById('step2').classList.remove('hidden');
+            document.getElementById('regionTitle').innerText = name;
+            history.pushState({step: 2}, "");
+        };
 
-  history.pushState({step:2},"");
-};
+        window.startApp = (gid) => {
+            document.getElementById('step2').classList.add('hidden');
+            document.getElementById('swipeStep').classList.remove('hidden');
+            
+            // Show Dialogue
+            const genreData = dialogues[gid] || dialogues['28'];
+            const rand = genreData[Math.floor(Math.random() * genreData.length)];
+            document.getElementById('dialogueArea').innerHTML = `
+                <div class="dialogue-box">
+                    <p class="italic text-lg text-white">"${rand.t}"</p>
+                    <p class="char-name">— ${rand.c}</p>
+                </div>
+            `;
 
-/* ================= ORIGINAL FLOW (SAFE) ================= */
-window.selectRegion = (lang,name)=>{
-  document.getElementById('step2').classList.add('hidden');
-  document.getElementById('step3').classList.remove('hidden');
-};
+            fetchShows(`/api/getShows?genre=${gid}&lang=${selectedLang}`);
+            history.pushState({step: 3}, "");
+        };
 
-window.startApp = (type)=>{
-  document.getElementById('step3').classList.add('hidden');
-  document.getElementById('swipeStep').classList.remove('hidden');
-};
+        window.addEventListener('popstate', (e) => {
+            if(!e.state) location.reload();
+            else if(e.state.step === 2) {
+                document.getElementById('swipeStep').classList.add('hidden');
+                document.getElementById('step2').classList.remove('hidden');
+            }
+        });
 
-/* Dummy placeholders (your real ones already exist in project) */
-window.openDetails = (id)=>{ console.log("Open Details:", id); };
-window.toggleWatchlist = ()=>{};
-window.toggleAuthModal = ()=>{};
+        // --- SWIPE GESTURES ---
+        const card = document.getElementById('showCard');
+        let startX, isDragging = false;
 
-</script>
-
-</body>
-</html>
+        card.addEventListener('touchstart', (e) => { startX = e.touches[0].clientX; isDragging = true; });
+        card.addEventListener('touchmove', (e) => {
+            if(!isDragging) return;
+            con
