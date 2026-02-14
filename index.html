@@ -1,203 +1,196 @@
-<!DOCTYPE html>
-<html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>IFEELAV | Curated by Abhimanyu</title>
+    <meta charset="UTF-8">
+    
+    <!-- 🔥 AUTO RESPONSIVE VIEWPORT (ALL DEVICES) -->
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+    
+    <title>IFEELAV | Curated by Abhimanyu</title>
 
-<script src="https://cdn.tailwindcss.com"></script>
-<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    <!-- Tailwind -->
+    <script src="https://cdn.tailwindcss.com"></script>
 
-<style>
-:root { --gold: #C5A059; }
-body { font-family: 'Inter', sans-serif; background: #ffffff; color: #1a1a1a; }
-.brand-font { font-family: 'Cinzel', serif; }
-.gold-text { color: var(--gold); }
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
 
-/* HERO */
-.hero-slider { position: relative; width: 100%; height: 60vh; border-radius: 28px; overflow: hidden; }
-.hero-slide { position: absolute; inset: 0; opacity: 0; transition: opacity 0.8s ease; }
-.hero-slide.active { opacity: 1; }
-.hero-overlay { position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,0.85), rgba(0,0,0,0.2)); }
+    <style>
+        :root { 
+            --gold: #C5A059; 
+            --dark-bg: #050505; 
+        }
 
-/* OTT ROW */
-.ott-row { margin-top: 40px; }
-.ott-scroll { display: flex; gap: 16px; overflow-x: auto; padding: 10px 0; }
-.ott-scroll::-webkit-scrollbar { display: none; }
-.poster-card { min-width: 160px; border-radius: 16px; overflow: hidden; cursor: pointer; transition: 0.3s; box-shadow: 0 8px 25px rgba(0,0,0,0.15); }
-.poster-card:hover { transform: scale(1.08); }
+        * {
+            box-sizing: border-box;
+        }
 
-.glass-panel {
-  background: rgba(255,255,255,0.9);
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(0,0,0,0.08);
-}
-</style>
+        html, body {
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
+        }
+        
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background: #ffffff; 
+            color: #1a1a1a; 
+            transition: 0.3s;
+            min-height: 100vh;
+        }
+
+        body.dark { 
+            background: var(--dark-bg); 
+            color: #f5f5f5; 
+        }
+
+        /* 🔥 AUTO RESPONSIVE TYPOGRAPHY (ALL SCREENS) */
+        h1 {
+            font-size: clamp(28px, 6vw, 80px);
+        }
+
+        h2 {
+            font-size: clamp(18px, 3vw, 34px);
+        }
+
+        p {
+            font-size: clamp(14px, 1.5vw, 18px);
+        }
+
+        .brand-font { 
+            font-family: 'Cinzel', serif; 
+        }
+
+        .gold-text { 
+            color: var(--gold); 
+        }
+
+        /* 🔥 MAIN CONTAINER AUTO RESOLUTION */
+        #mainContent {
+            width: 100%;
+            max-width: 1500px;
+            margin: 0 auto;
+            padding-left: clamp(12px, 4vw, 40px);
+            padding-right: clamp(12px, 4vw, 40px);
+        }
+
+        /* 🔥 HERO SLIDER (AUTO DEVICE HEIGHT) */
+        .hero-slider { 
+            position: relative; 
+            width: 100%; 
+            height: clamp(300px, 60vh, 720px); /* AUTO HEIGHT */
+            border-radius: clamp(16px, 3vw, 30px); 
+            overflow: hidden; 
+        }
+
+        .hero-slide { 
+            position: absolute; 
+            inset: 0; 
+            opacity: 0; 
+            transition: opacity 0.8s ease; 
+        }
+
+        .hero-slide.active { 
+            opacity: 1; 
+        }
+
+        .hero-slide img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .hero-overlay { 
+            position: absolute; 
+            inset: 0; 
+            background: linear-gradient(
+                to top, 
+                rgba(0,0,0,0.85), 
+                rgba(0,0,0,0.2)
+            ); 
+        }
+
+        /* 🔥 OTT ROW (NETFLIX STYLE RESPONSIVE) */
+        .ott-row { 
+            margin-top: clamp(24px, 5vw, 60px); 
+            width: 100%;
+        }
+
+        .ott-scroll { 
+            display: flex; 
+            gap: clamp(10px, 2vw, 20px); 
+            overflow-x: auto; 
+            padding: 10px 0;
+            scroll-snap-type: x mandatory;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .ott-scroll::-webkit-scrollbar { 
+            display: none; 
+        }
+
+        /* 🔥 POSTER CARDS AUTO SIZE (PHONE → 4K) */
+        .poster-card { 
+            min-width: clamp(120px, 18vw, 220px);
+            border-radius: clamp(12px, 2vw, 18px); 
+            overflow: hidden; 
+            transition: 0.3s; 
+            cursor: pointer; 
+            flex-shrink: 0;
+            scroll-snap-align: start;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+        }
+
+        .poster-card:hover { 
+            transform: scale(1.08); 
+        }
+
+        .poster-card img {
+            width: 100%;
+            height: clamp(180px, 28vw, 340px);
+            object-fit: cover;
+        }
+
+        /* 🔥 NAVBAR RESPONSIVE */
+        .navbar-container {
+            padding-left: clamp(12px, 4vw, 40px);
+            padding-right: clamp(12px, 4vw, 40px);
+        }
+
+        /* 🔥 GLASS PANEL RESPONSIVE */
+        .glass-panel { 
+            background: rgba(255, 255, 255, 0.92); 
+            backdrop-filter: blur(12px); 
+            border: 1px solid rgba(0,0,0,0.08); 
+            border-radius: clamp(12px, 2vw, 20px);
+        }
+
+        body.dark .glass-panel { 
+            background: rgba(20, 20, 20, 0.92); 
+            border: 1px solid rgba(255, 255, 255, 0.15); 
+            color: white; 
+        }
+
+        /* 🔥 BUTTON RESPONSIVE */
+        .cta-button {
+            padding: clamp(10px, 1.5vw, 16px) clamp(20px, 3vw, 40px);
+            font-size: clamp(14px, 1.5vw, 18px);
+            border-radius: 999px;
+        }
+
+        /* 🔥 MOBILE OPTIMIZATION */
+        @media (max-width: 768px) {
+            .hero-slider {
+                height: 42vh;
+            }
+
+            .poster-card:hover {
+                transform: none; /* disable zoom on mobile */
+            }
+        }
+
+        /* 🔥 ULTRA WIDE SCREEN (4K FIX) */
+        @media (min-width: 1800px) {
+            #mainContent {
+                max-width: 1700px;
+            }
+        }
+    </style>
 </head>
-
-<body>
-
-<!-- NAVBAR (UNCHANGED LOGIC) -->
-<div class="fixed top-0 left-0 w-full z-50 p-4 flex justify-between items-center bg-white/90 backdrop-blur border-b shadow-sm">
-  <div class="text-xl font-bold brand-font gold-text cursor-pointer" onclick="location.reload()">IFEELAV</div>
-  <div class="flex gap-4 items-center">
-    <input type="text" placeholder="Search Shows..." class="border-b outline-none">
-    <button onclick="toggleWatchlist()">❤️</button>
-    <button onclick="toggleAuthModal()">👤</button>
-  </div>
-</div>
-
-<div id="mainContent" class="pt-24 px-4 pb-20 max-w-6xl mx-auto">
-
-  <!-- ================= PREMIUM HOMEPAGE (STEP1) ================= -->
-  <div id="step1">
-
-    <!-- Branding -->
-    <div class="text-center mb-12">
-      <h1 class="brand-font text-6xl md:text-7xl gold-text">IFEELAV</h1>
-      <p class="uppercase tracking-[0.4em] text-gray-500 mt-2 text-sm">Curated by Abhimanyu</p>
-      <p class="mt-4 text-gray-600 italic max-w-xl mx-auto">
-        “Discover stories that match your mood, not just your watchlist.”
-      </p>
-
-      <!-- FIXED WORKING BUTTON -->
-      <button onclick="openRegionSelector()" 
-      class="mt-8 bg-[#C5A059] text-white px-8 py-3 rounded-full font-bold shadow-lg hover:scale-105 transition">
-        Start Exploring ✨
-      </button>
-    </div>
-
-    <!-- HERO SLIDER -->
-    <div class="hero-slider" id="heroSlider"></div>
-
-    <!-- ROWS -->
-    <div class="ott-row">
-      <h2 class="brand-font text-2xl gold-text mb-2">Trending Now</h2>
-      <div class="ott-scroll" id="trendingRow"></div>
-    </div>
-
-    <div class="ott-row">
-      <h2 class="brand-font text-2xl gold-text mb-2">Top Rated</h2>
-      <div class="ott-scroll" id="topRatedRow"></div>
-    </div>
-
-  </div>
-
-  <!-- ================= STEP2 (UNCHANGED CORE LOGIC) ================= -->
-  <div id="step2" class="hidden text-center max-w-3xl mx-auto">
-    <h1 id="regionTitle" class="brand-font text-3xl gold-text mb-6"></h1>
-    <div class="grid grid-cols-2 md:grid-cols-3 gap-4 mb-8" id="step2Grid">
-      <!-- Dynamic -->
-    </div>
-    <button onclick="history.back()" class="text-xs opacity-60 p-4">← Go Back</button>
-  </div>
-
-  <!-- ================= STEP3 (UNCHANGED) ================= -->
-  <div id="step3" class="hidden text-center max-w-3xl mx-auto">
-    <h1 class="brand-font text-3xl gold-text mb-8">Select Format</h1>
-    <div class="flex gap-6 justify-center">
-      <button onclick="startApp('movie')" class="glass-panel p-6 rounded-xl font-bold">Movies 🎬</button>
-      <button onclick="startApp('tv')" class="glass-panel p-6 rounded-xl font-bold">Series 📺</button>
-    </div>
-  </div>
-
-  <!-- ================= SWIPE STEP (UNTOUCHED) ================= -->
-  <div id="swipeStep" class="hidden text-center">
-    <h2 class="text-xl font-bold">Swipe Engine Active</h2>
-  </div>
-
-</div>
-
-<script type="module">
-
-/* ================= HERO + ROW DATA ================= */
-async function loadHomepageContent() {
-  const res = await fetch('/api/shows?type=tv');
-  const data = await res.json();
-  const items = (data.results || []).slice(0, 20);
-
-  // HERO
-  const hero = document.getElementById('heroSlider');
-  let index = 0;
-
-  items.slice(0,5).forEach((item,i)=>{
-    const slide = document.createElement('div');
-    slide.className = 'hero-slide' + (i===0 ? ' active' : '');
-    slide.innerHTML = `
-      <img src="https://image.tmdb.org/t/p/original${item.backdrop_path || item.poster_path}" 
-      class="w-full h-full object-cover">
-      <div class="hero-overlay"></div>
-      <div class="absolute bottom-10 left-10 text-white">
-        <h2 class="text-4xl brand-font">${item.name || item.title}</h2>
-        <button onclick="openDetails(${item.id})"
-        class="bg-[#C5A059] px-6 py-2 mt-2 rounded-full font-bold">
-        View Details
-        </button>
-      </div>
-    `;
-    hero.appendChild(slide);
-  });
-
-  setInterval(()=>{
-    const slides = document.querySelectorAll('.hero-slide');
-    slides.forEach(s=>s.classList.remove('active'));
-    index = (index+1)%slides.length;
-    slides[index].classList.add('active');
-  },4000);
-
-  // ROWS
-  function renderRow(id,list){
-    const container = document.getElementById(id);
-    list.forEach(item=>{
-      if(!item.poster_path) return;
-      const card = document.createElement('div');
-      card.className='poster-card';
-      card.onclick=()=>openDetails(item.id);
-      card.innerHTML=`<img src="https://image.tmdb.org/t/p/w342${item.poster_path}" class="w-full h-56 object-cover">`;
-      container.appendChild(card);
-    });
-  }
-
-  renderRow('trendingRow', items);
-  renderRow('topRatedRow', [...items].sort((a,b)=>b.vote_average-a.vote_average));
-}
-
-loadHomepageContent();
-
-/* ================= FIXED REGION SELECTOR (B FLOW) ================= */
-window.openRegionSelector = () => {
-  document.getElementById('step1').classList.add('hidden');
-  document.getElementById('step2').classList.remove('hidden');
-  document.getElementById('regionTitle').innerText = "Choose Your Region";
-
-  const grid = document.getElementById('step2Grid');
-  grid.innerHTML = `
-    <button onclick="selectRegion('hi','Bollywood')" class="glass-panel p-4 rounded-xl font-bold">Bollywood 🇮🇳</button>
-    <button onclick="selectRegion('en','Hollywood')" class="glass-panel p-4 rounded-xl font-bold">Hollywood 🌎</button>
-    <button onclick="selectRegion('ja','Anime')" class="glass-panel p-4 rounded-xl font-bold">Anime 🇯🇵</button>
-    <button onclick="selectRegion('ko','K-Drama')" class="glass-panel p-4 rounded-xl font-bold">K-Drama 🇰🇷</button>
-  `;
-
-  history.pushState({step:2},"");
-};
-
-/* ================= ORIGINAL FLOW (SAFE) ================= */
-window.selectRegion = (lang,name)=>{
-  document.getElementById('step2').classList.add('hidden');
-  document.getElementById('step3').classList.remove('hidden');
-};
-
-window.startApp = (type)=>{
-  document.getElementById('step3').classList.add('hidden');
-  document.getElementById('swipeStep').classList.remove('hidden');
-};
-
-/* Dummy placeholders (your real ones already exist in project) */
-window.openDetails = (id)=>{ console.log("Open Details:", id); };
-window.toggleWatchlist = ()=>{};
-window.toggleAuthModal = ()=>{};
-
-</script>
-
-</body>
-</html>
