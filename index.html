@@ -65,7 +65,7 @@
             </div>
 
             <button onclick="toggleAuthModal()" class="glass-panel w-10 h-10 rounded-full flex items-center justify-center text-gray-600 hover:text-[#C5A059] transition shadow-lg relative overflow-hidden p-0">
-                <img id="headerAvatar" src="https://api.dicebear.com/7.x/initials/svg?seed=User" class="w-full h-full object-cover hidden">
+                <img id="headerAvatar" src="" class="w-full h-full object-cover hidden">
                 <span id="headerIconDefault">👤</span>
                 <span id="loginStatus" class="absolute top-0 right-0 w-3 h-3 bg-gray-400 rounded-full border-2 border-white z-10"></span>
             </button>
@@ -103,8 +103,8 @@
                 <h2 id="userNameDisplay" class="premium-font text-xl mb-1">User</h2>
                 <p id="userEmailDisplay" class="text-sm text-gray-400 mb-6">user@example.com</p>
 
-                <div class="mb-6">
-                    <p class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">Choose Your Avatar</p>
+                <div class="mb-6 bg-gray-50 p-4 rounded-xl border border-gray-100">
+                    <p class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">Choose Your Vibe</p>
                     <div class="grid grid-cols-5 gap-2 justify-items-center" id="avatarGrid">
                         </div>
                 </div>
@@ -214,17 +214,18 @@
         let selectedLang = ''; let searchTimer;
         
         // --- COOL AVATAR LIST ---
+        // Ye sab alag-alag styles hain
         const avatarList = [
-            "https://api.dicebear.com/7.x/adventurer/svg?seed=Felix",
-            "https://api.dicebear.com/7.x/adventurer/svg?seed=Chloe",
-            "https://api.dicebear.com/7.x/adventurer/svg?seed=Ryan",
-            "https://api.dicebear.com/7.x/adventurer/svg?seed=Abby",
-            "https://api.dicebear.com/7.x/micah/svg?seed=Leo",
-            "https://api.dicebear.com/7.x/micah/svg?seed=Nora",
-            "https://api.dicebear.com/7.x/notionists/svg?seed=Bear",
-            "https://api.dicebear.com/7.x/bottts/svg?seed=Robo",
-            "https://api.dicebear.com/7.x/avataaars/svg?seed=Cool",
-            "https://api.dicebear.com/7.x/avataaars/svg?seed=Cute"
+            "https://api.dicebear.com/7.x/adventurer/svg?seed=Felix", // Cool
+            "https://api.dicebear.com/7.x/adventurer/svg?seed=Abby", // Girl
+            "https://api.dicebear.com/7.x/micah/svg?seed=Leo", // Professional
+            "https://api.dicebear.com/7.x/bottts/svg?seed=Robo", // Hacker/Bot
+            "https://api.dicebear.com/7.x/avataaars/svg?seed=Gangster", // Gangster
+            "https://api.dicebear.com/7.x/avataaars/svg?seed=Cute", // Cute
+            "https://api.dicebear.com/7.x/notionists/svg?seed=Bear", // Sketch
+            "https://api.dicebear.com/7.x/lorelei/svg?seed=Artist", // Artist
+            "https://api.dicebear.com/7.x/fun-emoji/svg?seed=Love", // Emoji
+            "https://api.dicebear.com/7.x/personas/svg?seed=Boss" // Boss
         ];
 
         window.toggleAuthModal = () => { document.getElementById('authModal').classList.toggle('active'); }
@@ -232,6 +233,7 @@
         onAuthStateChanged(auth, async (user) => {
             currentUser = user;
             if (user) {
+                // LOGIN HONE PAR
                 document.getElementById('loginStatus').classList.remove('bg-gray-400'); document.getElementById('loginStatus').classList.add('bg-green-500');
                 document.getElementById('loggedOutView').classList.add('hidden'); document.getElementById('loggedInView').classList.remove('hidden');
                 document.getElementById('userNameDisplay').innerText = user.displayName || user.email.split('@')[0];
@@ -239,9 +241,10 @@
                 document.getElementById('headerIconDefault').classList.add('hidden');
                 document.getElementById('headerAvatar').classList.remove('hidden');
                 
-                // Load Avatar & Watchlist
+                // Cloud se Avatar aur Watchlist lao
                 await loadUserData();
             } else {
+                // LOGOUT HONE PAR
                 document.getElementById('loginStatus').classList.remove('bg-green-500'); document.getElementById('loginStatus').classList.add('bg-gray-400');
                 document.getElementById('loggedOutView').classList.remove('hidden'); document.getElementById('loggedInView').classList.add('hidden');
                 document.getElementById('headerAvatar').classList.add('hidden'); document.getElementById('headerIconDefault').classList.remove('hidden');
@@ -253,18 +256,18 @@
         function renderAvatars() {
             const grid = document.getElementById('avatarGrid');
             grid.innerHTML = avatarList.map(url => `
-                <img src="${url}" class="avatar-option" onclick="changeAvatar('${url}')">
+                <img src="${url}" class="avatar-option" onclick="changeAvatar('${url}')" title="Choose this vibe">
             `).join('');
         }
-        renderAvatars(); // Call initially
+        renderAvatars();
 
         window.changeAvatar = async (url) => {
             if(!currentUser) return;
-            // Update UI immediately
+            // Turant photo badal do (User ko wait na karna pade)
             document.getElementById('profileAvatar').src = url;
             document.getElementById('headerAvatar').src = url;
             
-            // Save to Cloud
+            // Cloud pe save kar do
             const docRef = doc(db, "users", currentUser.uid);
             await updateDoc(docRef, { avatar: url });
         };
