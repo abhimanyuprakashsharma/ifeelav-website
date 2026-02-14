@@ -1,404 +1,260 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8" />
-    <!-- 🔥 FULL AUTO RESPONSIVE VIEWPORT -->
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
-    <title>IFEELAV | Curated by Abhimanyu</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+<title>IFEELAV | Curated by Abhimanyu</title>
 
-    <!-- Tailwind -->
-    <script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
 
-    <!-- Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Inter:wght@300;400;600&display=swap" rel="stylesheet" />
+<style>
+:root { --gold:#C5A059; }
 
-    <style>
-        :root {
-            --gold: #C5A059;
-            --dark-bg: #050505;
-        }
+*{box-sizing:border-box;margin:0;padding:0;}
+body{
+font-family:'Inter',sans-serif;
+background:#ffffff;
+color:#1a1a1a;
+overflow-x:hidden;
+}
 
-        * {
-            box-sizing: border-box;
-        }
+.brand-font{font-family:'Cinzel',serif;}
+.gold-text{color:var(--gold);}
 
-        html, body {
-            margin: 0;
-            padding: 0;
-            overflow-x: hidden;
-        }
+/* Responsive Container */
+#mainContent{
+width:100%;
+max-width:1500px;
+margin:auto;
+padding:clamp(12px,4vw,40px);
+padding-top:110px;
+}
 
-        body {
-            font-family: 'Inter', sans-serif;
-            background: #ffffff;
-            color: #1a1a1a;
-            transition: 0.3s;
-            min-height: 100vh;
-        }
+/* HERO SLIDER */
+.hero-slider{
+position:relative;
+width:100%;
+height:clamp(320px,60vh,720px);
+border-radius:28px;
+overflow:hidden;
+}
 
-        body.dark {
-            background: var(--dark-bg);
-            color: #f5f5f5;
-        }
+.hero-slide{
+position:absolute;
+inset:0;
+opacity:0;
+transition:opacity 0.8s ease;
+}
 
-        .brand-font {
-            font-family: 'Cinzel', serif;
-        }
+.hero-slide.active{opacity:1;}
 
-        .gold-text {
-            color: var(--gold);
-        }
+.hero-slide img{
+width:100%;
+height:100%;
+object-fit:cover;
+}
 
-        /* 🔥 AUTO RESPONSIVE TYPOGRAPHY */
-        h1 {
-            font-size: clamp(32px, 6vw, 80px);
-        }
+.hero-overlay{
+position:absolute;
+inset:0;
+background:linear-gradient(to top,rgba(0,0,0,0.85),rgba(0,0,0,0.2));
+}
 
-        h2 {
-            font-size: clamp(18px, 3vw, 36px);
-        }
+/* OTT ROW */
+.ott-row{margin-top:40px;}
+.ott-scroll{
+display:flex;
+gap:16px;
+overflow-x:auto;
+scroll-snap-type:x mandatory;
+}
+.ott-scroll::-webkit-scrollbar{display:none;}
 
-        p {
-            font-size: clamp(14px, 1.4vw, 18px);
-        }
-
-        /* 🔥 MAIN CONTAINER AUTO RESOLUTION */
-        #mainContent {
-            width: 100%;
-            max-width: 1500px;
-            margin: 0 auto;
-            padding-left: clamp(12px, 4vw, 40px);
-            padding-right: clamp(12px, 4vw, 40px);
-        }
-
-        /* 🔥 NAVBAR */
-        .navbar {
-            padding: clamp(10px, 2vw, 20px) clamp(16px, 4vw, 40px);
-            backdrop-filter: blur(12px);
-        }
-
-        /* 🎬 HERO SLIDER (MOVIES + SERIES MIX) */
-        .hero-slider {
-            position: relative;
-            width: 100%;
-            height: clamp(320px, 60vh, 720px);
-            border-radius: clamp(16px, 3vw, 32px);
-            overflow: hidden;
-        }
-
-        .hero-slide {
-            position: absolute;
-            inset: 0;
-            opacity: 0;
-            transition: opacity 0.8s ease;
-        }
-
-        .hero-slide.active {
-            opacity: 1;
-        }
-
-        .hero-slide img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-
-        .hero-overlay {
-            position: absolute;
-            inset: 0;
-            background: linear-gradient(to top, rgba(0,0,0,0.85), rgba(0,0,0,0.2));
-        }
-
-        /* 🔥 OTT ROWS (NETFLIX STYLE) */
-        .ott-row {
-            margin-top: clamp(28px, 5vw, 60px);
-            width: 100%;
-        }
-
-        .ott-scroll {
-            display: flex;
-            gap: clamp(10px, 2vw, 20px);
-            overflow-x: auto;
-            padding: 10px 0;
-            scroll-snap-type: x mandatory;
-            -webkit-overflow-scrolling: touch;
-        }
-
-        .ott-scroll::-webkit-scrollbar {
-            display: none;
-        }
-
-        /* 🎞 POSTER CARDS AUTO SIZE */
-        .poster-card {
-            min-width: clamp(130px, 18vw, 220px);
-            border-radius: clamp(12px, 2vw, 18px);
-            overflow: hidden;
-            cursor: pointer;
-            transition: 0.3s;
-            flex-shrink: 0;
-            scroll-snap-align: start;
-            box-shadow: 0 12px 30px rgba(0,0,0,0.15);
-        }
-
-        .poster-card:hover {
-            transform: scale(1.08);
-        }
-
-        .poster-card img {
-            width: 100%;
-            height: clamp(190px, 28vw, 340px);
-            object-fit: cover;
-        }
-
-        /* 🔥 GLASS PANEL */
-        .glass-panel {
-            background: rgba(255,255,255,0.92);
-            backdrop-filter: blur(12px);
-            border: 1px solid rgba(0,0,0,0.08);
-            border-radius: clamp(14px, 2vw, 22px);
-        }
-
-        body.dark .glass-panel {
-            background: rgba(20,20,20,0.92);
-            border: 1px solid rgba(255,255,255,0.15);
-            color: white;
-        }
-
-        /* 📱 MOBILE OPTIMIZATION */
-        @media (max-width: 768px) {
-            .poster-card:hover {
-                transform: none;
-            }
-            .hero-slider {
-                height: 42vh;
-            }
-        }
-
-        /* 🖥 ULTRA WIDE (4K) */
-        @media (min-width: 1800px) {
-            #mainContent {
-                max-width: 1700px;
-            }
-        }
-    </style>
+.poster-card{
+min-width:clamp(130px,18vw,220px);
+border-radius:16px;
+overflow:hidden;
+cursor:pointer;
+transition:0.3s;
+flex-shrink:0;
+scroll-snap-align:start;
+box-shadow:0 10px 25px rgba(0,0,0,0.15);
+}
+.poster-card:hover{transform:scale(1.08);}
+.poster-card img{
+width:100%;
+height:clamp(190px,28vw,340px);
+object-fit:cover;
+}
+</style>
 </head>
-<body class="light">
 
-    <!-- 🔝 NAVBAR (UNCHANGED LOGIC SAFE) -->
-    <div class="fixed top-0 left-0 w-full z-50 navbar flex justify-between items-center bg-white/90 border-b shadow-sm">
-        <div class="text-xl font-bold brand-font gold-text cursor-pointer" onclick="location.reload()">IFEELAV</div>
-        <div class="flex gap-4 items-center">
-            <input type="text" placeholder="Search Shows..." class="border-b outline-none text-sm md:text-base">
-            <button onclick="toggleWatchlist()" class="text-xl">❤️</button>
-            <button onclick="toggleAuthModal()" class="text-xl">👤</button>
-        </div>
-    </div>
+<body>
 
-    <div id="mainContent" class="pt-28 pb-20">
+<!-- NAVBAR -->
+<div class="fixed top-0 left-0 w-full z-50 flex justify-between items-center bg-white/95 backdrop-blur border-b px-6 py-4">
+<div class="text-xl font-bold brand-font gold-text cursor-pointer" onclick="location.reload()">IFEELAV</div>
+<div class="flex gap-4 items-center">
+<input type="text" placeholder="Search Shows..." class="border-b outline-none text-sm">
+<button>❤️</button>
+<button>👤</button>
+</div>
+</div>
 
-        <!-- 🏠 STEP1 PREMIUM OTT HOMEPAGE -->
-        <div id="step1">
+<div id="mainContent">
 
-            <!-- Branding -->
-            <div class="text-center mb-10">
-                <h1 class="brand-font gold-text">IFEELAV</h1>
-                <p class="uppercase tracking-[0.4em] text-gray-500 mt-2 text-xs md:text-sm">
-                    Curated by Abhimanyu
-                </p>
-                <p class="mt-4 text-gray-600 italic max-w-xl mx-auto">
-                    “Discover stories that match your mood, not just your watchlist.”
-                </p>
+<!-- STEP1 HOMEPAGE -->
+<div id="step1">
 
-                <!-- 🔥 WORKING BUTTON (REGION SELECTOR FLOW B) -->
-                <button onclick="openRegionSelector()"
-                    class="mt-8 bg-[#C5A059] text-white px-8 py-3 rounded-full font-bold shadow-lg hover:scale-105 transition">
-                    Start Exploring ✨
-                </button>
-            </div>
+<div class="text-center mb-10">
+<h1 class="brand-font gold-text text-5xl md:text-7xl">IFEELAV</h1>
+<p class="uppercase tracking-[0.4em] text-gray-500 mt-2 text-sm">Curated by Abhimanyu</p>
+<p class="mt-4 text-gray-600 italic max-w-xl mx-auto">
+“Discover stories that match your mood, not just your watchlist.”
+</p>
 
-            <!-- 🎬 HERO SLIDER -->
-            <div id="heroSlider" class="hero-slider mb-6"></div>
+<button onclick="openRegionSelector()" class="mt-8 bg-[#C5A059] text-white px-8 py-3 rounded-full font-bold shadow-lg hover:scale-105 transition">
+Start Exploring ✨
+</button>
+</div>
 
-            <!-- 🔥 OTT ROWS -->
-            <div class="ott-row">
-                <h2 class="brand-font gold-text mb-2">Trending Now</h2>
-                <div id="trendingRow" class="ott-scroll"></div>
-            </div>
+<!-- HERO BANNER -->
+<div id="heroSlider" class="hero-slider"></div>
 
-            <div class="ott-row">
-                <h2 class="brand-font gold-text mb-2">Top Rated</h2>
-                <div id="topRatedRow" class="ott-scroll"></div>
-            </div>
+<!-- ROWS -->
+<div class="ott-row">
+<h2 class="brand-font gold-text text-2xl mb-3">Trending Now</h2>
+<div id="trendingRow" class="ott-scroll"></div>
+</div>
 
-            <div class="ott-row">
-                <h2 class="brand-font gold-text mb-2">Hollywood</h2>
-                <div id="hollywoodRow" class="ott-scroll"></div>
-            </div>
+<div class="ott-row">
+<h2 class="brand-font gold-text text-2xl mb-3">Top Rated</h2>
+<div id="topRatedRow" class="ott-scroll"></div>
+</div>
 
-            <div class="ott-row">
-                <h2 class="brand-font gold-text mb-2">Bollywood</h2>
-                <div id="bollywoodRow" class="ott-scroll"></div>
-            </div>
+<div class="ott-row">
+<h2 class="brand-font gold-text text-2xl mb-3">Hollywood</h2>
+<div id="hollywoodRow" class="ott-scroll"></div>
+</div>
 
-            <div class="ott-row">
-                <h2 class="brand-font gold-text mb-2">Anime</h2>
-                <div id="animeRow" class="ott-scroll"></div>
-            </div>
-        </div>
+<div class="ott-row">
+<h2 class="brand-font gold-text text-2xl mb-3">Bollywood</h2>
+<div id="bollywoodRow" class="ott-scroll"></div>
+</div>
 
-        <!-- 🎯 STEP2 (REGION / MOOD FLOW SAFE) -->
-        <div id="step2" class="hidden text-center max-w-3xl mx-auto">
-            <h1 id="regionTitle" class="brand-font gold-text mb-6"></h1>
-            <div id="step2Grid" class="grid grid-cols-2 md:grid-cols-3 gap-4 mb-8"></div>
-            <button onclick="history.back()" class="text-xs opacity-60 p-4">← Go Back</button>
-        </div>
+<div class="ott-row">
+<h2 class="brand-font gold-text text-2xl mb-3">Anime</h2>
+<div id="animeRow" class="ott-scroll"></div>
+</div>
 
-        <!-- 🎬 STEP3 (FORMAT - UNTOUCHED) -->
-        <div id="step3" class="hidden text-center max-w-3xl mx-auto">
-            <h1 class="brand-font gold-text mb-8">Select Format</h1>
-            <div class="flex flex-col md:flex-row gap-6 justify-center">
-                <button onclick="startApp('movie')" class="glass-panel p-6 rounded-xl font-bold text-lg">Movies 🎬</button>
-                <button onclick="startApp('tv')" class="glass-panel p-6 rounded-xl font-bold text-lg">Series 📺</button>
-            </div>
-        </div>
+</div>
 
-        <!-- ❤️ SWIPE STEP (SAFE PLACEHOLDER - YOUR ORIGINAL LOGIC WILL HANDLE) -->
-        <div id="swipeStep" class="hidden text-center">
-            <h2 class="text-xl font-bold">Loading Recommendations...</h2>
-        </div>
+<!-- STEP2 REGION -->
+<div id="step2" class="hidden text-center max-w-3xl mx-auto">
+<h1 id="regionTitle" class="brand-font gold-text text-3xl mb-6"></h1>
+<div id="step2Grid" class="grid grid-cols-2 md:grid-cols-3 gap-4 mb-8"></div>
+</div>
 
-    </div>
+</div>
 
-    <script type="module">
+<script type="module">
 
-        /* 🎬 FETCH MOVIES + SERIES MIX (ULTRA PREMIUM) */
-        async function fetchMixedContent() {
-            try {
-                const [tvRes, movieRes] = await Promise.all([
-                    fetch('/api/shows?type=tv'),
-                    fetch('/api/shows?type=movie')
-                ]);
+/* 🔥 CASE-SAFE API FETCH (Capital Shows.js Fix) */
+async function fetchMixedContent(){
+try{
+let tvRes=await fetch('/api/Shows?type=tv');
+let movieRes=await fetch('/api/Shows?type=movie');
 
-                const tvData = await tvRes.json();
-                const movieData = await movieRes.json();
+if(!tvRes.ok||!movieRes.ok){
+tvRes=await fetch('/api/shows?type=tv');
+movieRes=await fetch('/api/shows?type=movie');
+}
 
-                const tv = tvData.results || [];
-                const movies = movieData.results || [];
+const tvData=await tvRes.json();
+const movieData=await movieRes.json();
 
-                return [...tv, ...movies]
-                    .filter(i => i.poster_path && i.backdrop_path && i.vote_average >= 6)
-                    .sort((a,b) => b.vote_average - a.vote_average)
-                    .slice(0, 30);
+const tv=tvData.results||[];
+const movies=movieData.results||[];
 
-            } catch (e) {
-                console.error("Content Load Error:", e);
-                return [];
-            }
-        }
+return [...tv,...movies]
+.filter(i=>i&&(i.backdrop_path||i.poster_path))
+.slice(0,30);
 
-        /* 🎥 HERO SLIDER */
-        function initHeroSlider(items) {
-            const hero = document.getElementById('heroSlider');
-            let index = 0;
-            hero.innerHTML = "";
+}catch(e){
+console.error("API Error:",e);
+return[];
+}
+}
 
-            items.slice(0, 6).forEach((item, i) => {
-                const title = item.name || item.title || "Show";
+/* HERO SLIDER */
+function initHeroSlider(items){
+const hero=document.getElementById('heroSlider');
+hero.innerHTML="";
+let index=0;
 
-                const slide = document.createElement('div');
-                slide.className = 'hero-slide' + (i === 0 ? ' active' : '');
-                slide.innerHTML = `
-                    <img src="https://image.tmdb.org/t/p/original${item.backdrop_path}" />
-                    <div class="hero-overlay"></div>
-                    <div class="absolute bottom-6 md:bottom-10 left-4 md:left-10 text-white max-w-xl">
-                        <h2 class="brand-font mb-2">${title}</h2>
-                        <p class="text-xs md:text-sm opacity-90 mb-3">
-                            ⭐ ${item.vote_average?.toFixed(1) || 'N/A'}
-                        </p>
-                        <button onclick="openDetails(${item.id})"
-                            class="bg-[#C5A059] px-6 py-2 rounded-full font-bold shadow-lg">
-                            View Details
-                        </button>
-                    </div>
-                `;
-                hero.appendChild(slide);
-            });
+items.slice(0,6).forEach((item,i)=>{
+const title=item.name||item.title||"Show";
+const slide=document.createElement('div');
+slide.className='hero-slide'+(i===0?' active':'');
+slide.innerHTML=`
+<img src="https://image.tmdb.org/t/p/original${item.backdrop_path||item.poster_path}">
+<div class="hero-overlay"></div>
+<div class="absolute bottom-8 left-6 text-white max-w-xl">
+<h2 class="brand-font text-3xl md:text-5xl mb-2">${title}</h2>
+<p class="text-sm mb-3">⭐ ${item.vote_average?.toFixed(1)||'N/A'}</p>
+</div>`;
+hero.appendChild(slide);
+});
 
-            setInterval(() => {
-                const slides = document.querySelectorAll('.hero-slide');
-                if (!slides.length) return;
-                slides.forEach(s => s.classList.remove('active'));
-                index = (index + 1) % slides.length;
-                slides[index].classList.add('active');
-            }, 4500);
-        }
+setInterval(()=>{
+const slides=document.querySelectorAll('.hero-slide');
+slides.forEach(s=>s.classList.remove('active'));
+index=(index+1)%slides.length;
+slides[index].classList.add('active');
+},4500);
+}
 
-        /* 🎞 RENDER OTT ROW */
-        function renderRow(id, list) {
-            const container = document.getElementById(id);
-            container.innerHTML = "";
+/* RENDER ROW */
+function renderRow(id,list){
+const container=document.getElementById(id);
+container.innerHTML="";
+list.forEach(item=>{
+if(!item.poster_path)return;
+const card=document.createElement('div');
+card.className='poster-card';
+card.innerHTML=`<img src="https://image.tmdb.org/t/p/w500${item.poster_path}">`;
+container.appendChild(card);
+});
+}
 
-            list.forEach(item => {
-                if (!item.poster_path) return;
+/* LOAD HOMEPAGE */
+async function loadHomepage(){
+const data=await fetchMixedContent();
+if(!data.length)return;
+initHeroSlider(data);
+renderRow('trendingRow',data);
+renderRow('topRatedRow',[...data].sort((a,b)=>b.vote_average-a.vote_average));
+renderRow('hollywoodRow',data.filter(i=>i.original_language==='en'));
+renderRow('bollywoodRow',data.filter(i=>i.original_language==='hi'));
+renderRow('animeRow',data.filter(i=>i.original_language==='ja'));
+}
 
-                const card = document.createElement('div');
-                card.className = 'poster-card';
-                card.onclick = () => openDetails(item.id);
-                card.innerHTML = `
-                    <img src="https://image.tmdb.org/t/p/w500${item.poster_path}" loading="lazy" />
-                `;
-                container.appendChild(card);
-            });
-        }
+/* REGION SELECTOR */
+window.openRegionSelector=()=>{
+document.getElementById('step1').classList.add('hidden');
+document.getElementById('step2').classList.remove('hidden');
+document.getElementById('regionTitle').innerText="Choose Your Region";
+document.getElementById('step2Grid').innerHTML=`
+<button onclick="alert('Hollywood Flow')" class="glass-panel p-4 rounded-xl font-bold">Hollywood 🌎</button>
+<button onclick="alert('Bollywood Flow')" class="glass-panel p-4 rounded-xl font-bold">Bollywood 🇮🇳</button>
+<button onclick="alert('Anime Flow')" class="glass-panel p-4 rounded-xl font-bold">Anime 🇯🇵</button>
+`;
+};
 
-        /* 🚀 LOAD HOMEPAGE */
-        async function loadHomepage() {
-            const data = await fetchMixedContent();
-            if (!data.length) return;
+loadHomepage();
 
-            initHeroSlider(data);
+</script>
 
-            renderRow('trendingRow', data.slice(0, 20));
-            renderRow('topRatedRow', [...data].sort((a,b)=>b.vote_average-a.vote_average));
-            renderRow('hollywoodRow', data.filter(i=>i.original_language==='en'));
-            renderRow('bollywoodRow', data.filter(i=>i.original_language==='hi'));
-            renderRow('animeRow', data.filter(i=>i.original_language==='ja'));
-        }
-
-        /* 🎯 REGION SELECTOR (FLOW B - FIXED) */
-        window.openRegionSelector = () => {
-            document.getElementById('step1').classList.add('hidden');
-            document.getElementById('step2').classList.remove('hidden');
-            document.getElementById('regionTitle').innerText = "Choose Your Region";
-
-            document.getElementById('step2Grid').innerHTML = `
-                <button onclick="selectRegion('hi','Bollywood')" class="glass-panel p-4 rounded-xl font-bold">Bollywood 🇮🇳</button>
-                <button onclick="selectRegion('en','Hollywood')" class="glass-panel p-4 rounded-xl font-bold">Hollywood 🌎</button>
-                <button onclick="selectRegion('ja','Anime')" class="glass-panel p-4 rounded-xl font-bold">Anime 🇯🇵</button>
-                <button onclick="selectRegion('ko','K-Drama')" class="glass-panel p-4 rounded-xl font-bold">K-Drama 🇰🇷</button>
-            `;
-
-            history.pushState({step:2}, "");
-        };
-
-        /* SAFE FLOW (DOES NOT TOUCH YOUR API ENGINE) */
-        window.selectRegion = (lang, name) => {
-            document.getElementById('step2').classList.add('hidden');
-            document.getElementById('step3').classList.remove('hidden');
-        };
-
-        window.startApp = (type) => {
-            document.getElementById('step3').classList.add('hidden');
-            document.getElementById('swipeStep').classList.remove('hidden');
-        };
-
-        /* PLACEHOLDER (YOUR ORIGINAL FUNCTIONS EXIST) */
-        window.openDetails = (id) => console.log("Open Details:", id);
-        window.toggleWatchlist = () => {};
-        window.toggleAuthModal = () => {};
-
-        loadHomepage();
-
-    </script>
 </body>
 </html>
