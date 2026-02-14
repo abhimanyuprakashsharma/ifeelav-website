@@ -16,29 +16,50 @@
         .gold-text { color: var(--gold); }
         .no-select { user-select: none; }
 
-        /* --- LAYOUT FIXES (Z-INDEX MAGIC) --- */
-        
-        /* 1. HERO (Behind everything) */
+        /* --- HERO BANNER FIX FOR MOBILE --- */
         .hero-banner-container {
-            position: fixed; /* Chipka hua */
+            position: fixed;
             top: 0; left: 0;
             width: 100%;
-            height: 75vh; 
-            z-index: 0; /* Sabse neeche */
-            mask-image: linear-gradient(to bottom, black 40%, transparent 100%);
+            z-index: 0;
+            /* Mobile Default: Shorter height & less aggressive fade */
+            height: 55vh; 
+            mask-image: linear-gradient(to bottom, black 60%, transparent 100%);
+        }
+
+        /* Desktop Override: Taller height */
+        @media (min-width: 768px) {
+            .hero-banner-container {
+                height: 80vh;
+                mask-image: linear-gradient(to bottom, black 40%, transparent 100%);
+            }
         }
         
         .hero-slide { position: absolute; inset: 0; opacity: 0; transition: opacity 1s ease-in-out; }
         .hero-slide.active { opacity: 1; }
         
-        /* 2. CONTENT WRAPPER (Above Hero) */
+        .hero-content { 
+            position: absolute; 
+            bottom: 15%; 
+            left: 5%; 
+            right: 5%;
+            z-index: 10; 
+            pointer-events: auto; 
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+        }
+
+        /* --- CONTENT WRAPPER --- */
         .main-scroll-area {
             position: relative;
-            z-index: 20; /* Hero se upar */
-            margin-top: 55vh; /* Hero dikhane ke liye jagah */
-            background: linear-gradient(to bottom, transparent, #000 100px, #000 100%);
+            z-index: 20;
+            /* Match margin to mobile hero height */
+            margin-top: 45vh; 
+            background: linear-gradient(to bottom, transparent, #000 50px, #000 100%);
             min-height: 100vh;
             padding-bottom: 80px;
+        }
+        @media (min-width: 768px) {
+            .main-scroll-area { margin-top: 60vh; }
         }
 
         /* ROWS */
@@ -57,7 +78,7 @@
             border-radius: 8px; overflow: hidden; 
             transition: transform 0.2s ease; cursor: pointer; position: relative;
             background: #222;
-            z-index: 25; /* Clickable area */
+            z-index: 25;
         }
         .poster-card:active { transform: scale(0.95); }
         .poster-card img { width: 100%; height: 100%; object-fit: cover; pointer-events: none; }
@@ -130,8 +151,8 @@
         <div id="detailContent"></div>
     </div>
 
-    <div id="authModal" class="flex items-center justify-center p-4">
-        <div class="bg-[#181818] p-6 rounded-2xl w-full max-w-sm border border-[#333] relative mt-20">
+    <div id="authModal" class="flex items-center justify-center p-4 min-h-screen">
+        <div class="bg-[#181818] p-6 rounded-2xl w-full max-w-sm border border-[#333] relative">
             <button onclick="window.toggleAuthModal()" class="absolute top-4 right-4 text-gray-400">✕</button>
             <div id="authForms">
                 <h2 class="text-2xl mb-6 font-bold text-center gold-text">Sign In</h2>
@@ -168,17 +189,17 @@
         window.toggleAuthModal = () => document.getElementById('authModal').classList.toggle('active');
         
         window.handleLogin = () => {
-            const e = document.getElementById('email').value.trim();
+            const e = document.getElementById('email').value.trim(); // TRIM ADDED HERE
             const p = document.getElementById('password').value;
-            if(!e || !p) { alert("Please enter details"); return; }
-            signInWithEmailAndPassword(auth, e, p).then(()=>window.toggleAuthModal()).catch(err=>alert(err.message));
+            if(!e || !p) { alert("Please enter email and password"); return; }
+            signInWithEmailAndPassword(auth, e, p).then(()=>window.toggleAuthModal()).catch(err=>alert("Login Error: " + err.message));
         };
 
         window.handleSignup = () => {
-            const e = document.getElementById('email').value.trim();
+            const e = document.getElementById('email').value.trim(); // TRIM ADDED HERE
             const p = document.getElementById('password').value;
-            if(!e || !p) { alert("Please enter details"); return; }
-            createUserWithEmailAndPassword(auth, e, p).then(()=>window.toggleAuthModal()).catch(err=>alert(err.message));
+            if(!e || !p) { alert("Please enter email and password"); return; }
+            createUserWithEmailAndPassword(auth, e, p).then(()=>window.toggleAuthModal()).catch(err=>alert("Signup Error: " + err.message));
         };
 
         window.handleLogout = () => signOut(auth);
@@ -206,6 +227,7 @@
                 const container = document.getElementById(elementId);
                 const items = data.results || [];
                 
+                // Pass ID as string to prevent int issues
                 container.innerHTML = items.map(item => `
                     <div class="poster-card" onclick="window.openDetails('${item.id}')">
                         <img src="https://image.tmdb.org/t/p/w500${item.poster_path}" loading="lazy">
@@ -230,10 +252,10 @@
             container.innerHTML = items.slice(0, 5).map((item, index) => `
                 <div class="hero-slide ${index === 0 ? 'active' : ''}">
                     <img src="https://image.tmdb.org/t/p/original${item.backdrop_path || item.poster_path}" class="w-full h-full object-cover opacity-70">
-                    <div class="absolute bottom-20 left-5 z-10 max-w-lg">
+                    <div class="hero-content">
                         <h1 class="text-3xl md:text-5xl font-bold mb-2 brand-font gold-text drop-shadow-lg">${item.name || item.original_name}</h1>
-                        <p class="text-xs md:text-sm text-gray-200 line-clamp-2 mb-4 drop-shadow-md">${item.overview}</p>
-                        <button onclick="window.openDetails('${item.id}')" class="bg-white text-black px-6 py-2 rounded font-bold hover:bg-gold transition text-sm shadow-lg">Play Trailer</button>
+                        <p class="text-xs md:text-sm text-gray-200 line-clamp-2 mb-4 drop-shadow-md max-w-lg">${item.overview}</p>
+                        <button onclick="window.openDetails('${item.id}')" class="bg-white text-black px-6 py-2 rounded font-bold hover:bg-gold transition text-sm md:text-base shadow-lg">Play Now</button>
                     </div>
                 </div>
             `).join('');
@@ -257,11 +279,13 @@
             content.innerHTML = '<div class="flex h-screen items-center justify-center text-gold animate-pulse">Loading Details...</div>';
 
             try {
-                // 1. Fetch Details
                 const res = await fetch(`/api/getDetails?id=${id}`);
                 const data = await res.json();
                 
-                // 2. Fetch Trailer
+                const isMobile = window.innerWidth < 768;
+                const heroImage = isMobile ? data.poster_path : (data.backdrop_path || data.poster_path);
+
+                // Fetch Trailer
                 let trailerKey = null;
                 try {
                     const type = data.number_of_seasons ? 'tv' : 'movie';
@@ -271,7 +295,7 @@
                     if(trailer) trailerKey = trailer.key;
                 } catch(e) {}
 
-                // 3. Fetch Streaming
+                // Fetch Streaming
                 let streamHTML = '';
                 try {
                     const sRes = await fetch(`/api/getStream?tmdb_id=${id}&type=tv`);
@@ -280,10 +304,10 @@
                     else streamHTML = '<span class="text-[10px] text-gray-500">Check local listings</span>';
                 } catch(e) {}
 
-                // 4. Render HTML
+                // Hero Section: Video or Image
                 const heroSection = trailerKey 
                     ? `<div class="aspect-video w-full bg-black"><iframe class="w-full h-full" src="https://www.youtube.com/embed/${trailerKey}?autoplay=1&mute=0&rel=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe></div>`
-                    : `<div class="relative w-full h-[50vh]"><img src="https://image.tmdb.org/t/p/original${data.backdrop_path || data.poster_path}" class="w-full h-full object-cover"><div class="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent"></div></div>`;
+                    : `<div class="relative w-full h-[50vh]"><img src="https://image.tmdb.org/t/p/original${heroImage}" class="w-full h-full object-cover"><div class="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent"></div></div>`;
 
                 content.innerHTML = `
                     <div class="bg-black min-h-screen">
@@ -351,15 +375,4 @@
         // --- SEARCH ---
         window.handleTyping = (e) => {
             const q = e.target.value.trim();
-            const dd = document.getElementById('searchDropdown');
-            if(q.length < 2) { dd.style.display = 'none'; return; }
-            
-            clearTimeout(window.searchTimer);
-            window.searchTimer = setTimeout(async () => {
-                const res = await fetch(`/api/getShows?query=${q}`);
-                const data = await res.json();
-                dd.style.display = 'block';
-                dd.innerHTML = data.results.slice(0,5).map(s => `
-                    <div class="flex items-center gap-3 p-3 hover:bg-gray-800 cursor-pointer border-b border-gray-700 transition" onclick="window.openDetails('${s.id}')">
-                        <img src="https://image.tmdb.org/t/p/w92${s.poster_path}" class="w-8 h-12 object-cover rounded">
-                        <span class="text-xs font-bold text-gray-300 line-clamp-1">${s.name || s.original_name}</span>
+            const dd = document.getElementById('searchDrop
