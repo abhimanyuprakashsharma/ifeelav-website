@@ -41,14 +41,13 @@
         .slide-right { transform: translateX(120%) rotate(15deg); opacity: 0; }
         .slide-left { transform: translateX(-120%) rotate(-15deg); opacity: 0; }
         .fade-in { animation: fadeIn 0.6s ease-out forwards; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-
+        
         #detailOverlay { transition: opacity 0.4s ease, transform 0.4s ease; opacity: 0; pointer-events: none; transform: translateY(50px); }
         #detailOverlay.active { opacity: 1; pointer-events: auto; transform: translateY(0); }
         #watchlistPanel { transition: transform 0.3s ease-in-out; transform: translateX(100%); }
         #watchlistPanel.open { transform: translateX(0); }
 
-        /* SEARCH SUGGESTIONS DROPDOWN */
+        /* Search Dropdown */
         #searchDropdown {
             position: absolute; top: 110%; left: 0; width: 100%;
             background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(15px);
@@ -56,15 +55,18 @@
             box-shadow: 0 15px 40px rgba(0,0,0,0.1);
             overflow: hidden; z-index: 100;
             max-height: 400px; overflow-y: auto;
-            transform-origin: top; transition: all 0.2s ease;
-            display: none;
+            transform-origin: top; transition: all 0.2s ease; display: none;
         }
         #searchDropdown.active { display: block; animation: dropDown 0.3s ease forwards; }
         @keyframes dropDown { from { opacity: 0; transform: scaleY(0.9); } to { opacity: 1; transform: scaleY(1); } }
-        
         .suggestion-item { padding: 10px 15px; display: flex; align-items: center; gap: 12px; cursor: pointer; border-bottom: 1px solid #f0f0f0; transition: background 0.2s; }
-        .suggestion-item:last-child { border-bottom: none; }
         .suggestion-item:hover { background: #fcf8f0; }
+
+        /* Login Modal */
+        #authModal { transition: opacity 0.3s ease; opacity: 0; pointer-events: none; }
+        #authModal.active { opacity: 1; pointer-events: auto; }
+        .auth-input { width: 100%; padding: 12px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 10px; outline: none; transition: border 0.3s; }
+        .auth-input:focus { border-color: var(--gold); }
     </style>
 </head>
 <body class="text-gray-800" onclick="closeSearchDropdown()">
@@ -72,16 +74,19 @@
 
     <div class="fixed top-0 left-0 w-full z-50 p-4 flex justify-between items-center bg-white/80 backdrop-blur-md border-b border-[#C5A059]/10">
         <div class="text-xl md:text-2xl font-bold italic premium-font gold-text cursor-pointer" onclick="location.reload()">IFEELAV</div>
-        <div class="flex gap-3">
+        <div class="flex gap-3 items-center">
             
             <div class="relative group z-50">
                 <input type="text" id="searchInput" placeholder="Search..." autocomplete="off"
-                    class="glass-panel rounded-full px-4 py-2 w-36 md:w-64 focus:w-48 md:focus:w-72 transition-all outline-none text-sm focus:border-[#C5A059]" 
+                    class="glass-panel rounded-full px-4 py-2 w-28 md:w-64 focus:w-40 md:focus:w-72 transition-all outline-none text-sm focus:border-[#C5A059]" 
                     oninput="handleTyping(event)" onclick="event.stopPropagation()">
-                <span class="absolute right-3 top-2.5 text-gray-400">🔍</span>
-                
                 <div id="searchDropdown"></div>
             </div>
+
+            <button onclick="toggleAuthModal()" class="glass-panel w-10 h-10 rounded-full flex items-center justify-center text-gray-600 hover:text-[#C5A059] transition shadow-lg relative">
+                <span id="userIcon">👤</span>
+                <span id="loginStatus" class="absolute top-0 right-0 w-3 h-3 bg-gray-400 rounded-full border-2 border-white"></span>
+            </button>
 
             <button onclick="toggleWatchlist()" class="glass-panel w-10 h-10 rounded-full flex items-center justify-center text-gray-600 hover:text-red-500 transition shadow-lg relative">
                 ❤️ <span id="badge" class="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] w-4 h-4 rounded-full flex items-center justify-center hidden">0</span>
@@ -89,8 +94,37 @@
         </div>
     </div>
 
+    <div id="authModal" class="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm">
+        <div class="bg-white p-8 rounded-3xl shadow-2xl w-full max-w-sm relative">
+            <button onclick="toggleAuthModal()" class="absolute top-4 right-4 text-gray-400 hover:text-red-500">✕</button>
+            
+            <div id="loggedOutView">
+                <h2 class="premium-font text-2xl mb-2">Welcome</h2>
+                <p class="text-xs text-gray-400 mb-6 uppercase tracking-wider">Sign in to sync your vault</p>
+                
+                <input type="email" id="email" placeholder="Email Address" class="auth-input">
+                <input type="password" id="password" placeholder="Password" class="auth-input">
+                
+                <button onclick="handleLogin()" class="w-full bg-[#C5A059] text-white py-3 rounded-xl font-bold hover:bg-[#b08d4b] transition mb-3">Sign In</button>
+                <button onclick="handleSignup()" class="w-full border border-[#C5A059] text-[#C5A059] py-3 rounded-xl font-bold hover:bg-[#fcf8f0] transition mb-4">Create Account</button>
+                
+                <div class="text-center border-t pt-4">
+                    <button onclick="handleGoogleLogin()" class="text-sm text-gray-500 hover:text-gray-800 flex items-center justify-center gap-2 w-full">
+                        <span class="text-lg">G</span> Continue with Google
+                    </button>
+                </div>
+            </div>
+
+            <div id="loggedInView" class="hidden text-center">
+                <div class="w-20 h-20 bg-gray-100 rounded-full mx-auto flex items-center justify-center text-4xl mb-4">👤</div>
+                <h2 id="userNameDisplay" class="premium-font text-xl mb-1">User</h2>
+                <p id="userEmailDisplay" class="text-sm text-gray-400 mb-6">user@example.com</p>
+                <button onclick="handleLogout()" class="w-full bg-red-50 text-red-500 py-3 rounded-xl font-bold hover:bg-red-100 transition">Sign Out</button>
+            </div>
+        </div>
+    </div>
+
     <div class="relative z-10 min-h-screen flex flex-col items-center justify-center pt-20 px-4 pb-10">
-        
         <div id="step1" class="text-center w-full max-w-3xl fade-in">
             <h1 class="premium-font italic text-5xl md:text-7xl gold-text mb-2 tracking-tighter">IFEELAV</h1>
             <p class="text-gray-400 uppercase tracking-[6px] text-[10px] mb-12 italic">The Abhimanyu Collection</p>
@@ -170,86 +204,146 @@
         <div id="watchlistItems" class="space-y-3"></div>
     </div>
 
-    <script>
-        // Canvas & Animation
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc, getDoc, updateDoc, arrayUnion, arrayRemove } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyAoCZuJ4tGdwmFuz8y-_tc5phvfbn2oi1A",
+            authDomain: "ifeelav-app.firebaseapp.com",
+            projectId: "ifeelav-app",
+            storageBucket: "ifeelav-app.firebasestorage.app",
+            messagingSenderId: "1060067685106",
+            appId: "1:1060067685106:web:4ba1523ee066af4633966b",
+            measurementId: "G-K7YJRZS854"
+        };
+
+        // Init Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        
+        let currentUser = null;
+        let shows = []; let index = 0; let watchlist = []; let currentDetailId = null;
+        let selectedLang = ''; let searchTimer;
+
+        // --- AUTH LOGIC ---
+        window.toggleAuthModal = () => {
+            const modal = document.getElementById('authModal');
+            modal.classList.toggle('active');
+        }
+
+        onAuthStateChanged(auth, async (user) => {
+            currentUser = user;
+            if (user) {
+                // Logged In
+                document.getElementById('loginStatus').classList.remove('bg-gray-400');
+                document.getElementById('loginStatus').classList.add('bg-green-500');
+                document.getElementById('loggedOutView').classList.add('hidden');
+                document.getElementById('loggedInView').classList.remove('hidden');
+                document.getElementById('userNameDisplay').innerText = user.displayName || "User";
+                document.getElementById('userEmailDisplay').innerText = user.email;
+                
+                // Load Cloud Watchlist
+                await loadCloudWatchlist();
+            } else {
+                // Logged Out
+                document.getElementById('loginStatus').classList.remove('bg-green-500');
+                document.getElementById('loginStatus').classList.add('bg-gray-400');
+                document.getElementById('loggedOutView').classList.remove('hidden');
+                document.getElementById('loggedInView').classList.add('hidden');
+                
+                // Load Local Watchlist
+                watchlist = JSON.parse(localStorage.getItem('avWatchlist')) || [];
+                updateWatchlistUI();
+            }
+        });
+
+        window.handleLogin = async () => {
+            const e = document.getElementById('email').value;
+            const p = document.getElementById('password').value;
+            try { await signInWithEmailAndPassword(auth, e, p); toggleAuthModal(); } catch(err) { alert(err.message); }
+        };
+
+        window.handleSignup = async () => {
+            const e = document.getElementById('email').value;
+            const p = document.getElementById('password').value;
+            try { await createUserWithEmailAndPassword(auth, e, p); toggleAuthModal(); } catch(err) { alert(err.message); }
+        };
+
+        window.handleGoogleLogin = async () => {
+            const provider = new GoogleAuthProvider();
+            try { await signInWithPopup(auth, provider); toggleAuthModal(); } catch(err) { alert(err.message); }
+        };
+
+        window.handleLogout = async () => {
+            await signOut(auth); toggleAuthModal();
+        };
+
+        // --- FIRESTORE LOGIC ---
+        async function loadCloudWatchlist() {
+            if (!currentUser) return;
+            const docRef = doc(db, "users", currentUser.uid);
+            const docSnap = await getDoc(docRef);
+            if (docSnap.exists()) {
+                watchlist = docSnap.data().watchlist || [];
+                // Merge local data if needed (Optional: Logic to merge local to cloud on first login)
+                // For now, let's just use cloud as master
+                updateWatchlistUI();
+            } else {
+                // Create user doc
+                await setDoc(docRef, { email: currentUser.email, watchlist: [] });
+                watchlist = [];
+                updateWatchlistUI();
+            }
+        }
+
+        async function saveToCloud(show, action) {
+            if (!currentUser) return;
+            const docRef = doc(db, "users", currentUser.uid);
+            if (action === 'add') {
+                await updateDoc(docRef, { watchlist: arrayUnion(show) });
+            } else if (action === 'remove') {
+                // Remove logic is tricky with objects, need exact match. 
+                // Simpler: Rewrite whole list
+                await updateDoc(docRef, { watchlist: watchlist });
+            }
+        }
+
+        // --- APP LOGIC (Updated for Cloud) ---
+        
+        // Canvas Animation
         const canvas = document.getElementById('bgCanvas'); const ctx = canvas.getContext('2d');
         function initCanvas() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
         window.onresize = initCanvas; initCanvas();
         let particles = Array.from({length: 50}, () => ({x:Math.random()*canvas.width, y:Math.random()*canvas.height, r:Math.random()*2, vx:Math.random()*0.5-0.25, vy:Math.random()*0.5-0.25}));
         function animate() { ctx.clearRect(0,0,canvas.width,canvas.height); ctx.fillStyle = `rgba(197, 160, 89, 0.3)`; particles.forEach(p => { p.x+=p.vx; p.y+=p.vy; if(p.x<0||p.x>canvas.width) p.vx*=-1; if(p.y<0||p.y>canvas.height) p.vy*=-1; ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, Math.PI*2); ctx.fill(); }); requestAnimationFrame(animate); } animate();
 
-        // Variables
-        let shows = []; let index = 0; let watchlist = JSON.parse(localStorage.getItem('avWatchlist')) || []; let currentDetailId = null;
-        let selectedLang = ''; let searchTimer;
-
-        // Steps Logic
-        function selectRegion(lang, name) { selectedLang = lang; document.getElementById('step1').classList.add('hidden'); document.getElementById('step2').classList.remove('hidden'); document.getElementById('regionTitle').innerText = "Exploring " + name; }
-        function resetToStep1() { document.getElementById('step2').classList.add('hidden'); document.getElementById('step1').classList.remove('hidden'); selectedLang = ''; }
-        async function startApp(genreId) { document.getElementById('step2').classList.add('hidden'); document.getElementById('swipeStep').classList.remove('hidden'); let url = `/api/getShows?`; if (genreId) url += `genre=${genreId}&`; if (selectedLang) url += `lang=${selectedLang}`; fetchShows(url); }
-
-        // --- NEW SMART SEARCH LOGIC ---
-        function handleTyping(e) {
-            const query = e.target.value.trim();
-            const dropdown = document.getElementById('searchDropdown');
-            
-            // Clear previous timer (Debounce)
-            clearTimeout(searchTimer);
-
-            if (query.length < 2) {
-                dropdown.classList.remove('active');
-                dropdown.innerHTML = '';
-                return;
-            }
-
-            // Wait 300ms before calling API (saves calls)
+        // Nav & Data Functions (Globally accessible via window)
+        window.selectRegion = (l, n) => { selectedLang = l; document.getElementById('step1').classList.add('hidden'); document.getElementById('step2').classList.remove('hidden'); document.getElementById('regionTitle').innerText = "Exploring " + n; }
+        window.resetToStep1 = () => { document.getElementById('step2').classList.add('hidden'); document.getElementById('step1').classList.remove('hidden'); selectedLang = ''; }
+        window.startApp = async (gid) => { document.getElementById('step2').classList.add('hidden'); document.getElementById('swipeStep').classList.remove('hidden'); let u = `/api/getShows?`; if (gid) u += `genre=${gid}&`; if (selectedLang) u += `lang=${selectedLang}`; fetchShows(u); }
+        
+        // Search
+        window.handleTyping = (e) => {
+            const q = e.target.value.trim(); const dd = document.getElementById('searchDropdown'); clearTimeout(searchTimer);
+            if (q.length < 2) { dd.classList.remove('active'); dd.innerHTML = ''; return; }
             searchTimer = setTimeout(async () => {
-                dropdown.classList.add('active');
-                dropdown.innerHTML = '<div class="p-3 text-sm text-gray-400 text-center">Searching...</div>';
-
+                dd.classList.add('active'); dd.innerHTML = '<div class="p-3 text-sm text-gray-400 text-center">Searching...</div>';
                 try {
-                    const res = await fetch(`/api/getShows?query=${encodeURIComponent(query)}`);
-                    const data = await res.json();
-                    const results = data.results ? data.results.slice(0, 6) : []; // Top 6 results
-
-                    if (results.length === 0) {
-                        dropdown.innerHTML = '<div class="p-3 text-sm text-gray-400 text-center">No matches found</div>';
-                    } else {
-                        dropdown.innerHTML = results.map(show => `
-                            <div class="suggestion-item" onclick="openFromSearch(${show.id})">
-                                <img src="https://image.tmdb.org/t/p/w92${show.poster_path}" onerror="this.src='https://placehold.co/40x60'" class="w-10 h-14 object-cover rounded shadow">
-                                <div>
-                                    <h4 class="font-bold text-gray-800 text-sm leading-tight">${show.name || show.original_name}</h4>
-                                    <span class="text-xs text-[#C5A059] font-medium">${show.first_air_date ? show.first_air_date.split('-')[0] : 'N/A'}</span>
-                                    <span class="text-[10px] text-gray-400 ml-2">★ ${show.vote_average.toFixed(1)}</span>
-                                </div>
-                            </div>
-                        `).join('');
-                    }
-                } catch (err) {
-                    dropdown.innerHTML = '<div class="p-3 text-sm text-red-400 text-center">Error fetching data</div>';
-                }
+                    const res = await fetch(`/api/getShows?query=${encodeURIComponent(q)}`); const data = await res.json();
+                    const results = data.results ? data.results.slice(0, 6) : [];
+                    if (results.length === 0) dd.innerHTML = '<div class="p-3 text-sm text-gray-400 text-center">No matches found</div>';
+                    else dd.innerHTML = results.map(s => `<div class="suggestion-item" onclick="openFromSearch(${s.id})"><img src="https://image.tmdb.org/t/p/w92${s.poster_path}" onerror="this.src='https://placehold.co/40x60'" class="w-10 h-14 object-cover rounded shadow"><div><h4 class="font-bold text-gray-800 text-sm leading-tight">${s.name || s.original_name}</h4><span class="text-xs text-[#C5A059] font-medium">${s.first_air_date ? s.first_air_date.split('-')[0] : 'N/A'}</span><span class="text-[10px] text-gray-400 ml-2">★ ${s.vote_average.toFixed(1)}</span></div></div>`).join('');
+                } catch (err) { dd.innerHTML = '<div class="p-3 text-sm text-red-400 text-center">Error</div>'; }
             }, 300);
         }
-
-        // Click on suggestion to open details directly
-        function openFromSearch(id) {
-            closeSearchDropdown();
-            // Check if we are in main view, if so, open details overlay
-            openDetails(id);
-        }
-
-        function closeSearchDropdown() {
-            document.getElementById('searchDropdown').classList.remove('active');
-        }
+        window.openFromSearch = (id) => { window.closeSearchDropdown(); window.openDetails(id); }
+        window.closeSearchDropdown = () => { document.getElementById('searchDropdown').classList.remove('active'); }
 
         async function fetchShows(endpoint) {
-            try {
-                const res = await fetch(endpoint);
-                const data = await res.json();
-                shows = data.results.filter(s => s.poster_path);
-                index = 0;
-                if(shows.length > 0) render(); else alert("No results found.");
-            } catch (err) { console.error(err); }
+            try { const res = await fetch(endpoint); const data = await res.json(); shows = data.results.filter(s => s.poster_path); index = 0; if(shows.length > 0) render(); else alert("No results found."); } catch (err) { console.error(err); }
         }
 
         function render() {
@@ -261,41 +355,75 @@
             const card = document.getElementById('showCard'); card.style.opacity = '0'; card.style.transform = 'scale(0.95)'; setTimeout(() => { card.style.opacity = '1'; card.style.transform = 'scale(1)'; }, 100);
         }
 
-        async function openDetails(id) {
+        window.openDetails = async (id) => {
             const overlay = document.getElementById('detailOverlay'); overlay.classList.remove('hidden'); setTimeout(() => overlay.classList.add('active'), 10); currentDetailId = id;
             try {
                 const res = await fetch(`/api/getDetails?id=${id}`); const data = await res.json();
-                
-                // Smart Image Logic
-                const isMobile = window.innerWidth < 768;
-                let heroImage = data.backdrop_path;
-                if (isMobile && data.poster_path) { heroImage = data.poster_path; } 
-                else if (!heroImage) { heroImage = data.poster_path; }
-                
-                document.getElementById('detailBackdrop').src = `https://image.tmdb.org/t/p/original${heroImage}`;
-                document.getElementById('detailTitle').innerText = data.name;
-                document.getElementById('detailOverview').innerText = data.overview;
+                const isMobile = window.innerWidth < 768; let hero = data.backdrop_path; if(isMobile && data.poster_path) hero = data.poster_path; else if(!hero) hero = data.poster_path;
+                document.getElementById('detailBackdrop').src = `https://image.tmdb.org/t/p/original${hero}`;
+                document.getElementById('detailTitle').innerText = data.name; document.getElementById('detailOverview').innerText = data.overview;
                 document.getElementById('detailYear').innerText = data.first_air_date ? data.first_air_date.split('-')[0] : 'N/A';
                 document.getElementById('detailRating').innerText = "★ " + data.vote_average.toFixed(1);
                 document.getElementById('detailSeasons').innerText = `${data.number_of_seasons || 0} Seasons`;
                 document.getElementById('detailLang').innerText = data.spoken_languages.map(l => l.english_name).join(', ');
-                document.getElementById('detailStatus').innerText = data.status;
-                document.getElementById('detailNetwork').innerText = data.networks[0]?.name || 'N/A';
+                document.getElementById('detailStatus').innerText = data.status; document.getElementById('detailNetwork').innerText = data.networks[0]?.name || 'N/A';
                 document.getElementById('castList').innerHTML = data.credits.cast.slice(0, 6).map(a => `<a href="https://www.google.com/search?q=${encodeURIComponent(a.name + ' actor')}" target="_blank" class="flex items-center gap-2 bg-gray-100 px-3 py-2 rounded-full hover:bg-[#C5A059] hover:text-white transition cursor-pointer"><img src="https://image.tmdb.org/t/p/w200${a.profile_path}" onerror="this.src='https://placehold.co/50'" class="w-8 h-8 rounded-full object-cover"><span class="text-sm font-bold">${a.name}</span></a>`).join('');
                 document.getElementById('screenshotGrid').innerHTML = data.images.backdrops.slice(0, 4).map(img => `<img src="https://image.tmdb.org/t/p/w500${img.file_path}" class="w-full h-32 object-cover rounded-xl hover:scale-105 transition duration-300">`).join('');
-            } catch (err) { console.error(err); alert("Could not fetch details."); closeDetails(); }
+            } catch (err) { console.error(err); alert("Could not fetch details."); window.closeDetails(); }
         }
 
-        function closeDetails() { const overlay = document.getElementById('detailOverlay'); overlay.classList.remove('active'); setTimeout(() => overlay.classList.add('hidden'), 400); }
-        function handleAction(type) { const card = document.getElementById('showCard'); if(type === 'smash') { addToWatchlist(shows[index]); card.classList.add('slide-right'); } else { card.classList.add('slide-left'); } setTimeout(() => { index++; card.classList.remove('slide-right', 'slide-left'); render(); }, 300); }
-        function addToWatchlist(show) { if (!watchlist.some(item => item.id === show.id)) { watchlist.push(show); localStorage.setItem('avWatchlist', JSON.stringify(watchlist)); updateWatchlistUI(); } }
-        function addToWatchlistCurrent() { if(currentDetailId) { let show = shows.find(s => s.id === currentDetailId); if(show) { addToWatchlist(show); alert("Added to Vault!"); } else { 
-            // Fetch minimal info to add to list if not in current list
-             fetch(`/api/getDetails?id=${currentDetailId}`).then(r=>r.json()).then(d=>{ addToWatchlist(d); alert("Added to Vault!"); });
-        } } }
-        function toggleWatchlist() { document.getElementById('watchlistPanel').classList.toggle('open'); updateWatchlistUI(); }
-        function removeFromWatchlist(id) { watchlist = watchlist.filter(item => item.id !== id); localStorage.setItem('avWatchlist', JSON.stringify(watchlist)); updateWatchlistUI(); }
-        function updateWatchlistUI() { const container = document.getElementById('watchlistItems'); const badge = document.getElementById('badge'); badge.innerText = watchlist.length; badge.classList.toggle('hidden', watchlist.length === 0); if (watchlist.length === 0) { container.innerHTML = '<p class="text-gray-400 text-sm text-center mt-10">Vault is empty.</p>'; return; } container.innerHTML = watchlist.map(item => `<div class="flex gap-3 items-center bg-gray-50 p-2 rounded-xl border border-gray-100 hover:shadow-md transition"><div onclick="openDetails(${item.id})" class="flex-1 flex gap-3 cursor-pointer items-center min-w-0"><img src="https://image.tmdb.org/t/p/w200${item.poster_path}" class="w-12 h-16 object-cover rounded-lg"><div class="flex-1 min-w-0"><h4 class="font-bold text-sm text-gray-800 truncate">${item.name || item.original_name}</h4><p class="text-[10px] text-gray-500">Tap for Info</p></div></div><button onclick="removeFromWatchlist(${item.id})" class="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-red-500 bg-white rounded-full shadow-sm">✕</button></div>`).join(''); } updateWatchlistUI();
+        window.closeDetails = () => { const o = document.getElementById('detailOverlay'); o.classList.remove('active'); setTimeout(() => o.classList.add('hidden'), 400); }
+        
+        window.handleAction = (type) => { 
+            const card = document.getElementById('showCard'); 
+            if(type === 'smash') { window.addToWatchlist(shows[index]); card.classList.add('slide-right'); } 
+            else { card.classList.add('slide-left'); } 
+            setTimeout(() => { index++; card.classList.remove('slide-right', 'slide-left'); render(); }, 300); 
+        }
+
+        // --- WATCHLIST LOGIC (Modified for Cloud) ---
+        window.addToWatchlist = (show) => {
+            if (!watchlist.some(item => item.id === show.id)) {
+                watchlist.push(show);
+                
+                if (currentUser) {
+                    saveToCloud(show, 'add'); // Cloud Save
+                } else {
+                    localStorage.setItem('avWatchlist', JSON.stringify(watchlist)); // Local Save
+                }
+                updateWatchlistUI();
+            }
+        }
+        
+        window.addToWatchlistCurrent = () => {
+            if(currentDetailId) { 
+                let show = shows.find(s => s.id === currentDetailId); 
+                if(show) { window.addToWatchlist(show); alert("Added to Vault!"); } 
+                else { fetch(`/api/getDetails?id=${currentDetailId}`).then(r=>r.json()).then(d=>{ window.addToWatchlist(d); alert("Added to Vault!"); }); }
+            } 
+        }
+
+        window.toggleWatchlist = () => { document.getElementById('watchlistPanel').classList.toggle('open'); updateWatchlistUI(); }
+        
+        window.removeFromWatchlist = (id) => {
+            watchlist = watchlist.filter(item => item.id !== id);
+            
+            if (currentUser) {
+                saveToCloud(null, 'remove'); // Remove from Cloud
+            } else {
+                localStorage.setItem('avWatchlist', JSON.stringify(watchlist)); // Remove from Local
+            }
+            updateWatchlistUI();
+        }
+
+        function updateWatchlistUI() {
+            const container = document.getElementById('watchlistItems'); const badge = document.getElementById('badge');
+            badge.innerText = watchlist.length; badge.classList.toggle('hidden', watchlist.length === 0);
+            if (watchlist.length === 0) { container.innerHTML = '<p class="text-gray-400 text-sm text-center mt-10">Vault is empty.</p>'; return; }
+            container.innerHTML = watchlist.map(item => `<div class="flex gap-3 items-center bg-gray-50 p-2 rounded-xl border border-gray-100 hover:shadow-md transition"><div onclick="openDetails(${item.id})" class="flex-1 flex gap-3 cursor-pointer items-center min-w-0"><img src="https://image.tmdb.org/t/p/w200${item.poster_path}" class="w-12 h-16 object-cover rounded-lg"><div class="flex-1 min-w-0"><h4 class="font-bold text-sm text-gray-800 truncate">${item.name || item.original_name}</h4><p class="text-[10px] text-gray-500">Tap for Info</p></div></div><button onclick="removeFromWatchlist(${item.id})" class="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-red-500 bg-white rounded-full shadow-sm">✕</button></div>`).join('');
+        }
+        // Initial load (for local storage if not logged in)
+        updateWatchlistUI();
     </script>
 </body>
 </html>
