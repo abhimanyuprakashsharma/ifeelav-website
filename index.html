@@ -3,178 +3,345 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>IFEELAV | Ultra Premium</title>
+    <title>IFEELAV | The Collection</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,700&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
     
     <style>
         :root { --gold: #C5A059; --bg-center: #ffffff; --bg-edge: #f2eee5; }
-        body { margin: 0; overflow: hidden; font-family: 'Inter', sans-serif; background: radial-gradient(circle at center, var(--bg-center) 20%, var(--bg-edge) 100%); }
+        /* Scrollbar hide karne ke liye */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-thumb { background: #C5A059; border-radius: 10px; }
+        
+        body { margin: 0; font-family: 'Inter', sans-serif; background: radial-gradient(circle at center, var(--bg-center) 20%, var(--bg-edge) 100%); overflow-x: hidden; }
         #bgCanvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; }
         .premium-font { font-family: 'Playfair Display', serif; }
         .gold-text { color: var(--gold); }
         
-        .glass-panel { background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(12px); border: 1px solid rgba(197, 160, 89, 0.2); box-shadow: 0 8px 32px rgba(197, 160, 89, 0.1); }
-        .genre-btn { background: linear-gradient(145deg, #fff, #f9f9f9); border: 1px solid rgba(197, 160, 89, 0.2); color: #444; font-family: 'Playfair Display', serif; font-size: 1.2rem; font-weight: 700; padding: 1.5rem 1rem; border-radius: 20px; transition: all 0.3s; text-transform: uppercase; letter-spacing: 1px; }
-        .genre-btn:hover { border-color: var(--gold); color: var(--gold); transform: translateY(-3px); box-shadow: 0 10px 20px rgba(197, 160, 89, 0.15); }
+        .glass-panel { background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(12px); border: 1px solid rgba(197, 160, 89, 0.2); box-shadow: 0 8px 32px rgba(197, 160, 89, 0.1); }
         
-        .premium-card { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(25px); box-shadow: 0 40px 80px rgba(197, 160, 89, 0.2); border: 1px solid rgba(197, 160, 89, 0.3); border-radius: 40px; cursor: pointer; transition: transform 0.3s; }
-        .premium-card:active { transform: scale(0.98); }
-        
+        /* Mobile Responsive Card */
+        .premium-card { 
+            background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(25px);
+            box-shadow: 0 30px 60px rgba(197, 160, 89, 0.2);
+            border: 1px solid rgba(197, 160, 89, 0.3); border-radius: 30px; 
+            cursor: pointer; transition: transform 0.3s;
+            height: 65vh; width: 100%; max-width: 400px;
+        }
+        @media (min-width: 768px) { .premium-card { height: 75vh; } }
+
         .gold-btn { background: linear-gradient(135deg, var(--gold) 0%, #A68545 100%); box-shadow: 0 10px 25px rgba(197, 160, 89, 0.3); }
+        
+        /* Animations */
         .slide-right { transform: translateX(120%) rotate(15deg); opacity: 0; }
         .slide-left { transform: translateX(-120%) rotate(-15deg); opacity: 0; }
         .fade-in { animation: fadeIn 0.6s ease-out forwards; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-        
-        /* Modal Animation */
-        #detailModal { transition: opacity 0.3s ease, transform 0.3s ease; opacity: 0; pointer-events: none; transform: scale(0.95); }
-        #detailModal.active { opacity: 1; pointer-events: auto; transform: scale(1); }
-        
-        #watchlistPanel { transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1); transform: translateX(100%); }
+
+        /* Full Page Detail View */
+        #detailOverlay { 
+            transition: opacity 0.4s ease, transform 0.4s ease; 
+            opacity: 0; pointer-events: none; transform: translateY(50px);
+        }
+        #detailOverlay.active { opacity: 1; pointer-events: auto; transform: translateY(0); }
+
+        /* Watchlist Drawer */
+        #watchlistPanel { transition: transform 0.3s ease-in-out; transform: translateX(100%); }
         #watchlistPanel.open { transform: translateX(0); }
     </style>
 </head>
-<body>
+<body class="text-gray-800">
     <canvas id="bgCanvas"></canvas>
 
-    <div class="fixed top-0 left-0 w-full z-50 p-4 flex justify-between items-center">
-        <div class="text-xl font-bold italic premium-font gold-text cursor-pointer" onclick="location.reload()">IFEELAV</div>
+    <div class="fixed top-0 left-0 w-full z-50 p-4 flex justify-between items-center bg-white/80 backdrop-blur-md border-b border-[#C5A059]/10">
+        <div class="text-xl md:text-2xl font-bold italic premium-font gold-text cursor-pointer" onclick="location.reload()">IFEELAV</div>
         <div class="flex gap-3">
             <div class="relative group">
-                <input type="text" id="searchInput" placeholder="Search..." class="glass-panel rounded-full px-4 py-2 w-32 focus:w-48 transition-all outline-none text-sm text-gray-700 placeholder-gray-400 focus:border-[#C5A059]" onkeypress="handleSearch(event)">
+                <input type="text" id="searchInput" placeholder="Search..." class="glass-panel rounded-full px-4 py-2 w-32 focus:w-64 transition-all outline-none text-sm focus:border-[#C5A059]" onkeypress="handleSearch(event)">
                 <span class="absolute right-3 top-2.5 text-gray-400">🔍</span>
             </div>
-            <button onclick="toggleWatchlist()" class="glass-panel w-10 h-10 rounded-full flex items-center justify-center text-gray-600 hover:text-[#C5A059] transition">❤️</button>
+            <button onclick="toggleWatchlist()" class="glass-panel w-10 h-10 rounded-full flex items-center justify-center text-gray-600 hover:text-red-500 transition shadow-lg relative">
+                ❤️ <span id="badge" class="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] w-4 h-4 rounded-full flex items-center justify-center hidden">0</span>
+            </button>
         </div>
     </div>
 
-    <div class="relative z-10 h-screen flex items-center justify-center pt-10">
+    <div class="relative z-10 h-screen flex flex-col items-center justify-center pt-16 px-4">
         
-        <div id="setup" class="text-center p-6 max-w-lg w-full fade-in">
-            <h1 class="premium-font italic text-7xl gold-text mb-2 tracking-tighter drop-shadow-sm">IFEELAV</h1>
-            <p class="text-gray-400 uppercase tracking-[6px] text-[10px] mb-12 italic">Curated by Abhimanyu</p>
-            <div class="grid grid-cols-2 gap-4">
-                <button onclick="startApp('mystery', '9648')" class="genre-btn">Mystery</button>
-                <button onclick="startApp('thriller', '53')" class="genre-btn">Thriller</button>
-                <button onclick="startApp('sci-fi', '10765')" class="genre-btn">Sci-Fi</button>
-                <button onclick="startApp('horror', '9648')" class="genre-btn">Horror</button>
+        <div id="setup" class="text-center w-full max-w-2xl fade-in">
+            <h1 class="premium-font italic text-6xl md:text-8xl gold-text mb-2 tracking-tighter">IFEELAV</h1>
+            <p class="text-gray-400 uppercase tracking-[6px] text-xs mb-12">The Abhimanyu Collection</p>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <button onclick="startApp('mystery', '9648')" class="glass-panel p-6 rounded-2xl hover:border-[#C5A059] hover:text-[#C5A059] transition font-bold uppercase tracking-wider">Mystery</button>
+                <button onclick="startApp('thriller', '53')" class="glass-panel p-6 rounded-2xl hover:border-[#C5A059] hover:text-[#C5A059] transition font-bold uppercase tracking-wider">Thriller</button>
+                <button onclick="startApp('sci-fi', '10765')" class="glass-panel p-6 rounded-2xl hover:border-[#C5A059] hover:text-[#C5A059] transition font-bold uppercase tracking-wider">Sci-Fi</button>
+                <button onclick="startApp('horror', '9648')" class="glass-panel p-6 rounded-2xl hover:border-[#C5A059] hover:text-[#C5A059] transition font-bold uppercase tracking-wider">Horror</button>
             </div>
         </div>
 
-        <div id="swipeStep" class="hidden w-full max-w-sm px-5">
-            <div id="showCard" onclick="openDetails()" class="premium-card overflow-hidden relative transition-all duration-500 transform ease-in-out">
-                <img id="poster" src="" class="w-full h-[450px] object-cover bg-gray-100">
-                <div class="absolute bottom-0 left-0 w-full h-32 bg-gradient-to-t from-black/80 to-transparent"></div>
-                <div class="absolute bottom-4 left-6 right-6 text-white">
-                    <p class="text-[10px] tracking-widest uppercase mb-1 opacity-80">Tap for Details</p>
-                    <h2 id="title" class="premium-font text-2xl truncate"></h2>
+        <div id="swipeStep" class="hidden w-full flex flex-col items-center">
+            <div id="showCard" onclick="openDetails(shows[index].id)" class="premium-card overflow-hidden relative mb-6">
+                <img id="poster" src="" class="w-full h-full object-cover">
+                <div class="absolute bottom-0 left-0 w-full h-48 bg-gradient-to-t from-black via-black/50 to-transparent"></div>
+                <div class="absolute bottom-6 left-6 right-6 text-white">
+                    <div class="flex items-center gap-2 mb-2">
+                        <span id="matchRate" class="bg-[#C5A059] text-white text-[10px] font-bold px-2 py-1 rounded">98% MATCH</span>
+                        <span class="text-xs opacity-80 uppercase tracking-widest">Tap for Info</span>
+                    </div>
+                    <h2 id="title" class="premium-font text-3xl md:text-4xl leading-none mb-2"></h2>
+                    <p id="genres" class="text-sm opacity-70"></p>
                 </div>
             </div>
             
-            <div class="flex justify-center gap-10 mt-8">
-                <button onclick="handleAction('pass')" class="w-16 h-16 rounded-full border border-gray-200 bg-white text-gray-400 hover:text-red-500 shadow-sm text-xl transition">✖</button>
-                <button onclick="handleAction('smash')" class="w-20 h-20 rounded-full gold-btn text-white flex items-center justify-center shadow-xl text-3xl hover:scale-110 transition">♥</button>
+            <div class="flex gap-8">
+                <button onclick="handleAction('pass')" class="w-16 h-16 rounded-full bg-white text-gray-400 border border-gray-200 text-2xl shadow-lg hover:scale-110 transition">✕</button>
+                <button onclick="handleAction('smash')" class="w-20 h-20 rounded-full gold-btn text-white text-4xl shadow-xl hover:scale-110 transition">♥</button>
             </div>
         </div>
     </div>
 
-    <div id="detailModal" class="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-        <div class="bg-white w-full max-w-md rounded-[30px] overflow-hidden shadow-2xl relative max-h-[90vh] overflow-y-auto">
-            <div class="relative h-48">
-                <img id="modalBackdrop" src="" class="w-full h-full object-cover">
-                <button onclick="closeDetails()" class="absolute top-4 right-4 bg-black/50 text-white w-8 h-8 rounded-full flex items-center justify-center backdrop-blur-md">✕</button>
+    <div id="detailOverlay" class="fixed inset-0 z-[60] bg-white overflow-y-auto hidden">
+        <button onclick="closeDetails()" class="fixed top-4 right-4 z-50 bg-black/50 text-white w-10 h-10 rounded-full backdrop-blur-md hover:bg-red-600 transition">✕</button>
+
+        <div class="relative h-[50vh] md:h-[60vh]">
+            <img id="detailBackdrop" src="" class="w-full h-full object-cover">
+            <div class="absolute inset-0 bg-gradient-to-t from-white via-transparent to-black/30"></div>
+            <div class="absolute bottom-0 left-0 w-full p-6 md:p-12">
+                <h1 id="detailTitle" class="premium-font text-4xl md:text-6xl text-gray-900 mb-2"></h1>
+                <div class="flex flex-wrap gap-3 text-sm font-semibold text-gray-600">
+                    <span id="detailYear" class="border border-gray-300 px-2 py-0.5 rounded"></span>
+                    <span id="detailSeasons" class="text-[#C5A059]"></span>
+                    <span id="detailRating" class="bg-green-100 text-green-800 px-2 py-0.5 rounded"></span>
+                </div>
             </div>
-            <div class="p-6 relative -mt-6 bg-white rounded-t-[30px]">
-                <div class="flex justify-between items-start mb-4">
-                    <h2 id="modalTitle" class="premium-font text-3xl text-gray-900 leading-tight"></h2>
-                    <span id="modalRating" class="bg-yellow-100 text-yellow-700 text-xs font-bold px-2 py-1 rounded-lg shrink-0 ml-2"></span>
+        </div>
+
+        <div class="max-w-5xl mx-auto px-6 py-8 grid grid-cols-1 md:grid-cols-3 gap-12">
+            <div class="md:col-span-2 space-y-8">
+                <div>
+                    <h3 class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Synopsis</h3>
+                    <p id="detailOverview" class="text-lg text-gray-700 leading-relaxed"></p>
                 </div>
-                <div class="flex gap-4 text-xs text-gray-400 mb-6 font-semibold tracking-wide uppercase">
-                    <span id="modalDate"></span>
-                    <span>•</span>
-                    <span id="modalLang"></span>
-                </div>
-                <p id="modalOverview" class="text-gray-600 text-sm leading-7 font-light"></p>
                 
-                <button onclick="closeDetails()" class="w-full mt-8 bg-gray-900 text-white py-4 rounded-xl font-bold tracking-wide uppercase text-xs">Close Details</button>
+                <div>
+                    <h3 class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4">Cast (Click to Google)</h3>
+                    <div id="castList" class="flex flex-wrap gap-4"></div>
+                </div>
+
+                <div>
+                    <h3 class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4">Screenshots</h3>
+                    <div id="screenshotGrid" class="grid grid-cols-2 gap-2"></div>
+                </div>
+            </div>
+
+            <div class="space-y-6">
+                <div class="bg-gray-50 p-6 rounded-2xl border border-gray-100">
+                    <h3 class="premium-font text-xl mb-4">Info</h3>
+                    <div class="space-y-3 text-sm">
+                        <div class="flex justify-between">
+                            <span class="text-gray-500">Language</span>
+                            <span id="detailLang" class="font-bold"></span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-500">Status</span>
+                            <span id="detailStatus" class="font-bold"></span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-500">Network</span>
+                            <span id="detailNetwork" class="font-bold"></span>
+                        </div>
+                    </div>
+                </div>
+                <button onclick="addToWatchlistCurrent()" class="w-full py-4 bg-[#C5A059] text-white font-bold rounded-xl shadow-lg hover:bg-[#b08d4b] transition">ADD TO WATCHLIST</button>
             </div>
         </div>
     </div>
 
-    <div id="watchlistPanel" class="fixed top-0 right-0 h-full w-80 bg-white/95 backdrop-blur-xl shadow-2xl z-[60] p-6 border-l border-[#C5A059]/30 overflow-y-auto">
+    <div id="watchlistPanel" class="fixed top-0 right-0 h-full w-80 md:w-96 bg-white/98 backdrop-blur-xl shadow-2xl z-[70] p-6 border-l border-[#C5A059]/30 overflow-y-auto">
         <div class="flex justify-between items-center mb-8"><h2 class="premium-font text-2xl gold-text italic">Your Vault</h2><button onclick="toggleWatchlist()" class="text-gray-400 hover:text-red-500 text-xl">✕</button></div>
-        <div id="watchlistItems" class="space-y-4"></div>
+        <div id="watchlistItems" class="space-y-3"></div>
     </div>
 
     <script>
-        // Animation
+        // --- CANVAS ANIMATION ---
         const canvas = document.getElementById('bgCanvas'); const ctx = canvas.getContext('2d');
-        let particles = []; function initCanvas() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; particles = []; for(let i=0; i<80; i++) particles.push({x:Math.random()*canvas.width, y:Math.random()*canvas.height, r:Math.random()*2, vx:Math.random()*0.5-0.25, vy:Math.random()*0.5-0.25}); }
+        function initCanvas() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
         window.onresize = initCanvas; initCanvas();
-        function animate() { ctx.clearRect(0,0,canvas.width,canvas.height); ctx.fillStyle = `rgba(197, 160, 89, 0.3)`; particles.forEach(p => { p.x+=p.vx; p.y+=p.vy; if(p.x<0||p.x>canvas.width) p.vx*=-1; if(p.y<0||p.y>canvas.height) p.vy*=-1; ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, Math.PI*2); ctx.fill(); }); requestAnimationFrame(animate); } animate();
+        // Simplified animation for better performance
+        let particles = Array.from({length: 50}, () => ({x:Math.random()*canvas.width, y:Math.random()*canvas.height, r:Math.random()*2, vx:Math.random()*0.5-0.25, vy:Math.random()*0.5-0.25}));
+        function animate() { 
+            ctx.clearRect(0,0,canvas.width,canvas.height); ctx.fillStyle = `rgba(197, 160, 89, 0.3)`; 
+            particles.forEach(p => { p.x+=p.vx; p.y+=p.vy; if(p.x<0||p.x>canvas.width) p.vx*=-1; if(p.y<0||p.y>canvas.height) p.vy*=-1; ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, Math.PI*2); ctx.fill(); }); 
+            requestAnimationFrame(animate); 
+        }
+        animate();
 
-        // App Logic
-        let shows = []; let index = 0; let watchlist = JSON.parse(localStorage.getItem('avWatchlist')) || [];
+        // --- GLOBAL VARIABLES ---
+        let shows = []; let index = 0;
+        let watchlist = JSON.parse(localStorage.getItem('avWatchlist')) || [];
+        let currentDetailId = null;
 
-        async function startApp(vibe, genreId) { transitionToSwipe(); fetchShows(`/api/getShows?genre=${genreId}`); }
-        async function handleSearch(e) { if (e.key === 'Enter') { const query = e.target.value; if (!query) return; transitionToSwipe(); fetchShows(`/api/getShows?query=${encodeURIComponent(query)}`); } }
-        
+        // --- MAIN FUNCTIONS ---
+        async function startApp(vibe, genreId) {
+            transitionToSwipe();
+            fetchShows(`/api/getShows?genre=${genreId}`);
+        }
+
+        async function handleSearch(e) {
+            if (e.key === 'Enter' && e.target.value) {
+                transitionToSwipe();
+                fetchShows(`/api/getShows?query=${encodeURIComponent(e.target.value)}`);
+            }
+        }
+
         async function fetchShows(endpoint) {
             try {
                 const res = await fetch(endpoint);
                 const data = await res.json();
-                shows = data.results.filter(s => s.poster_path); // Filter bad data
+                shows = data.results.filter(s => s.poster_path);
                 index = 0;
-                if(shows.length > 0) render(); else alert("No shows found.");
-            } catch (err) { alert("API Error. Check Console."); }
+                if(shows.length > 0) render(); else alert("No results found.");
+            } catch (err) { console.error(err); }
         }
 
-        function transitionToSwipe() { document.getElementById('setup').classList.add('hidden'); document.getElementById('swipeStep').classList.remove('hidden'); }
+        function transitionToSwipe() {
+            document.getElementById('setup').classList.add('hidden');
+            document.getElementById('swipeStep').classList.remove('hidden');
+        }
 
         function render() {
-            if (index >= shows.length) { alert("End of list!"); location.reload(); return; }
+            if (index >= shows.length) { alert("Reached end of list!"); location.reload(); return; }
             const show = shows[index];
             document.getElementById('title').innerText = show.name || show.original_name;
-            document.getElementById('poster').src = `https://image.tmdb.org/t/p/w500${show.poster_path}`;
+            document.getElementById('poster').src = `https://image.tmdb.org/t/p/w780${show.poster_path}`;
+            document.getElementById('genres').innerText = "First Air: " + (show.first_air_date || 'N/A');
             
             // Animation Reset
             const card = document.getElementById('showCard');
             card.style.opacity = '0'; card.style.transform = 'scale(0.95)';
-            setTimeout(() => { card.style.opacity = '1'; card.style.transform = 'scale(1)'; }, 50);
+            setTimeout(() => { card.style.opacity = '1'; card.style.transform = 'scale(1)'; }, 100);
         }
 
-        // --- NEW DETAIL MODAL FUNCTIONS ---
-        function openDetails() {
-            const show = shows[index];
-            document.getElementById('modalTitle').innerText = show.name || show.original_name;
-            document.getElementById('modalOverview').innerText = show.overview || "No details available.";
-            document.getElementById('modalRating').innerText = "★ " + show.vote_average.toFixed(1);
-            document.getElementById('modalDate').innerText = show.first_air_date || "N/A";
-            document.getElementById('modalLang').innerText = show.original_language.toUpperCase();
-            
-            // Use Backdrop if available, else Poster
-            const imgPath = show.backdrop_path || show.poster_path;
-            document.getElementById('modalBackdrop').src = `https://image.tmdb.org/t/p/w780${imgPath}`;
-            
-            document.getElementById('detailModal').classList.add('active');
+        // --- NEW: DEEP DETAILS FUNCTION (The Investigator) ---
+        async function openDetails(id) {
+            // Show overlay immediately with loading state
+            const overlay = document.getElementById('detailOverlay');
+            overlay.classList.remove('hidden');
+            setTimeout(() => overlay.classList.add('active'), 10); // Fade in
+            currentDetailId = id;
+
+            try {
+                // Call our new Jasoos API
+                const res = await fetch(`/api/getDetails?id=${id}`);
+                const data = await res.json();
+
+                // 1. Basic Info
+                document.getElementById('detailTitle').innerText = data.name;
+                document.getElementById('detailBackdrop').src = `https://image.tmdb.org/t/p/original${data.backdrop_path || data.poster_path}`;
+                document.getElementById('detailOverview').innerText = data.overview;
+                document.getElementById('detailYear').innerText = data.first_air_date ? data.first_air_date.split('-')[0] : 'N/A';
+                document.getElementById('detailRating').innerText = "★ " + data.vote_average.toFixed(1);
+                
+                // 2. Seasons (Webseries Logic)
+                const seasonCount = data.number_of_seasons || 0;
+                const episodeCount = data.number_of_episodes || 0;
+                document.getElementById('detailSeasons').innerText = `${seasonCount} Seasons (${episodeCount} Eps)`;
+
+                // 3. Languages & Network
+                document.getElementById('detailLang').innerText = data.spoken_languages.map(l => l.english_name).join(', ');
+                document.getElementById('detailStatus').innerText = data.status;
+                document.getElementById('detailNetwork').innerText = data.networks[0]?.name || 'N/A';
+
+                // 4. Cast (Google Search Link)
+                const castDiv = document.getElementById('castList');
+                castDiv.innerHTML = data.credits.cast.slice(0, 6).map(actor => `
+                    <a href="https://www.google.com/search?q=${encodeURIComponent(actor.name + ' actor')}" target="_blank" 
+                       class="flex items-center gap-2 bg-gray-100 px-3 py-2 rounded-full hover:bg-[#C5A059] hover:text-white transition cursor-pointer">
+                        <img src="https://image.tmdb.org/t/p/w200${actor.profile_path}" onerror="this.src='https://placehold.co/50'" class="w-8 h-8 rounded-full object-cover">
+                        <span class="text-sm font-bold">${actor.name}</span>
+                    </a>
+                `).join('');
+
+                // 5. Screenshots
+                const screenDiv = document.getElementById('screenshotGrid');
+                // Get backdrops, exclude the first one (used in header)
+                const images = data.images.backdrops.slice(1, 5); 
+                screenDiv.innerHTML = images.map(img => `
+                    <img src="https://image.tmdb.org/t/p/w500${img.file_path}" class="w-full h-32 object-cover rounded-xl hover:scale-105 transition duration-300">
+                `).join('');
+
+            } catch (err) {
+                console.error(err);
+                alert("Could not fetch details.");
+                closeDetails();
+            }
         }
 
         function closeDetails() {
-            document.getElementById('detailModal').classList.remove('active');
+            const overlay = document.getElementById('detailOverlay');
+            overlay.classList.remove('active');
+            setTimeout(() => overlay.classList.add('hidden'), 400);
         }
 
+        // --- ACTIONS ---
         function handleAction(type) {
             const card = document.getElementById('showCard');
-            if (type === 'smash') { addToWatchlist(shows[index]); card.classList.add('slide-right'); } 
+            if(type === 'smash') { addToWatchlist(shows[index]); card.classList.add('slide-right'); }
             else { card.classList.add('slide-left'); }
-            setTimeout(() => { index++; card.classList.remove('slide-right', 'slide-left'); render(); }, 400);
+            setTimeout(() => { index++; card.classList.remove('slide-right', 'slide-left'); render(); }, 300);
         }
 
-        function addToWatchlist(show) { if (!watchlist.some(item => item.id === show.id)) { watchlist.push(show); localStorage.setItem('avWatchlist', JSON.stringify(watchlist)); updateWatchlistUI(); } }
+        function addToWatchlist(show) {
+            if (!watchlist.some(item => item.id === show.id)) {
+                watchlist.push(show);
+                localStorage.setItem('avWatchlist', JSON.stringify(watchlist));
+                updateWatchlistUI();
+            }
+        }
+
+        function addToWatchlistCurrent() {
+            // Adds the currently open show in details view
+            if(currentDetailId) {
+                // Fetch basics from existing data or simplified object
+                // For simplicity, we just alerting success as we need the full object to save properly 
+                // In a pro app, we would pass the full object. 
+                // Let's just save what we have or find it in 'shows' array
+                let show = shows.find(s => s.id === currentDetailId);
+                if(show) { addToWatchlist(show); alert("Added to Vault!"); }
+            }
+        }
+
         function toggleWatchlist() { document.getElementById('watchlistPanel').classList.toggle('open'); updateWatchlistUI(); }
-        function removeFromWatchlist(id) { watchlist = watchlist.filter(item => item.id !== id); localStorage.setItem('avWatchlist', JSON.stringify(watchlist)); updateWatchlistUI(); }
-        function updateWatchlistUI() { const container = document.getElementById('watchlistItems'); if (watchlist.length === 0) { container.innerHTML = '<p class="text-gray-400 text-sm text-center mt-10">Vault is empty.</p>'; return; } container.innerHTML = watchlist.map(item => `<div class="flex gap-3 items-center bg-gray-50 p-2 rounded-xl border border-gray-100"><img src="https://image.tmdb.org/t/p/w200${item.poster_path}" class="w-12 h-16 object-cover rounded-lg"><div class="flex-1 min-w-0"><h4 class="font-bold text-sm text-gray-800 truncate">${item.name || item.original_name}</h4><p class="text-[10px] text-gray-500">${item.first_air_date ? item.first_air_date.split('-')[0] : 'N/A'}</p></div><button onclick="removeFromWatchlist(${item.id})" class="text-gray-400 hover:text-red-500">✕</button></div>`).join(''); } 
+        
+        function removeFromWatchlist(id) {
+            watchlist = watchlist.filter(item => item.id !== id);
+            localStorage.setItem('avWatchlist', JSON.stringify(watchlist));
+            updateWatchlistUI();
+        }
+
+        function updateWatchlistUI() {
+            const container = document.getElementById('watchlistItems');
+            const badge = document.getElementById('badge');
+            
+            badge.innerText = watchlist.length;
+            badge.classList.toggle('hidden', watchlist.length === 0);
+
+            if (watchlist.length === 0) { container.innerHTML = '<p class="text-gray-400 text-sm text-center mt-10">Vault is empty.</p>'; return; }
+            
+            // Added onclick to items here
+            container.innerHTML = watchlist.map(item => `
+                <div class="flex gap-3 items-center bg-gray-50 p-2 rounded-xl border border-gray-100 hover:shadow-md transition">
+                    <div onclick="openDetails(${item.id})" class="flex-1 flex gap-3 cursor-pointer items-center min-w-0">
+                        <img src="https://image.tmdb.org/t/p/w200${item.poster_path}" class="w-12 h-16 object-cover rounded-lg">
+                        <div class="flex-1 min-w-0">
+                            <h4 class="font-bold text-sm text-gray-800 truncate">${item.name || item.original_name}</h4>
+                            <p class="text-[10px] text-gray-500">Tap for Info</p>
+                        </div>
+                    </div>
+                    <button onclick="removeFromWatchlist(${item.id})" class="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-red-500 bg-white rounded-full shadow-sm">✕</button>
+                </div>
+            `).join('');
+        }
         updateWatchlistUI();
     </script>
 </body>
