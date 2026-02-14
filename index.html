@@ -26,7 +26,7 @@
         .row-container { padding: 20px 0 20px 20px; }
         .row-title { font-size: 1.2rem; font-weight: 600; margin-bottom: 10px; color: #e5e5e5; border-left: 3px solid var(--gold); padding-left: 10px; }
         .row-scroll { display: flex; gap: 12px; overflow-x: auto; padding-right: 20px; scroll-behavior: smooth; }
-        .row-scroll::-webkit-scrollbar { display: none; } /* Hide Scrollbar */
+        .row-scroll::-webkit-scrollbar { display: none; } 
         
         .poster-card { 
             flex: 0 0 auto; width: 140px; height: 210px; 
@@ -37,7 +37,7 @@
         .poster-card:hover { transform: scale(1.1); z-index: 5; box-shadow: 0 10px 20px rgba(0,0,0,0.5); }
         .poster-card img { width: 100%; height: 100%; object-fit: cover; }
 
-        /* MODALS (Login & Details) */
+        /* MODALS */
         #detailOverlay, #authModal { 
             position: fixed; inset: 0; z-index: 100; 
             background: rgba(0,0,0,0.95); backdrop-filter: blur(5px);
@@ -69,16 +69,16 @@
 
     <div class="relative z-10 -mt-20 pb-20">
         <div class="row-container">
-            <h2 class="row-title">Trending Now</h2>
+            <h2 class="row-title">Trending Now 🔥</h2>
             <div id="trendingRow" class="row-scroll"></div>
-        </div>
-        <div class="row-container">
-            <h2 class="row-title">Bollywood Hits 🇮🇳</h2>
-            <div id="bollywoodRow" class="row-scroll"></div>
         </div>
         <div class="row-container">
             <h2 class="row-title">Hollywood Action 🎬</h2>
             <div id="hollywoodRow" class="row-scroll"></div>
+        </div>
+        <div class="row-container">
+            <h2 class="row-title">Bollywood Hits 🇮🇳</h2>
+            <div id="bollywoodRow" class="row-scroll"></div>
         </div>
         <div class="row-container">
             <h2 class="row-title">Anime World 🇯🇵</h2>
@@ -137,7 +137,7 @@
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
 
-        // --- AUTH LOGIC ---
+        // --- AUTH ---
         window.toggleAuthModal = () => document.getElementById('authModal').classList.toggle('active');
         window.handleLogin = () => signInWithEmailAndPassword(auth, document.getElementById('email').value, document.getElementById('password').value).then(()=>window.toggleAuthModal()).catch(e=>alert(e.message));
         window.handleSignup = () => createUserWithEmailAndPassword(auth, document.getElementById('email').value, document.getElementById('password').value).then(()=>window.toggleAuthModal()).catch(e=>alert(e.message));
@@ -164,8 +164,6 @@
                 const res = await fetch(url);
                 const data = await res.json();
                 const container = document.getElementById(elementId);
-                
-                // Backup if backend returns empty (rare case)
                 const items = data.results || [];
                 
                 container.innerHTML = items.map(item => `
@@ -173,21 +171,26 @@
                         <img src="https://image.tmdb.org/t/p/w500${item.poster_path}" loading="lazy">
                     </div>
                 `).join('');
-
-                return items; // Return for Hero Slider usage
+                return items;
             } catch(e) { console.error(e); }
         }
 
         // --- INIT HERO & ROWS ---
         async function initApp() {
-            // 1. Trending Row & Hero
+            // 1. Trending
             const trending = await fetchRow('/api/getShows?query=', 'trendingRow');
-            if(trending) initHero(trending);
+            if(trending && trending.length > 0) initHero(trending);
 
-            // 2. Other Categories
+            // 2. Hollywood Action (TV Genre: 10759, NOT 28)
+            fetchRow('/api/getShows?lang=en&genre=10759', 'hollywoodRow');
+            
+            // 3. Bollywood (Generic Hindi)
             fetchRow('/api/getShows?lang=hi', 'bollywoodRow');
-            fetchRow('/api/getShows?lang=en&genre=28', 'hollywoodRow');
-            fetchRow('/api/getShows?lang=ja', 'animeRow');
+            
+            // 4. Anime (Genre 16)
+            fetchRow('/api/getShows?lang=ja&genre=16', 'animeRow');
+            
+            // 5. K-Drama
             fetchRow('/api/getShows?lang=ko', 'kdramaRow');
         }
 
@@ -204,7 +207,6 @@
                 </div>
             `).join('');
 
-            // Auto Slide
             let current = 0;
             setInterval(() => {
                 const slides = document.querySelectorAll('.hero-slide');
@@ -214,7 +216,7 @@
             }, 5000);
         }
 
-        // --- DETAILS LOGIC (The Magic Part) ---
+        // --- DETAILS ---
         window.openDetails = async (id) => {
             const overlay = document.getElementById('detailOverlay');
             const content = document.getElementById('detailContent');
@@ -222,11 +224,9 @@
             content.innerHTML = '<div class="flex h-screen items-center justify-center text-gold">Loading Details...</div>';
 
             try {
-                // Fetch Details
                 const res = await fetch(`/api/getDetails?id=${id}`);
                 const data = await res.json();
 
-                // Streaming (Safe Fetch)
                 let streamHTML = '';
                 try {
                     const sRes = await fetch(`/api/getStream?tmdb_id=${id}&type=tv`);
@@ -258,16 +258,12 @@
                             </div>
                             <div class="space-y-4 text-sm text-gray-400">
                                 <p><span class="text-gray-500">Genres:</span> ${data.genres.map(g=>g.name).join(', ')}</p>
-                                <p><span class="text-gray-500">Network:</span> ${data.networks[0]?.name || 'N/A'}</p>
                                 <p><span class="text-gray-500">Seasons:</span> ${data.number_of_seasons}</p>
                             </div>
                         </div>
                     </div>
                 `;
-
-                // Load Episodes (Season 1)
                 if(data.seasons?.length > 0) window.loadEpisodes(id, 1);
-
             } catch(e) { content.innerHTML = '<p class="text-center mt-20 text-red-500">Error loading content.</p>'; }
         };
 
@@ -281,10 +277,7 @@
                     <div class="flex items-center gap-4 p-3 hover:bg-gray-800 rounded transition border-b border-gray-800">
                         <div class="text-xl font-bold text-gray-500 w-8">${e.episode_number}</div>
                         <div class="flex-1">
-                            <div class="flex justify-between">
-                                <h4 class="font-bold text-white">${e.name}</h4>
-                                <span class="text-xs text-gray-400">${e.runtime ? e.runtime+'m' : ''}</span>
-                            </div>
+                            <div class="flex justify-between"><h4 class="font-bold text-white">${e.name}</h4><span class="text-xs text-gray-400">${e.runtime ? e.runtime+'m' : ''}</span></div>
                             <p class="text-xs text-gray-400 line-clamp-2 mt-1">${e.overview || 'No description'}</p>
                         </div>
                     </div>
@@ -298,7 +291,6 @@
         window.handleTyping = (e) => {
             const q = e.target.value; const dd = document.getElementById('searchDropdown');
             if(q.length < 2) { dd.style.display = 'none'; return; }
-            
             clearTimeout(window.searchTimer);
             window.searchTimer = setTimeout(async () => {
                 const res = await fetch(`/api/getShows?query=${q}`);
@@ -313,9 +305,7 @@
             }, 300);
         }
 
-        // Start the app
         initApp();
-
     </script>
 </body>
 </html>
