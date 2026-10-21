@@ -54,6 +54,8 @@ export default async function handler(req, res) {
             return res.status(404).json({ error: "Show or Movie not found" });
         }
 
+        const title = data.title || data.name || data.original_title || data.original_name || 'Title';
+
         // Extract Trailer
         let trailerKey = null;
         if (data.videos && Array.isArray(data.videos.results)) {
@@ -62,26 +64,61 @@ export default async function handler(req, res) {
             trailerKey = (officialTrailer || anyTrailer)?.key || null;
         }
 
-        // Extract Watch Providers (India first, then US)
+        // Extract Watch Providers (India first, then US as fallback)
         const providersRaw = data['watch/providers']?.results;
         const regionData = providersRaw?.IN || providersRaw?.US || null;
         const streamingProviders = [];
         const seenProviders = new Set();
 
         if (regionData) {
-            const streams = [...(regionData.flatrate || []), ...(regionData.rent || []), ...(regionData.buy || [])];
-            for (const p of streams) {
-                if (!seenProviders.has(p.provider_name)) {
-                    seenProviders.add(p.provider_name);
+            const flatrate = (regionData.flatrate || []).map(p => ({ ...p, tier: 'Subscription' }));
+            const free = (regionData.free || []).map(p => ({ ...p, tier: 'Free Stream' }));
+            const rent = (regionData.rent || []).map(p => ({ ...p, tier: 'Rent / Buy' }));
+            const buy = (regionData.buy || []).map(p => ({ ...p, tier: 'Rent / Buy' }));
+
+            const allStreams = [...free, ...flatrate, ...rent, ...buy];
+            for (const p of allStreams) {
+                const key = `${p.provider_name.toLowerCase()}`;
+                if (!seenProviders.has(key)) {
+                    seenProviders.add(key);
                     streamingProviders.push({
                         id: p.provider_id,
                         name: p.provider_name,
+                        tier: p.tier || 'Stream',
                         logo_path: p.logo_path ? `https://image.tmdb.org/t/p/w92${p.logo_path}` : null,
-                        link: regionData.link || ''
+                        link: regionData.link || `https://www.themoviedb.org/${actualType}/${data.id}/watch`
                     });
                 }
             }
         }
+
+        // Free Player Servers Config
+        const freeServers = [
+            {
+                name: 'Server 1 (VidSrc Fast)',
+                url: actualType === 'movie' 
+                    ? `https://vidsrc.cc/v2/embed/movie/${data.id}` 
+                    : `https://vidsrc.cc/v2/embed/tv/${data.id}/{season}/{episode}`
+            },
+            {
+                name: 'Server 2 (VidSrc Pro)',
+                url: actualType === 'movie' 
+                    ? `https://vidsrc.to/embed/movie/${data.id}` 
+                    : `https://vidsrc.to/embed/tv/${data.id}/{season}/{episode}`
+            },
+            {
+                name: 'Server 3 (Embed.su HD)',
+                url: actualType === 'movie' 
+                    ? `https://embed.su/embed/movie/${data.id}` 
+                    : `https://embed.su/embed/tv/${data.id}/{season}/{episode}`
+            },
+            {
+                name: 'Server 4 (SuperEmbed)',
+                url: actualType === 'movie'
+                    ? `https://multiembed.mov/?video_id=${data.id}&tmdb=1`
+                    : `https://multiembed.mov/?video_id=${data.id}&tmdb=1&s={season}&e={episode}`
+            }
+        ];
 
         // Extract Cast
         const topCast = (data.credits?.cast || []).slice(0, 12).map(c => ({
@@ -115,7 +152,7 @@ export default async function handler(req, res) {
         const cleanResponse = {
             id: data.id,
             media_type: actualType,
-            title: data.title || data.name || data.original_title || data.original_name,
+            title: title,
             tagline: data.tagline || '',
             overview: data.overview || 'No description available.',
             poster_path: data.poster_path,
@@ -130,7 +167,9 @@ export default async function handler(req, res) {
             number_of_episodes: data.number_of_episodes || 0,
             director: directorOrCreator,
             trailer_key: trailerKey,
+            youtube_search_url: `https://www.youtube.com/results?search_query=${encodeURIComponent(title + ' full movie')}`,
             streaming_providers: streamingProviders,
+            free_servers: freeServers,
             cast: topCast,
             seasons: (data.seasons || []).filter(s => s.season_number > 0).map(s => ({
                 id: s.id,

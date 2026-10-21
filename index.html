@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5, viewport-fit=cover">
-    <title>IFEELAV | Curated Cinema & Series</title>
-    <meta name="description" content="Discover, explore and track the finest movies, series, anime and Bollywood hits. Curated by Abhimanyu.">
+    <title>IFEELAV | Curated Cinema & Free Streaming</title>
+    <meta name="description" content="Discover, explore, and stream the finest movies, series, anime, and Bollywood hits freely or on official OTT platforms. Curated by Abhimanyu.">
     
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -88,24 +88,18 @@
 
         /* Glassmorphism Styles */
         .glass-panel {
-            background: rgba(18, 18, 24, 0.85);
+            background: rgba(18, 18, 24, 0.88);
             backdrop-filter: blur(16px);
             -webkit-backdrop-filter: blur(16px);
             border: 1px solid rgba(255, 255, 255, 0.08);
-        }
-
-        .glass-card {
-            background: rgba(255, 255, 255, 0.03);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.07);
         }
 
         /* Hero Banner Slides */
         .hero-banner-container {
             position: relative;
             width: 100%;
-            height: 80vh;
-            min-height: 550px;
+            height: 82vh;
+            min-height: 580px;
             overflow: hidden;
         }
 
@@ -224,7 +218,7 @@
             <div class="flex items-center gap-6">
                 <a href="#" onclick="window.scrollTo({top: 0, behavior: 'smooth'}); return false;" class="flex items-center gap-2 group">
                     <span class="text-2xl md:text-3xl font-extrabold brand-font gold-gradient-text tracking-wider">IFEELAV</span>
-                    <span class="hidden sm:inline-block text-[10px] uppercase tracking-widest text-gold/70 border border-gold/30 px-2 py-0.5 rounded-full font-semibold">Pro</span>
+                    <span class="hidden sm:inline-block text-[10px] uppercase tracking-widest text-gold/70 border border-gold/30 px-2 py-0.5 rounded-full font-semibold">Cinema & Stream</span>
                 </a>
 
                 <!-- Nav Category Links -->
@@ -272,7 +266,6 @@
     <!-- Hero Showcase Slider -->
     <header class="hero-banner-container" id="heroSection">
         <div id="heroSlider" class="w-full h-full relative">
-            <!-- Skeleton for Hero while loading -->
             <div class="hero-slide active">
                 <div class="w-full h-full skeleton opacity-50"></div>
                 <div class="absolute inset-0 bg-gradient-to-t from-[#08080a] via-[#08080a]/60 to-transparent"></div>
@@ -334,9 +327,7 @@
                     </button>
                 </div>
             </div>
-            <div id="trendingRow" class="flex gap-4 overflow-x-auto no-scrollbar scroll-smooth py-2 px-1">
-                <!-- Skeleton cards loaded by JS -->
-            </div>
+            <div id="trendingRow" class="flex gap-4 overflow-x-auto no-scrollbar scroll-smooth py-2 px-1"></div>
         </section>
 
         <!-- Hollywood Movies -->
@@ -449,7 +440,7 @@
                     <i class="fa-brands fa-github text-sm"></i> GitHub
                 </a>
             </div>
-            <p class="text-[11px] text-gray-600">Powered by TMDB API. All posters, media, and trademarks belong to their respective owners.</p>
+            <p class="text-[11px] text-gray-600">IFEELAV is a streaming search & discovery engine. All media trademarks belong to their respective owners.</p>
         </div>
     </footer>
 
@@ -461,8 +452,58 @@
         <div id="detailContent" class="min-h-screen"></div>
     </div>
 
+    <!-- Built-in In-App Stream Video Player Modal -->
+    <div id="streamPlayerModal" class="fixed inset-0 z-[130] bg-black/95 backdrop-blur-2xl flex flex-col justify-center items-center p-3 sm:p-6 hidden">
+        <div class="relative w-full max-w-5xl rounded-3xl overflow-hidden border border-white/15 shadow-2xl bg-[#0c0c12] flex flex-col">
+            
+            <!-- Player Bar Header -->
+            <div class="flex items-center justify-between px-5 py-3 border-b border-white/10 bg-black/60">
+                <div class="flex items-center gap-3 min-w-0">
+                    <i class="fa-solid fa-play-circle text-gold text-lg shrink-0"></i>
+                    <div>
+                        <h3 id="playerModalTitle" class="text-xs sm:text-sm font-bold text-white truncate">Playing Media</h3>
+                        <p id="playerModalSubtitle" class="text-[10px] text-gold truncate">Free Internet Stream</p>
+                    </div>
+                </div>
+
+                <!-- Server Selector & Close -->
+                <div class="flex items-center gap-2">
+                    <select id="playerServerSelect" onchange="window.changePlayerServer(this.value)" class="bg-[#181822] text-white text-[11px] font-semibold rounded-lg px-2.5 py-1.5 border border-white/15 outline-none focus:border-gold cursor-pointer">
+                        <option value="server1">Server 1 (VidSrc Fast)</option>
+                        <option value="server2">Server 2 (VidSrc Pro)</option>
+                        <option value="server3">Server 3 (Embed.su HD)</option>
+                        <option value="server4">Server 4 (SuperEmbed)</option>
+                        <option value="trailer">Official Trailer (YouTube)</option>
+                    </select>
+
+                    <button onclick="window.closeStreamPlayer()" class="w-8 h-8 rounded-full bg-white/10 hover:bg-gold text-white hover:text-black flex items-center justify-center transition">
+                        <i class="fa-solid fa-xmark text-xs"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- 16:9 Iframe Stream Screen -->
+            <div class="relative w-full aspect-video bg-black flex items-center justify-center">
+                <div id="playerLoadingSpinner" class="absolute inset-0 flex flex-col items-center justify-center bg-black/80 z-10 text-gold pointer-events-none">
+                    <i class="fa-solid fa-circle-notch fa-spin text-3xl mb-2"></i>
+                    <span class="text-xs tracking-wider text-gray-300">Connecting to stream server...</span>
+                </div>
+                <iframe id="streamIframe" class="w-full h-full" src="" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen referrerpolicy="origin"></iframe>
+            </div>
+
+            <!-- Player Footer Notes -->
+            <div class="px-5 py-2.5 bg-black/80 flex flex-col sm:flex-row items-center justify-between gap-2 text-[11px] text-gray-400">
+                <div class="flex items-center gap-2">
+                    <i class="fa-solid fa-shield-halved text-gold text-xs"></i>
+                    <span>Stream not buffering? Switch to Server 2 or 3 above. Adblocker recommended.</span>
+                </div>
+                <div id="playerOttJumpLink" class="shrink-0"></div>
+            </div>
+        </div>
+    </div>
+
     <!-- YouTube Trailer Video Modal -->
-    <div id="trailerModal" class="fixed inset-0 z-[120] bg-black/95 backdrop-blur-2xl flex items-center justify-center p-4 hidden">
+    <div id="trailerModal" class="fixed inset-0 z-[125] bg-black/95 backdrop-blur-2xl flex items-center justify-center p-4 hidden">
         <div class="relative w-full max-w-4xl aspect-video rounded-2xl overflow-hidden border border-white/20 shadow-2xl bg-black">
             <button onclick="window.closeTrailerModal()" class="absolute top-3 right-3 z-30 bg-black/80 hover:bg-gold text-white hover:text-black w-9 h-9 rounded-full flex items-center justify-center border border-white/20 transition">
                 <i class="fa-solid fa-xmark text-sm"></i>
@@ -484,11 +525,9 @@
                     ✕
                 </button>
             </div>
-            <div id="watchlistItemsList" class="flex-1 overflow-y-auto py-4 space-y-3 no-scrollbar">
-                <!-- Dynamically populated -->
-            </div>
+            <div id="watchlistItemsList" class="flex-1 overflow-y-auto py-4 space-y-3 no-scrollbar"></div>
             <div class="pt-4 border-t border-white/10 flex justify-between items-center text-xs text-gray-500">
-                <span>Stored locally & in profile</span>
+                <span>Saved in browser profile</span>
                 <button onclick="window.clearAllWatchlist()" class="hover:text-red-400 transition">Clear All</button>
             </div>
         </div>
@@ -576,6 +615,7 @@
         let heroInterval = null;
         let currentHeroIdx = 0;
         let currentDetailsData = null;
+        let currentPlayingStream = null;
 
         // --- TOAST NOTIFICATIONS ---
         window.showToast = (msg, type = 'info') => {
@@ -825,9 +865,14 @@
                             </div>
 
                             <!-- Hover Overlay -->
-                            <div class="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex flex-col justify-end p-2.5">
+                            <div class="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex flex-col justify-end p-2.5">
                                 <h3 class="text-xs font-bold text-white line-clamp-2 leading-tight">${item.title}</h3>
-                                <p class="text-[10px] text-gray-400 mt-1">${item.release_date ? item.release_date.split('-')[0] : ''}</p>
+                                <div class="flex items-center justify-between mt-2">
+                                    <span class="text-[10px] text-gray-400">${item.release_date ? item.release_date.split('-')[0] : ''}</span>
+                                    <button onclick="event.stopPropagation(); window.playStreamDirect('${item.id}', '${type}', '${item.title.replace(/'/g, "\\'")}', 1, 1)" class="w-6 h-6 rounded-full bg-gold text-black flex items-center justify-center hover:scale-110 transition shadow-md" title="Stream Now">
+                                        <i class="fa-solid fa-play text-[9px]"></i>
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     `;
@@ -879,12 +924,15 @@
                                 ${item.overview || 'Experience this exceptional title now streaming on premium platforms.'}
                             </p>
 
-                            <div class="flex items-center gap-3">
-                                <button onclick="window.openDetails('${item.id}', '${type}')" class="px-6 py-2.5 rounded-xl bg-gold hover:bg-gold-light text-black font-bold text-xs sm:text-sm transition flex items-center gap-2 shadow-lg shadow-gold/20 hover:scale-105 active:scale-95">
-                                    <i class="fa-solid fa-circle-info"></i> More Details
+                            <div class="flex flex-wrap items-center gap-3">
+                                <button onclick="window.playStreamDirect('${item.id}', '${type}', '${item.title.replace(/'/g, "\\'")}', 1, 1)" class="px-6 py-2.5 rounded-xl bg-gold hover:bg-gold-light text-black font-bold text-xs sm:text-sm transition flex items-center gap-2 shadow-lg shadow-gold/20 hover:scale-105 active:scale-95">
+                                    <i class="fa-solid fa-play"></i> Watch Now
                                 </button>
-                                <button onclick="window.toggleWatchlistItem({id: '${item.id}', title: '${item.title.replace(/'/g, "\\'")}', poster_path: '${item.poster_path}', media_type: '${type}', vote_average: ${item.vote_average || 0}})" class="px-4 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-white font-semibold text-xs sm:text-sm transition border border-white/15 flex items-center gap-2 backdrop-blur">
-                                    <i class="fa-solid fa-bookmark text-gold"></i> Watchlist
+                                <button onclick="window.openDetails('${item.id}', '${type}')" class="px-5 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-white font-semibold text-xs sm:text-sm transition border border-white/15 flex items-center gap-2 backdrop-blur">
+                                    <i class="fa-solid fa-circle-info"></i> More Info
+                                </button>
+                                <button onclick="window.toggleWatchlistItem({id: '${item.id}', title: '${item.title.replace(/'/g, "\\'")}', poster_path: '${item.poster_path}', media_type: '${type}', vote_average: ${item.vote_average || 0}})" class="px-4 py-2.5 rounded-xl bg-white/5 hover:bg-white/15 text-white font-semibold text-xs sm:text-sm transition border border-white/10 flex items-center gap-2 backdrop-blur">
+                                    <i class="fa-solid fa-bookmark text-gold"></i>
                                 </button>
                             </div>
                         </div>
@@ -936,7 +984,6 @@
             window.setHeroSlide(prevIdx);
         };
 
-        // Pause hero on hover
         const heroSection = document.getElementById('heroSection');
         if (heroSection) {
             heroSection.addEventListener('mouseenter', () => clearInterval(heroInterval));
@@ -985,11 +1032,107 @@
             });
         };
 
+        // --- STREAM PLAYER CONTROLLER ---
+        window.playStreamDirect = (id, type, title, season = 1, episode = 1) => {
+            currentPlayingStream = {
+                id,
+                type: type === 'movie' ? 'movie' : 'tv',
+                title,
+                season,
+                episode,
+                trailerKey: currentDetailsData?.trailer_key || null
+            };
+
+            const modal = document.getElementById('streamPlayerModal');
+            const titleEl = document.getElementById('playerModalTitle');
+            const subTitleEl = document.getElementById('playerModalSubtitle');
+            const selectEl = document.getElementById('playerServerSelect');
+            const ottJump = document.getElementById('playerOttJumpLink');
+
+            titleEl.innerText = title;
+            subTitleEl.innerText = type === 'movie' ? 'Full Movie Stream' : `Season ${season} • Episode ${episode}`;
+            selectEl.value = 'server1';
+
+            if (currentDetailsData && currentDetailsData.streaming_providers?.length > 0) {
+                ottJump.innerHTML = `
+                    <button onclick="window.closeStreamPlayer(); window.openDetails('${id}', '${type}')" class="text-gold hover:underline flex items-center gap-1 font-semibold">
+                        <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i> View Official OTT Options
+                    </button>
+                `;
+            } else {
+                ottJump.innerHTML = '';
+            }
+
+            modal.classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+            window.loadStreamIframe('server1');
+        };
+
+        window.changePlayerServer = (serverKey) => {
+            window.loadStreamIframe(serverKey);
+        };
+
+        window.loadStreamIframe = (serverKey) => {
+            if (!currentPlayingStream) return;
+            const iframe = document.getElementById('streamIframe');
+            const spinner = document.getElementById('playerLoadingSpinner');
+            const { id, type, season, episode, trailerKey } = currentPlayingStream;
+
+            spinner.style.display = 'flex';
+
+            let streamUrl = '';
+            if (serverKey === 'server1') {
+                streamUrl = type === 'movie' 
+                    ? `https://vidsrc.cc/v2/embed/movie/${id}` 
+                    : `https://vidsrc.cc/v2/embed/tv/${id}/${season}/${episode}`;
+            } else if (serverKey === 'server2') {
+                streamUrl = type === 'movie' 
+                    ? `https://vidsrc.to/embed/movie/${id}` 
+                    : `https://vidsrc.to/embed/tv/${id}/${season}/${episode}`;
+            } else if (serverKey === 'server3') {
+                streamUrl = type === 'movie' 
+                    ? `https://embed.su/embed/movie/${id}` 
+                    : `https://embed.su/embed/tv/${id}/${season}/${episode}`;
+            } else if (serverKey === 'server4') {
+                streamUrl = type === 'movie'
+                    ? `https://multiembed.mov/?video_id=${id}&tmdb=1`
+                    : `https://multiembed.mov/?video_id=${id}&tmdb=1&s=${season}&e=${episode}`;
+            } else if (serverKey === 'trailer') {
+                if (trailerKey) {
+                    streamUrl = `https://www.youtube-nocookie.com/embed/${trailerKey}?autoplay=1`;
+                } else {
+                    window.showToast("No official YouTube trailer found for this title", "error");
+                    spinner.style.display = 'none';
+                    return;
+                }
+            }
+
+            iframe.src = streamUrl;
+            iframe.onload = () => {
+                spinner.style.display = 'none';
+            };
+            setTimeout(() => {
+                spinner.style.display = 'none';
+            }, 3000);
+        };
+
+        window.closeStreamPlayer = () => {
+            const modal = document.getElementById('streamPlayerModal');
+            const iframe = document.getElementById('streamIframe');
+            iframe.src = '';
+            modal.classList.add('hidden');
+            if (!document.getElementById('detailOverlay').classList.contains('active')) {
+                document.body.style.overflow = 'auto';
+            }
+            currentPlayingStream = null;
+        };
+
         // --- DETAILS OVERLAY MODAL ---
         window.openDetails = async (id, type = 'tv') => {
             const overlay = document.getElementById('detailOverlay');
             const content = document.getElementById('detailContent');
             overlay.classList.remove('hidden');
+            overlay.classList.add('active');
             document.body.style.overflow = 'hidden';
 
             content.innerHTML = `
@@ -1014,17 +1157,37 @@
                 const year = data.release_date ? data.release_date.split('-')[0] : '';
                 const runtime = data.runtime ? `${Math.floor(data.runtime / 60)}h ${data.runtime % 60}m` : null;
 
-                // Watch Providers HTML
+                // Watch Providers HTML (Categorized)
                 let providersHTML = '';
                 if (data.streaming_providers && data.streaming_providers.length > 0) {
-                    providersHTML = data.streaming_providers.map(p => `
-                        <a href="${p.link || '#'}" target="_blank" rel="noopener" class="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white/[0.05] hover:bg-white/[0.12] border border-white/10 transition group shrink-0">
-                            ${p.logo_path ? `<img src="${p.logo_path}" class="w-5 h-5 rounded-md object-cover">` : '<i class="fa-solid fa-play text-xs text-gold"></i>'}
-                            <span class="text-xs font-semibold text-gray-200 group-hover:text-gold transition">${p.name}</span>
-                        </a>
-                    `).join('');
+                    providersHTML = `
+                        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+                            ${data.streaming_providers.map(p => `
+                                <a href="${p.link || '#'}" target="_blank" rel="noopener" class="flex items-center gap-3 p-3 rounded-2xl bg-white/[0.04] hover:bg-gold/10 border border-white/10 hover:border-gold/50 transition group shadow-md">
+                                    <div class="w-10 h-10 rounded-xl overflow-hidden bg-black/40 shrink-0 flex items-center justify-center border border-white/10">
+                                        ${p.logo_path ? `<img src="${p.logo_path}" class="w-full h-full object-cover">` : '<i class="fa-solid fa-play text-xs text-gold"></i>'}
+                                    </div>
+                                    <div class="min-w-0 flex-1">
+                                        <h5 class="text-xs font-bold text-white group-hover:text-gold transition truncate">${p.name}</h5>
+                                        <span class="text-[10px] text-gray-400">${p.tier || 'Watch OTT'}</span>
+                                    </div>
+                                    <i class="fa-solid fa-arrow-up-right-from-square text-[10px] text-gray-500 group-hover:text-gold transition"></i>
+                                </a>
+                            `).join('')}
+                        </div>
+                    `;
                 } else {
-                    providersHTML = `<span class="text-xs text-gray-500 italic">No direct stream provider listed for your region yet.</span>`;
+                    providersHTML = `
+                        <div class="p-4 rounded-2xl bg-white/[0.02] border border-white/5 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-gray-400">
+                            <div class="flex items-center gap-2">
+                                <i class="fa-solid fa-circle-info text-gold"></i>
+                                <span>Not currently streaming on subscription OTT in India. You can watch it using the Free Stream Player above or search on YouTube.</span>
+                            </div>
+                            <a href="${data.youtube_search_url}" target="_blank" rel="noopener" class="px-4 py-2 rounded-xl bg-red-600/20 hover:bg-red-600/40 text-red-300 font-bold text-xs border border-red-500/30 transition flex items-center gap-2 shrink-0">
+                                <i class="fa-brands fa-youtube text-red-500"></i> Search on YouTube
+                            </a>
+                        </div>
+                    `;
                 }
 
                 // Cast HTML
@@ -1047,7 +1210,7 @@
                     seasonsHTML = `
                         <div class="mt-8 mb-4">
                             <h3 class="text-sm font-bold uppercase tracking-wider text-gold mb-3 flex items-center gap-2">
-                                <i class="fa-solid fa-list-ol"></i> Seasons & Episodes
+                                <i class="fa-solid fa-list-ol"></i> Episodes & Seasons
                             </h3>
                             <div class="flex gap-2 overflow-x-auto no-scrollbar pb-2" id="seasonTabsContainer">
                                 ${data.seasons.map((s, idx) => `
@@ -1065,7 +1228,7 @@
 
                 content.innerHTML = `
                     <!-- Hero Banner for Details -->
-                    <div class="relative w-full h-[55vh] min-h-[400px]">
+                    <div class="relative w-full h-[58vh] min-h-[420px]">
                         <img src="${backdrop}" class="w-full h-full object-cover">
                         <div class="absolute inset-0 bg-gradient-to-t from-black via-black/60 to-black/30"></div>
                         <div class="absolute inset-0 bg-gradient-to-r from-black via-black/50 to-transparent"></div>
@@ -1077,7 +1240,7 @@
                                 ${year ? `<span class="text-gray-300">• ${year}</span>` : ''}
                                 ${runtime ? `<span class="text-gray-300">• ${runtime}</span>` : ''}
                                 ${data.number_of_seasons ? `<span class="text-gray-300">• ${data.number_of_seasons} Season${data.number_of_seasons > 1 ? 's' : ''}</span>` : ''}
-                                <span class="text-gray-400 border border-white/20 px-1.5 rounded text-[10px]">HD</span>
+                                <span class="text-gray-400 border border-white/20 px-1.5 rounded text-[10px]">HD 1080p</span>
                             </div>
 
                             <h1 class="text-3xl md:text-5xl font-extrabold brand-font text-white drop-shadow-xl leading-tight mb-2">
@@ -1085,11 +1248,15 @@
                             </h1>
                             ${data.tagline ? `<p class="text-xs md:text-sm text-gold/90 italic mb-4">${data.tagline}</p>` : ''}
 
-                            <!-- Action Buttons -->
+                            <!-- Action Buttons: Play Stream, Trailer, Watchlist -->
                             <div class="flex flex-wrap items-center gap-3 mt-4">
+                                <button onclick="window.playStreamDirect('${data.id}', '${data.media_type}', '${data.title.replace(/'/g, "\\'")}', 1, 1)" class="px-6 py-2.5 rounded-xl bg-gradient-to-r from-gold-light to-gold text-black font-extrabold text-xs sm:text-sm transition flex items-center gap-2 shadow-xl hover:scale-105 active:scale-95 shadow-gold/20">
+                                    <i class="fa-solid fa-play"></i> Watch Stream (Free)
+                                </button>
+
                                 ${data.trailer_key ? `
-                                    <button onclick="window.playTrailer('${data.trailer_key}')" class="px-5 py-2.5 rounded-xl bg-red-600 hover:bg-red-500 text-white font-bold text-xs transition flex items-center gap-2 shadow-lg hover:scale-105 active:scale-95">
-                                        <i class="fa-solid fa-play"></i> Watch Trailer
+                                    <button onclick="window.playTrailer('${data.trailer_key}')" class="px-5 py-2.5 rounded-xl bg-red-600/90 hover:bg-red-600 text-white font-bold text-xs transition flex items-center gap-2 shadow-lg hover:scale-105 active:scale-95">
+                                        <i class="fa-brands fa-youtube"></i> Trailer
                                     </button>
                                 ` : ''}
 
@@ -1104,14 +1271,17 @@
                     <!-- Details Main Body -->
                     <div class="max-w-5xl mx-auto px-4 md:px-8 py-8 space-y-8 bg-black">
                         
-                        <!-- Watch Providers Bar -->
-                        <div>
-                            <h3 class="text-xs font-bold uppercase tracking-wider text-gray-400 mb-2.5 flex items-center gap-2">
-                                <i class="fa-solid fa-satellite-dish text-gold"></i> Streaming Providers
-                            </h3>
-                            <div class="flex items-center gap-3 overflow-x-auto no-scrollbar py-1">
-                                ${providersHTML}
+                        <!-- WHERE TO WATCH SECTION (OTT Platforms) -->
+                        <div class="p-5 rounded-3xl bg-white/[0.02] border border-white/10 shadow-xl">
+                            <div class="flex items-center justify-between mb-4">
+                                <div>
+                                    <h3 class="text-xs font-extrabold uppercase tracking-widest text-gold flex items-center gap-2">
+                                        <i class="fa-solid fa-tv text-gold"></i> Where to Watch Officially (OTT)
+                                    </h3>
+                                    <p class="text-[11px] text-gray-400 mt-0.5">Stream in 4K / Dolby Atmos on verified platforms in India</p>
+                                </div>
                             </div>
+                            ${providersHTML}
                         </div>
 
                         <!-- Synopsis & Metadata -->
@@ -1235,17 +1405,25 @@
                 }
 
                 container.innerHTML = data.episodes.map(ep => `
-                    <div class="flex flex-col sm:flex-row items-start gap-4 p-3.5 rounded-2xl bg-white/[0.03] hover:bg-white/[0.06] border border-white/5 transition">
+                    <div class="flex flex-col sm:flex-row items-start gap-4 p-3.5 rounded-2xl bg-white/[0.03] hover:bg-white/[0.06] border border-white/5 transition group">
                         <div class="w-full sm:w-44 aspect-video rounded-xl overflow-hidden bg-zinc-800 shrink-0 relative">
                             <img src="${ep.still_path || 'https://placehold.co/300x170/1a1a24/gold?text=Episode+' + ep.episode_number}" class="w-full h-full object-cover" loading="lazy">
                             <span class="absolute bottom-1.5 right-1.5 bg-black/80 text-white text-[10px] px-1.5 py-0.5 rounded font-bold">${ep.runtime ? ep.runtime + 'm' : ''}</span>
+                            <button onclick="window.playStreamDirect('${showId}', 'tv', '${currentDetailsData?.title.replace(/'/g, "\\'")}', ${seasonNumber}, ${ep.episode_number})" class="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 flex items-center justify-center transition text-gold text-2xl" title="Play Episode">
+                                <i class="fa-solid fa-circle-play hover:scale-110 transition"></i>
+                            </button>
                         </div>
                         <div class="flex-1 min-w-0">
                             <div class="flex items-center justify-between gap-2 mb-1">
-                                <h4 class="text-xs sm:text-sm font-bold text-white">
+                                <h4 class="text-xs sm:text-sm font-bold text-white group-hover:text-gold transition">
                                     <span class="text-gold mr-1.5">${ep.episode_number}.</span> ${ep.name}
                                 </h4>
-                                ${ep.air_date ? `<span class="text-[10px] text-gray-500 shrink-0">${ep.air_date}</span>` : ''}
+                                <div class="flex items-center gap-2">
+                                    ${ep.air_date ? `<span class="text-[10px] text-gray-500 shrink-0">${ep.air_date}</span>` : ''}
+                                    <button onclick="window.playStreamDirect('${showId}', 'tv', '${currentDetailsData?.title.replace(/'/g, "\\'")}', ${seasonNumber}, ${ep.episode_number})" class="px-2.5 py-1 rounded-lg bg-gold/20 hover:bg-gold text-gold hover:text-black font-bold text-[10px] transition flex items-center gap-1">
+                                        <i class="fa-solid fa-play text-[8px]"></i> Play
+                                    </button>
+                                </div>
                             </div>
                             <p class="text-xs text-gray-400 line-clamp-3 font-light leading-relaxed">${ep.overview}</p>
                         </div>
@@ -1259,6 +1437,7 @@
         window.closeDetails = () => {
             const overlay = document.getElementById('detailOverlay');
             overlay.classList.add('hidden');
+            overlay.classList.remove('active');
             document.body.style.overflow = 'auto';
             currentDetailsData = null;
         };
@@ -1347,7 +1526,6 @@
             if (clearBtn) clearBtn.classList.add('hidden');
         };
 
-        // Close search on click outside
         document.addEventListener('click', (e) => {
             const searchBox = document.getElementById('searchInput');
             const searchDropdown = document.getElementById('searchDropdown');
@@ -1356,9 +1534,9 @@
             }
         });
 
-        // Close modals on Escape key
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape') {
+                window.closeStreamPlayer();
                 window.closeDetails();
                 window.closeTrailerModal();
                 window.closeWatchlistModal();
@@ -1370,13 +1548,11 @@
         async function initApp() {
             updateWatchlistBadges();
 
-            // Load Trending for Hero and Row
             const trending = await fetchRowData('/api/getShows?category=trending', 'trendingRow');
             if (trending && trending.length > 0) {
                 initHeroSlider(trending);
             }
 
-            // Load Other Curated Rows in Parallel
             fetchRowData('/api/getShows?type=movie&sort=popularity.desc', 'hollywoodRow');
             fetchRowData('/api/getShows?type=tv&sort=popularity.desc', 'tvRow');
             fetchRowData('/api/getShows?lang=hi&type=movie', 'bollywoodRow');
