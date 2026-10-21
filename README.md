@@ -141,9 +141,9 @@ ifeelav-website/
 
 ## 👨‍💻 Author
 
-**Abhimanyu Sharma**
+**Abhimanyu Prakash Sharma**
 - GitHub: [@abhimanyuprakashsharma](https://github.com/abhimanyuprakashsharma)
-- Instagram: [@axviixv](https://instagram.com/axviixv)
+- Project: [IFEELAV](https://ifeelav-website.vercel.app)
 
 ---
 
